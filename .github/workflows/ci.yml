@@ -1,0 +1,40 @@
+name: RevForge CI / CD Pipeline
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  quality-gates:
+    name: Typecheck, Security Tests & Production Build
+    runs-on: ubuntu-latest
+
+    env:
+      NODE_ENV: test
+      MOCK_SANDBOX: "true"
+      DATABASE_URL: "postgres://postgres:postgres@localhost:5432/revforge_test"
+      PADDLE_ENVIRONMENT: "sandbox"
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Strict Typecheck
+        run: npx tsc --noEmit
+
+      - name: Run Zero-Trust Security & Engine Verification
+        run: npm run verify
+
+      - name: Next.js Production Build
+        run: npm run build

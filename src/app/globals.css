@@ -1,0 +1,126 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* 11-step Neutral Scale (Light Theme) */
+    --background: 210 20% 98%;
+    --foreground: 220 25% 10%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 220 25% 10%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 25% 10%;
+
+    /* Single Brand Accent: Deep Forest Emerald (Restrained & Authoritative) */
+    --primary: 160 84% 33%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 214 32% 91%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 20% 95%;
+    --muted-foreground: 215 16% 47%;
+
+    /* Semantic Status Indicators */
+    --success: 152 76% 36%;
+    --success-foreground: 0 0% 100%;
+    
+    --warning: 38 92% 50%;
+    --warning-foreground: 24 95% 10%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --info: 212 96% 45%;
+    --info-foreground: 0 0% 100%;
+
+    /* 1px Hairline Borders */
+    --border: 214 32% 88%;
+    --input: 214 32% 88%;
+    --ring: 160 84% 33%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    /* 11-step Neutral Scale (Dark Theme - Slate Grade) */
+    --background: 222 47% 5%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 7%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 7%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Single Brand Accent in Dark Mode */
+    --primary: 160 84% 39%;
+    --primary-foreground: 222 47% 5%;
+
+    --secondary: 217 33% 14%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 12%;
+    --muted-foreground: 215 20% 65%;
+
+    /* Semantic Status Indicators */
+    --success: 152 76% 42%;
+    --success-foreground: 222 47% 5%;
+
+    --warning: 45 93% 47%;
+    --warning-foreground: 222 47% 5%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+
+    --info: 212 96% 55%;
+    --info-foreground: 222 47% 5%;
+
+    /* 1px Hairline Borders */
+    --border: 217 33% 18%;
+    --input: 217 33% 18%;
+    --ring: 160 84% 39%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Tabular numbers for financial and metrics tables */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* RTL Helpers & Logical Flow */
+[dir="rtl"] {
+  text-align: right;
+}
+
+[dir="rtl"] .code-island,
+.ltr-island {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: isolate;
+}
+
+/* Subtle Engineering Grid Line Background */
+.bg-blueprint {
+  background-size: 24px 24px;
+  background-image: 
+    linear-gradient(to right, hsl(var(--border) / 0.4) 1px, transparent 1px),
+    linear-gradient(to bottom, hsl(var(--border) / 0.4) 1px, transparent 1px);
+}
+
+/* Hairline 1px Border Precision */
+.border-hairline {
+  border-width: 1px;
+}

@@ -1,0 +1,35 @@
+# RevForge AI — gVisor Isolated Disassembly & Clean-Room Sandbox
+# Base: Debian Bookworm Slim with minimal attack surface
+FROM debian:bookworm-slim
+
+# Prevent interactive prompts
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install core analysis utilities & headless runtimes
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    binutils \
+    file \
+    unzip \
+    tar \
+    python3 \
+    openjdk-17-jre-headless \
+    nodejs \
+    npm \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create unprivileged sandbox user (UID 10001)
+RUN groupadd -g 10001 revsandbox && \
+    useradd -u 10001 -g revsandbox -m -s /bin/sh revsandbox
+
+# Create scratch directory writable by sandbox user
+RUN mkdir -p /vault/target /vault/output && \
+    chown -R revsandbox:revsandbox /vault
+
+# Drop all root privileges
+USER 10001:10001
+WORKDIR /vault
+
+# Air-gapped container execution entrypoint
+ENTRYPOINT ["/usr/bin/node"]
