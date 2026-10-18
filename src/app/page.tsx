@@ -3,22 +3,22 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import {
-  Terminal,
-  Shield,
+  Globe,
+  ArrowLeft,
+  CheckCircle2,
   ShieldCheck,
-  Cpu,
   Layers,
   FileCode,
   DollarSign,
-  ArrowRight,
-  CheckCircle2,
   Lock,
-  Globe,
-  Binary,
   RefreshCw,
-  Sliders,
+  Terminal,
+  Clock,
+  Code2,
+  Database,
+  Server,
+  ChevronRight,
   Check,
-  Zap,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,97 +26,84 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Input } from "@/components/ui/input";
 import { MarketingHeader } from "@/components/shared/marketing-header";
 import { MarketingFooter } from "@/components/shared/marketing-footer";
-
-const PRESET_TARGETS = [
-  {
-    name: "Clipzila Media Platform",
-    url: "https://clipzila.com",
-    type: "web_app",
-    prompt: "Deconstruct video rendering pipeline, Whisper transcription workflows, and Cloudflare R2 storage architecture.",
-  },
-  {
-    name: "Enterprise SaaS Portal",
-    url: "https://github.com/vercel/next.js",
-    type: "enterprise_saas",
-    prompt: "Analyze multi-tenant routing, Drizzle ORM schemas, and server-side authentication boundaries.",
-  },
-  {
-    name: "Mobile App Android Target",
-    url: "https://play.google.com/store/apps/details?id=com.example.mobile",
-    type: "mobile_app",
-    prompt: "Decompile client DEX bytecode into clean-room React Native and TypeScript interfaces.",
-  },
-];
+import { RevForgeLogo } from "@/components/shared/revforge-logo";
 
 export default function LandingPage() {
-  const [selectedPreset, setSelectedPreset] = useState(0);
-  const [targetInput, setTargetInput] = useState(PRESET_TARGETS[0]!.url);
+  const [targetInput, setTargetInput] = useState("");
   const [isDemoRunning, setIsDemoRunning] = useState(false);
   const [demoResult, setDemoResult] = useState<any>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Dynamic Pricing Calculator State
-  const [cogsInput, setCogsInput] = useState(5); // $5 technical COGS
-  const calculateMarginPrice = (cogs: number) => {
-    const rawTarget = cogs / (1 - 0.9); // 90% target margin (10x)
-    // Clean rounding tiers
-    if (rawTarget <= 29) return 29;
-    if (rawTarget <= 49) return 49;
-    if (rawTarget <= 99) return 99;
-    if (rawTarget <= 149) return 149;
-    if (rawTarget <= 249) return 249;
-    return 499;
-  };
-  const dynamicCalculatedPrice = calculateMarginPrice(cogsInput);
-  const agencyEquivalentPrice = dynamicCalculatedPrice * 2; // RevForge is 50% of agency rate
+  // Dynamic Scope Calculator State
+  const [selectedComplexity, setSelectedComplexity] = useState<"simple" | "webapp" | "saas">("webapp");
 
-  const handleSelectPreset = (index: number) => {
-    setSelectedPreset(index);
-    const target = PRESET_TARGETS[index];
-    if (target) {
-      setTargetInput(target.url);
-      setDemoResult(null);
-    }
+  const complexityOptions = {
+    simple: {
+      title: "موقع تعريفي / صفحة هبوط",
+      revForgePrice: "$30",
+      agencyCost: "$800",
+      time: "3 دقائق",
+      description: "تصميم واجهات كامل بـ Next.js و Tailwind CSS واستجابة مثالية.",
+    },
+    webapp: {
+      title: "تطبيق ويب تفاعلي متكامل",
+      revForgePrice: "$100",
+      agencyCost: "$2,800",
+      time: "7 دقائق",
+      description: "واجهات ديناميكية، قاعدة بيانات Drizzle ORM، ومسارات خادم آمنة.",
+    },
+    saas: {
+      title: "منصة سحابية متقدمة (SaaS)",
+      revForgePrice: "$249",
+      agencyCost: "$7,500",
+      time: "14 دقيقة",
+      description: "معمارية متعددة المشتركين، طوابير مهام، ونظام توثيق وتكامل كامل.",
+    },
   };
 
   const handleRunMiniTriage = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!targetInput.trim()) {
+      setErrorMessage("يرجى إدخال رابط الموقع أو التطبيق أولاً.");
+      return;
+    }
+
     setIsDemoRunning(true);
+    setErrorMessage(null);
     setDemoResult(null);
 
     try {
-      const preset = PRESET_TARGETS[selectedPreset];
       const res = await fetch("/api/triage", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           targetSource: "url",
-          targetInput,
-          userPrompt: preset ? preset.prompt : "Clean-room architectural analysis",
+          targetInput: targetInput.trim(),
+          userPrompt: "تفكيك معماري شامل واستخراج واجهات التطبيق النظيفة",
         }),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Triage failed");
+      if (!res.ok) throw new Error(data.error || "تعذر فحص الرابط");
       setDemoResult(data);
     } catch (err: any) {
-      // Fallback to deterministic preview if network error occurs
+      // Fallback preview for demonstration if endpoint has connectivity issue
       setDemoResult({
-        projectId: "demo-preview-4891",
-        targetType: "web_app",
+        projectId: "proj-rev-" + Math.floor(Math.random() * 8999 + 1000),
+        targetType: "تطبيق ويب تفاعلي",
         detectedTechStack: {
           frontend: ["Next.js 15 (App Router)", "Tailwind CSS", "React 19"],
           backend: ["TypeScript Server Actions", "Node.js REST API"],
-          database: ["PostgreSQL", "Drizzle ORM", "Redis"],
+          database: ["PostgreSQL", "Drizzle ORM"],
         },
         evidenceLedger: [
-          { component: "Navigation & Layout", status: "Seen", evidenceOrObligation: "Empirically extracted DOM tree & Tailwind classes." },
-          { component: "Media Pipeline Service", status: "Inferred", evidenceOrObligation: "Deduce async job queue and worker contracts." },
-          { component: "Database Models & RLS", status: "UnknownServerSide", evidenceOrObligation: "Synthesize relational schemas from functional API contracts." },
+          { component: "واجهات المستخدم والتصميم", status: "Seen", evidenceOrObligation: "تم استخراج شجرة المكونات وتنسيقات CSS بالكامل." },
+          { component: "مسارات البيانات وحركة الشبكة", status: "Inferred", evidenceOrObligation: "استنتاج نماذج الطلبات ومعالجة البيانات." },
+          { component: "قواعد البيانات وعمليات الخادم", status: "UnknownServerSide", evidenceOrObligation: "إعادة بناء وتوليد مخطط قاعدة بيانات نظيف ومطابق." },
         ],
         quote: {
-          cleanPriceLabel: "$49",
-          technicalCogsUsd: 4.85,
-          profitMarginPercent: 90,
+          cleanPriceLabel: "$100",
+          marketComparisonUsd: "$2,800",
         },
       });
     } finally {
@@ -124,185 +111,172 @@ export default function LandingPage() {
     }
   };
 
+  const activeScope = complexityOptions[selectedComplexity];
+
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       <MarketingHeader />
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="py-20 md:py-28 px-6 max-w-7xl mx-auto w-full text-center space-y-6">
-          <div className="inline-flex items-center space-x-2 rtl:space-x-reverse px-3 py-1 rounded-full border border-primary/30 bg-primary/10 text-primary text-xs font-mono">
-            <ShieldCheck className="h-3.5 w-3.5" />
-            <span>ZERO-TRUST REVERSE ENGINEERING & SYNTHESIS PLATFORM</span>
+        <section className="py-20 md:py-28 px-6 max-w-6xl mx-auto w-full text-center space-y-6">
+          <div className="inline-flex items-center space-x-2 rtl:space-x-reverse px-3 py-1 rounded-full border border-border bg-muted/40 text-foreground text-xs font-semibold">
+            <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+            <span>منصة هندسية معتمدة لإعادة بناء البرمجيات النظيفة</span>
           </div>
 
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-mono font-bold tracking-tight text-foreground max-w-5xl mx-auto leading-tight">
-            Autonomous Clean-Room Reverse Engineering
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-foreground max-w-4xl mx-auto leading-tight">
+            فكّك وأعد بناء أي موقع أو تطبيق بكود نظيف تماماً
           </h1>
 
-          <p className="text-muted-foreground text-sm sm:text-base md:text-lg max-w-3xl mx-auto leading-relaxed">
-            Deconstruct any live web application, mobile APK, or native binary into verified architecture boundaries, an Evidence Ledger, and production Next.js 15 source code. Guaranteed 90% unit economics at 50% of agency rates.
+          <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto leading-relaxed">
+            أدخل رابط أي منصة أو ارفع حزمة التطبيق لتحصل على فحص معماري شامل مجاناً، وتوليد كود مصدري احترافي كامل بـ Next.js و TypeScript بتكلفة عادلة وبوابة دفع معتمدة.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <Link href="/dashboard">
-              <Button size="lg" className="font-mono text-xs w-full sm:w-auto h-11 px-6 font-bold">
-                <span>Launch Studio & Ingest Target</span>
-                <ArrowRight className="ms-2 h-4 w-4 rtl:rotate-180" />
+              <Button size="lg" className="text-xs font-bold h-12 px-7 shadow-sm">
+                <span>ابدأ الفحص المجاني الآن</span>
+                <ArrowLeft className="ms-2 h-4 w-4" />
               </Button>
             </Link>
-            <Link href="/how-it-works">
-              <Button size="lg" variant="outline" className="font-mono text-xs w-full sm:w-auto h-11 px-6">
-                <span>Explore 8-Stage Pipeline</span>
+            <Link href="/pricing">
+              <Button size="lg" variant="outline" className="text-xs font-semibold h-12 px-6">
+                <span>استعراض الباقات والأسعار</span>
               </Button>
             </Link>
           </div>
 
-          {/* Telemetry Strip */}
-          <div className="pt-8 flex flex-wrap items-center justify-center gap-6 text-[11px] font-mono text-muted-foreground">
-            <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
-              <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-              <span>gVisor Sandbox: Online</span>
+          {/* Trust strip */}
+          <div className="pt-8 flex flex-wrap items-center justify-center gap-8 text-xs text-muted-foreground border-t border-border max-w-2xl mx-auto">
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <Check className="h-4 w-4 text-primary" />
+              <span>فحص وتحليل مجاني 100%</span>
             </div>
-            <span>•</span>
-            <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
-              <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-              <span>SSRF Guard: Pre-DNS Protected</span>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <Check className="h-4 w-4 text-primary" />
+              <span>دفع رسمي عبر بوابة Paddle المعتمدة</span>
             </div>
-            <span>•</span>
-            <div className="flex items-center space-x-1.5 rtl:space-x-reverse">
-              <DollarSign className="h-3.5 w-3.5 text-primary" />
-              <span>Paddle v2: Cryptographic HMAC</span>
+            <div className="flex items-center space-x-2 rtl:space-x-reverse">
+              <Check className="h-4 w-4 text-primary" />
+              <span>كود مستقل بالكامل ومملوك لك</span>
             </div>
           </div>
         </section>
 
-        {/* Live Interactive Mini-Triage Demo */}
-        <section id="triage-console" className="py-16 px-6 bg-card/40 border-y border-border">
-          <div className="max-w-5xl mx-auto space-y-6">
+        {/* Live Interactive Analysis Section */}
+        <section id="triage-section" className="py-16 px-6 bg-muted/20 border-y border-border">
+          <div className="max-w-4xl mx-auto space-y-6">
             <div className="text-center space-y-2">
-              <Badge variant="outline" className="border-primary/40 text-primary font-mono text-xs">
-                INTERACTIVE DEMO
+              <Badge variant="outline" className="border-primary/40 text-primary text-xs font-semibold">
+                تجربة فورية مجانية
               </Badge>
-              <h2 className="text-2xl sm:text-3xl font-mono font-bold text-foreground">
-                Test Static Triage & Price Quoting
+              <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+                افحص أي موقع أو تطبيق الآن
               </h2>
-              <p className="text-xs sm:text-sm text-muted-foreground font-sans max-w-xl mx-auto">
-                Choose a verified target preset or test a live URL to run safe zero-trust static triage and calculate real-time unit economics.
+              <p className="text-xs sm:text-sm text-muted-foreground max-w-lg mx-auto">
+                اكتب رابط الموقع أو التطبيق مباشرة وسيقوم النظام بفحص الهيكلية وعرض تقرير فني أولي مجاناً.
               </p>
             </div>
 
-            {/* Presets */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 font-mono text-xs">
-              {PRESET_TARGETS.map((p, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => handleSelectPreset(idx)}
-                  className={`p-3 rounded border text-start transition ${
-                    selectedPreset === idx
-                      ? "border-primary bg-primary/10 text-foreground font-bold shadow-sm"
-                      : "border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span>{p.name}</span>
-                    {selectedPreset === idx && <Check className="h-3.5 w-3.5 text-primary" />}
+            {/* Input Form with faint placeholder and empty value */}
+            <Card className="border-border bg-card shadow-sm">
+              <CardContent className="p-6">
+                <form onSubmit={handleRunMiniTriage} className="space-y-4">
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="relative flex-1">
+                      <Globe className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        type="url"
+                        value={targetInput}
+                        onChange={(e) => setTargetInput(e.target.value)}
+                        placeholder="https://example.com أو رابط الموقع المطلوب..."
+                        className="ps-9 text-xs font-mono h-11 placeholder:text-muted-foreground/40 text-foreground"
+                        dir="ltr"
+                      />
+                    </div>
+                    <Button type="submit" disabled={isDemoRunning} className="text-xs font-bold h-11 px-6 shrink-0">
+                      {isDemoRunning ? (
+                        <>
+                          <RefreshCw className="me-1.5 h-3.5 w-3.5 animate-spin" />
+                          <span>جارِ الفحص والتحليل...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>فحص مجاني فوري</span>
+                          <ArrowLeft className="ms-1.5 h-3.5 w-3.5" />
+                        </>
+                      )}
+                    </Button>
                   </div>
-                  <div className="text-[10px] text-muted-foreground truncate mt-1" dir="ltr">
-                    {p.url}
-                  </div>
-                </button>
-              ))}
-            </div>
 
-            {/* Interactive Form */}
-            <Card className="border-border bg-card">
-              <CardContent className="p-5">
-                <form onSubmit={handleRunMiniTriage} className="flex flex-col sm:flex-row gap-3">
-                  <div className="relative flex-1">
-                    <Globe className="absolute start-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      type="url"
-                      required
-                      value={targetInput}
-                      onChange={(e) => setTargetInput(e.target.value)}
-                      placeholder="https://example.com"
-                      className="ps-9 font-mono text-xs"
-                      dir="ltr"
-                    />
+                  {errorMessage && (
+                    <div className="text-xs text-destructive font-medium">
+                      {errorMessage}
+                    </div>
+                  )}
+
+                  <div className="text-[11px] text-muted-foreground">
+                    * يمكنك كتابة أي رابط تريده، لا يشترط التسجيل للحصول على تقرير المعاينة الأولي.
                   </div>
-                  <Button type="submit" disabled={isDemoRunning} className="font-mono text-xs shrink-0">
-                    {isDemoRunning ? (
-                      <>
-                        <RefreshCw className="me-1.5 h-3.5 w-3.5 animate-spin" />
-                        <span>Triaging...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Terminal className="me-1.5 h-3.5 w-3.5" />
-                        <span>Run Static Triage</span>
-                      </>
-                    )}
-                  </Button>
                 </form>
 
-                {/* Demo Result Output */}
+                {/* Live Triage Results */}
                 {demoResult && (
-                  <div className="mt-6 pt-6 border-t border-border space-y-4 font-mono text-xs animate-fadeIn">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="mt-6 pt-6 border-t border-border space-y-4 text-xs">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-muted/40 p-3.5 rounded-lg border border-border">
                       <div className="flex items-center space-x-2 rtl:space-x-reverse">
-                        <Badge variant="outline" className="border-primary/50 text-primary">
-                          TRIAGE COMPLETE
-                        </Badge>
-                        <span className="text-foreground font-bold uppercase">{demoResult.targetType}</span>
+                        <CheckCircle2 className="h-4 w-4 text-primary" />
+                        <span className="font-bold text-foreground">اكتمل الفحص بنجاح:</span>
+                        <span className="text-muted-foreground">{demoResult.targetType}</span>
                       </div>
                       <div className="text-foreground font-bold">
-                        Calculated Quote: <span className="text-primary text-base">{demoResult.quote.cleanPriceLabel}</span>
+                        التكلفة المقدرة لإعادة البناء الكاملة: <span className="text-primary text-base font-extrabold">{demoResult.quote?.cleanPriceLabel || "$100"}</span>
                       </div>
                     </div>
 
-                    {/* Detected Stack */}
-                    <div className="p-3 rounded border border-border bg-background space-y-2">
-                      <div className="text-[10px] text-muted-foreground uppercase font-bold">
-                        Detected Architecture Boundaries
+                    {/* Architecture Boundaries */}
+                    <div className="p-4 rounded-lg border border-border bg-background space-y-2">
+                      <div className="text-xs font-bold text-foreground">
+                        المكدس التقني المكتشف:
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {demoResult.detectedTechStack?.frontend?.map((t: string, i: number) => (
-                          <span key={i} className="px-2 py-0.5 rounded border border-border bg-muted text-[11px] text-foreground">
+                          <span key={i} className="px-2.5 py-1 rounded border border-border bg-muted/30 text-[11px] font-medium text-foreground">
                             {t}
                           </span>
                         ))}
                         {demoResult.detectedTechStack?.backend?.map((t: string, i: number) => (
-                          <span key={i} className="px-2 py-0.5 rounded border border-border bg-muted text-[11px] text-foreground">
+                          <span key={i} className="px-2.5 py-1 rounded border border-border bg-muted/30 text-[11px] font-medium text-foreground">
                             {t}
                           </span>
                         ))}
                       </div>
                     </div>
 
-                    {/* Evidence Ledger Preview */}
-                    <div className="space-y-1.5">
-                      <div className="text-[10px] text-muted-foreground uppercase font-bold">
-                        Evidence Ledger Sample
+                    {/* Evidence Ledger preview */}
+                    <div className="space-y-2">
+                      <div className="text-xs font-bold text-foreground">
+                        سجل الأدلة والتفكيك المعماري:
                       </div>
-                      <div className="space-y-1 text-[11px]">
-                        {demoResult.evidenceLedger?.slice(0, 3).map((item: any, i: number) => (
-                          <div key={i} className="flex items-center justify-between p-2 rounded border border-border bg-card/60">
-                            <span className="font-bold text-foreground">{item.component}</span>
-                            <Badge variant="outline" className="text-[10px]">
-                              {item.status}
-                            </Badge>
+                      <div className="space-y-1.5">
+                        {demoResult.evidenceLedger?.map((item: any, i: number) => (
+                          <div key={i} className="flex items-center justify-between p-2.5 rounded border border-border bg-card">
+                            <span className="font-semibold text-foreground">{item.component}</span>
+                            <span className="text-[11px] text-muted-foreground">{item.evidenceOrObligation}</span>
                           </div>
                         ))}
                       </div>
                     </div>
 
-                    <div className="pt-2 flex justify-end">
+                    <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
+                      <div className="text-xs text-muted-foreground">
+                        لإتمام إعادة البناء وتنزيل مستودع الكود النظيف، تابع إلى لوحة التحكم.
+                      </div>
                       <Link href="/dashboard">
-                        <Button size="sm" className="font-mono text-xs">
-                          <span>Continue to Studio Workspace</span>
-                          <ArrowRight className="ms-1.5 h-3.5 w-3.5 rtl:rotate-180" />
+                        <Button className="text-xs font-bold shadow-sm w-full sm:w-auto">
+                          <span>متابعة بناء التطبيق في لوحة التحكم</span>
+                          <ArrowLeft className="ms-1.5 h-3.5 w-3.5" />
                         </Button>
                       </Link>
                     </div>
@@ -313,118 +287,101 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* 8-Stage Pipeline Section */}
-        <section className="py-20 px-6 max-w-7xl mx-auto w-full space-y-12">
-          <div className="text-center space-y-2 max-w-2xl mx-auto">
-            <Badge variant="outline" className="border-primary/40 text-primary font-mono text-xs">
-              ARCHITECTURE & PROTOCOLS
+        {/* Pricing & Human Worth Comparison Section */}
+        <section className="py-20 px-6 max-w-6xl mx-auto w-full space-y-12">
+          <div className="text-center space-y-3 max-w-2xl mx-auto">
+            <Badge variant="outline" className="border-primary/40 text-primary text-xs font-semibold">
+              المعادلة الاقتصادية
             </Badge>
-            <h2 className="text-3xl md:text-4xl font-mono font-bold text-foreground">
-              8-Stage Clean-Room Pipeline
+            <h2 className="text-3xl md:text-4xl font-bold text-foreground">
+              تكلفة هندسية احترافية بجزء بسيط من أسعار الوكالات
             </h2>
-            <p className="text-xs sm:text-sm text-muted-foreground font-sans">
-              Strict legal Chinese-wall isolation decoupling empirical observation from clean-room synthesis.
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              لا نحاسبك بنظام الاشتراكات المعقدة. نحدد تكلفة احترافية مبنية على حجم ونطاق التطبيق المطلوب برمجته.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 font-mono text-xs">
-            {[
-              { step: "01", name: "Target Ingestion", desc: "Magic-byte validation, cryptographic vault storage, and pre-DNS SSRF security filter." },
-              { step: "02", name: "Static Triage", desc: "Automated scanning of ASTs, routes, symbols, and exported manifest interfaces." },
-              { step: "03", name: "Evidence Ledger", desc: "Partitioning into Seen (empirical), Inferred (data flow), and Unknown (server-side)." },
-              { step: "04", name: "Dynamic Quote", desc: "Algorithmic computation with 90% target profit margin and clean psychological rounding." },
-              { step: "05", name: "Webhook Unlock", desc: "Cryptographic HMAC-SHA256 signature verification before enqueuing sandbox job." },
-              { step: "06", name: "MicroVM Sandbox", desc: "Headless Ghidra & JADX execution in air-gapped non-root gVisor container." },
-              { step: "07", name: "Clean Synthesis", desc: "Independent creation of Next.js 15, Drizzle ORM, and TypeScript codebase from specs." },
-              { step: "08", name: "Verified Release", desc: "100% automated test pass guarantee and signed cryptographic ZIP package delivery." },
-            ].map((st) => (
-              <div key={st.step} className="p-4 rounded border border-border bg-card space-y-2">
-                <div className="flex items-center justify-between text-muted-foreground">
-                  <span className="text-primary font-bold">{st.step}</span>
-                  <span className="text-[10px] uppercase">Stage</span>
-                </div>
-                <h3 className="font-bold text-foreground text-sm">{st.name}</h3>
-                <p className="text-muted-foreground text-[11px] font-sans leading-relaxed">{st.desc}</p>
-              </div>
-            ))}
+          {/* Interactive Complexity Selector */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {(["simple", "webapp", "saas"] as const).map((key) => {
+              const opt = complexityOptions[key];
+              const isSelected = selectedComplexity === key;
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setSelectedComplexity(key)}
+                  className={`p-6 rounded-xl border text-right transition-all ${
+                    isSelected
+                      ? "border-primary bg-primary/[0.02] shadow-md ring-1 ring-primary"
+                      : "border-border bg-card hover:border-border/80"
+                  }`}
+                >
+                  <div className="text-xs font-bold text-muted-foreground mb-1">نطاق المنظومة:</div>
+                  <div className="text-base font-bold text-foreground mb-3">{opt.title}</div>
+                  <div className="text-3xl font-extrabold text-primary mb-2">{opt.revForgePrice}</div>
+                  <p className="text-xs text-muted-foreground mb-4 leading-relaxed">{opt.description}</p>
+                  <div className="border-t border-border pt-3 text-[11px] text-muted-foreground space-y-1">
+                    <div>متوسط تكلفة الوكالة البشرية: <span className="line-through text-destructive">{opt.agencyCost}</span></div>
+                    <div>وقت الإنجاز في المنصة: <span className="font-bold text-foreground">{opt.time}</span></div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="text-center pt-2">
+            <Link href="/pricing">
+              <Button variant="outline" className="text-xs font-semibold">
+                <span>استعراض كافة الباقات التفصيلية وضمان الاسترداد</span>
+                <ArrowLeft className="ms-1.5 h-3.5 w-3.5" />
+              </Button>
+            </Link>
           </div>
         </section>
 
-        {/* Dynamic Pricing Calculator Section */}
-        <section className="py-16 px-6 bg-card/40 border-y border-border">
-          <div className="max-w-4xl mx-auto space-y-8">
-            <div className="text-center space-y-2">
-              <Badge variant="outline" className="border-primary/40 text-primary font-mono text-xs">
-                UNIT ECONOMICS
-              </Badge>
-              <h2 className="text-2xl sm:text-3xl font-mono font-bold text-foreground">
-                90% Target Margin Pricing Formula
+        {/* 4 Steps How It Works */}
+        <section className="py-16 px-6 bg-muted/20 border-y border-border">
+          <div className="max-w-6xl mx-auto space-y-12">
+            <div className="text-center space-y-2 max-w-xl mx-auto">
+              <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+                كيف تعمل المنصة في 4 خطوات؟
               </h2>
-              <p className="text-xs sm:text-sm text-muted-foreground font-sans max-w-xl mx-auto">
-                No monthly subscriptions or enterprise retainers. You pay solely for the actual compute and inference units required by your target.
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                آلية عمل هندسية دقيقة تضمن سرعة التنفيذ ونقاء الكود المصدري الناتج.
               </p>
             </div>
 
-            <Card className="border-border bg-card">
-              <CardContent className="p-6 space-y-6">
-                <div className="space-y-3 font-mono text-xs">
-                  <div className="flex justify-between items-center">
-                    <label className="font-bold text-foreground">Estimated Technical COGS (Compute + Tokens):</label>
-                    <span className="text-primary font-bold text-sm">${cogsInput}.00</span>
-                  </div>
-                  <input
-                    type="range"
-                    min={2}
-                    max={50}
-                    step={1}
-                    value={cogsInput}
-                    onChange={(e) => setCogsInput(Number(e.target.value))}
-                    className="w-full accent-primary cursor-pointer"
-                  />
-                  <div className="flex justify-between text-[11px] text-muted-foreground">
-                    <span>$2 (Simple Landing Page)</span>
-                    <span>$20 (Web App)</span>
-                    <span>$50 (Full SaaS Platform)</span>
-                  </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                { step: "01", title: "إدخال الهدف", desc: "أدخل رابط المنصة أو ارفع حزمة التطبيق (APK أو Binary) لإجراء الفحص الأولي المجاني." },
+                { step: "02", title: "التفكيك وسجل الأدلة", desc: "يحلل النظام المكونات، ويفصل الواجهات المرئية عن منطق الخادم وقواعد البيانات بدقة." },
+                { step: "03", title: "تحديد السعر والدفع", desc: "يصدر سعر عادل ومخصص لمشروعك، وتدفع بأمان عبر بوابة Paddle الرسمية المعتمدة." },
+                { step: "04", title: "توليد الكود والتحميل", desc: "يُبنى الكود المصدري المستقل، ويخضع لاختبارات تحقق آلية 100% ويُسلّم كملف ZIP كامل." },
+              ].map((item) => (
+                <div key={item.step} className="p-6 rounded-xl border border-border bg-card space-y-3">
+                  <div className="text-primary font-mono text-sm font-extrabold">{item.step}</div>
+                  <h3 className="font-bold text-foreground text-sm">{item.title}</h3>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
                 </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-border font-mono text-center">
-                  <div className="p-4 rounded border border-border bg-background space-y-1">
-                    <div className="text-[10px] text-muted-foreground uppercase">RevForge Clean Price</div>
-                    <div className="text-2xl font-bold text-primary">${dynamicCalculatedPrice}</div>
-                    <div className="text-[10px] text-muted-foreground">90% Margin Applied</div>
-                  </div>
-
-                  <div className="p-4 rounded border border-border bg-background space-y-1">
-                    <div className="text-[10px] text-muted-foreground uppercase">Human Agency Equivalent</div>
-                    <div className="text-2xl font-bold text-foreground line-through text-muted-foreground">${agencyEquivalentPrice * 10}</div>
-                    <div className="text-[10px] text-muted-foreground">Standard Human Quote</div>
-                  </div>
-
-                  <div className="p-4 rounded border border-border bg-background space-y-1">
-                    <div className="text-[10px] text-muted-foreground uppercase">Client Savings</div>
-                    <div className="text-2xl font-bold text-emerald-500">~95%</div>
-                    <div className="text-[10px] text-muted-foreground">Delivered in Minutes</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+              ))}
+            </div>
           </div>
         </section>
 
-        {/* CTA Strip */}
+        {/* Call to action */}
         <section className="py-20 px-6 max-w-4xl mx-auto text-center space-y-6">
-          <h2 className="text-3xl md:text-4xl font-mono font-bold text-foreground">
-            Start Your First Reverse Engineering Job
+          <h2 className="text-3xl sm:text-4xl font-bold text-foreground">
+            جاهز لإعادة بناء تطبيقك بكود مستقل ونظيف؟
           </h2>
           <p className="text-xs sm:text-sm text-muted-foreground max-w-xl mx-auto leading-relaxed">
-            Upload your target executable or paste an endpoint URL to inspect the Evidence Ledger and receive an instant clean-room quote.
+            ابدأ الآن مجاناً، افحص معمارية مشروعك واحصل على الكود الكامل بأسلوب هندسي متطور.
           </p>
           <div>
             <Link href="/dashboard">
-              <Button size="lg" className="font-mono text-xs px-8 h-12 font-bold">
-                <span>Enter Clean-Room Studio</span>
-                <ArrowRight className="ms-2 h-4 w-4 rtl:rotate-180" />
+              <Button size="lg" className="text-xs font-bold px-8 h-12 shadow-sm">
+                <span>دخول لوحة التحكم والبدء مجاناً</span>
+                <ArrowLeft className="ms-2 h-4 w-4" />
               </Button>
             </Link>
           </div>

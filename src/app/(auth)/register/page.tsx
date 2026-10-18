@@ -3,11 +3,11 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Terminal, Shield, ArrowRight, Lock, Mail, User, Building } from "lucide-react";
+import { ArrowLeft, Lock, Mail, User, Building, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { LangThemeToggle } from "@/components/shared/lang-theme-toggle";
+import { RevForgeLogo } from "@/components/shared/revforge-logo";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -22,7 +22,7 @@ export default function RegisterPage() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!agreeTerms) {
-      setError("You must agree to the Terms of Service and Clean-Room IP Policy.");
+      setError("يجب الموافقة على شروط الخدمة وسياسة الملكية الفكرية.");
       return;
     }
 
@@ -30,57 +30,53 @@ export default function RegisterPage() {
     setError(null);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 600));
+      await new Promise((resolve) => setTimeout(resolve, 500));
       if (typeof window !== "undefined") {
         localStorage.setItem(
           "revforge_session",
-          JSON.stringify({ email, name, organization, authenticated: true, role: "workspace_admin" })
+          JSON.stringify({ email: email.trim(), name: name.trim(), organization: organization.trim(), authenticated: true })
         );
       }
       router.push("/dashboard");
     } catch (err: any) {
-      setError(err.message || "Failed to create workspace.");
+      setError(err.message || "فشل إنشاء الحساب.");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center px-4 py-12 bg-background text-foreground font-mono">
-      <div className="absolute top-4 end-4">
-        <LangThemeToggle />
-      </div>
-
+    <div className="min-h-screen flex flex-col justify-center items-center px-4 py-12 bg-background text-foreground">
       <div className="w-full max-w-md space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-2">
-          <Link href="/" className="inline-flex items-center space-x-2 rtl:space-x-reverse group">
-            <div className="h-8 w-8 rounded border border-primary/40 bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary/20 transition">
-              <Terminal className="h-4 w-4" />
+          <Link href="/" className="inline-flex items-center space-x-2.5 rtl:space-x-reverse group">
+            <div className="h-9 w-9 rounded border border-border bg-muted/40 flex items-center justify-center">
+              <RevForgeLogo className="h-5 w-5" />
             </div>
-            <span className="font-mono text-base font-bold tracking-tight text-foreground">
-              RevForge<span className="text-primary">.ai</span>
+            <span className="font-bold text-lg tracking-tight text-foreground">
+              RevForge
             </span>
           </Link>
-          <p className="text-xs text-muted-foreground font-sans">
-            Deploy an isolated clean-room reverse engineering workspace
+          <p className="text-xs text-muted-foreground">
+            إنشاء حساب جديد للبدء في فحص وتحليل التطبيقات
           </p>
         </div>
 
         {/* Card */}
-        <Card className="border-border bg-card">
+        <Card className="border-border bg-card shadow-sm">
           <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-sm font-bold text-foreground">
-              Create Engineering Workspace
+            <CardTitle className="text-base font-bold text-foreground">
+              إنشاء حساب مهندس
             </CardTitle>
             <CardDescription className="text-xs">
-              Includes dedicated sandbox runner, Evidence Ledger audit logs, and Paddle billing integration.
+              يتيح لك فحصاً غير محدود للمشاريع وإدارة عمليات التفكيك والبناء.
             </CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-4">
             {error && (
-              <div className="p-2.5 rounded border border-destructive/40 bg-destructive/10 text-destructive text-xs">
+              <div className="p-2.5 rounded-md border border-destructive/40 bg-destructive/10 text-destructive text-xs">
                 {error}
               </div>
             )}
@@ -88,36 +84,35 @@ export default function RegisterPage() {
             <form onSubmit={handleRegister} className="space-y-3.5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-foreground">Full Name</label>
+                  <label className="text-xs font-semibold text-foreground">الاسم الكامل</label>
                   <div className="relative">
                     <User className="absolute start-3 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
                     <Input
                       required
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      placeholder="Dr. Abdelraheem"
-                      className="ps-9 font-mono text-xs"
+                      placeholder="د. عبدالرحيم"
+                      className="ps-9 text-xs"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-medium text-foreground">Organization</label>
+                  <label className="text-xs font-semibold text-foreground">الشركة أو المنظمة</label>
                   <div className="relative">
                     <Building className="absolute start-3 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
                     <Input
-                      required
                       value={organization}
                       onChange={(e) => setOrganization(e.target.value)}
-                      placeholder="Systems Lab Inc"
-                      className="ps-9 font-mono text-xs"
+                      placeholder="اسم الشركة"
+                      className="ps-9 text-xs"
                     />
                   </div>
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-foreground">Work Email</label>
+                <label className="text-xs font-semibold text-foreground">البريد الإلكتروني</label>
                 <div className="relative">
                   <Mail className="absolute start-3 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
                   <Input
@@ -125,14 +120,15 @@ export default function RegisterPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="architect@organization.com"
-                    className="ps-9 font-mono text-xs"
+                    placeholder="name@company.com"
+                    className="ps-9 text-xs"
+                    dir="ltr"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-foreground">Master Password</label>
+                <label className="text-xs font-semibold text-foreground">كلمة المرور</label>
                 <div className="relative">
                   <Lock className="absolute start-3 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
                   <Input
@@ -141,7 +137,8 @@ export default function RegisterPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="ps-9 font-mono text-xs"
+                    className="ps-9 text-xs"
+                    dir="ltr"
                   />
                 </div>
               </div>
@@ -155,29 +152,25 @@ export default function RegisterPage() {
                   className="mt-0.5 rounded border-border"
                 />
                 <label htmlFor="agreeTerms" className="leading-tight text-[11px]">
-                  I agree to the{" "}
+                  أوافق على{" "}
                   <Link href="/terms" className="text-primary underline">
-                    Terms
-                  </Link>
-                  ,{" "}
-                  <Link href="/acceptable-use" className="text-primary underline">
-                    Acceptable Use Policy
-                  </Link>
-                  , and{" "}
+                    شروط الخدمة
+                  </Link>{" "}
+                  و{" "}
                   <Link href="/clean-room-ip-policy" className="text-primary underline">
-                    Clean-Room Policy
+                    سياسة الملكية الفكرية
                   </Link>
                   .
                 </label>
               </div>
 
-              <Button type="submit" disabled={isLoading} className="w-full text-xs font-mono">
+              <Button type="submit" disabled={isLoading} className="w-full text-xs font-bold shadow-sm">
                 {isLoading ? (
-                  <span>Initializing Workspace...</span>
+                  <span>جارِ إنشاء الحساب...</span>
                 ) : (
                   <>
-                    <span>Create Enterprise Account</span>
-                    <ArrowRight className="ms-1.5 h-3.5 w-3.5 rtl:rotate-180" />
+                    <span>إنشاء الحساب والبدء</span>
+                    <ArrowLeft className="ms-1.5 h-3.5 w-3.5" />
                   </>
                 )}
               </Button>
@@ -185,17 +178,17 @@ export default function RegisterPage() {
           </CardContent>
 
           <CardFooter className="border-t border-border pt-4 text-center justify-center text-xs text-muted-foreground">
-            <span>Already have a workspace? </span>
-            <Link href="/login" className="text-primary hover:underline ms-1 font-semibold">
-              Sign In
+            <span>لديك حساب بالفعل؟ </span>
+            <Link href="/login" className="text-primary hover:underline ms-1 font-bold">
+              تسجيل الدخول
             </Link>
           </CardFooter>
         </Card>
 
         {/* Security badge */}
         <div className="text-center text-[11px] text-muted-foreground flex items-center justify-center space-x-1.5 rtl:space-x-reverse">
-          <Shield className="h-3 w-3 text-primary" />
-          <span>Non-Root Sandbox • Zero Data Retention • AES-256</span>
+          <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+          <span>حماية وتشفير عالي الأمان لبياناتك</span>
         </div>
       </div>
     </div>

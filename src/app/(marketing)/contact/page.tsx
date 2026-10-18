@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import { MarketingHeader } from "@/components/shared/marketing-header";
@@ -221,3 +221,4 @@ export default function ContactPage() {
     </div>
   );
 }
+

@@ -1,10 +1,10 @@
-import React from "react";
+﻿import React from "react";
 import { MarketingHeader } from "@/components/shared/marketing-header";
 import { MarketingFooter } from "@/components/shared/marketing-footer";
 import { Badge } from "@/components/ui/badge";
 
 export const metadata = {
-  title: "Privacy Policy & Data Retention — RevForge AI",
+  title: "Privacy Policy & Data Retention — RevForge",
   description: "Zero-retention data privacy standards, cryptographic vault handling, and artifact lifecycle policies.",
 };
 
@@ -30,7 +30,7 @@ export default function PrivacyPage() {
           <section className="space-y-2">
             <h2 className="text-base font-mono font-bold text-foreground">1. Zero-Retention Artifact Principles</h2>
             <p>
-              At RevForge AI, our operational architecture is built upon a fundamental Zero-Trust commitment: <strong>We do not retain, train on, or monetize your submitted binaries, source code, or reverse-engineered deliverables.</strong>
+              At RevForge, our operational architecture is built upon a fundamental Zero-Trust commitment: <strong>We do not retain, train on, or monetize your submitted binaries, source code, or reverse-engineered deliverables.</strong>
             </p>
           </section>
 
@@ -84,3 +84,4 @@ export default function PrivacyPage() {
     </div>
   );
 }
+

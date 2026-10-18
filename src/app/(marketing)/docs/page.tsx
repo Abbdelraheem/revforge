@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { MarketingHeader } from "@/components/shared/marketing-header";
 import { MarketingFooter } from "@/components/shared/marketing-footer";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +7,7 @@ import { Terminal, Shield, Cpu, Database, Code2, BookOpen, Layers, CheckCircle2,
 import Link from "next/link";
 
 export const metadata = {
-  title: "Documentation & Architecture Reference — RevForge AI",
+  title: "Documentation & Architecture Reference — RevForge",
   description: "Comprehensive technical manual, system architecture, API specifications, and clean-room synthesis protocols.",
 };
 
@@ -15,7 +15,7 @@ const docSections = [
   {
     id: "architecture",
     title: "1. Zero-Trust System Architecture",
-    description: "RevForge AI implements a clean-room architectural synthesis engine decoupled from untrusted client binaries and web sources.",
+    description: "RevForge implements a clean-room architectural synthesis engine decoupled from untrusted client binaries and web sources.",
     content: (
       <div className="space-y-4 text-sm leading-relaxed text-muted-foreground">
         <p>
@@ -70,7 +70,7 @@ const docSections = [
     content: (
       <div className="space-y-4 text-sm leading-relaxed text-muted-foreground">
         <p>
-          RevForge AI eliminates arbitrary subscription lock-in by computing project-specific dynamic quotes based on real-world compute and model token consumption:
+          RevForge eliminates arbitrary subscription lock-in by computing project-specific dynamic quotes based on real-world compute and model token consumption:
         </p>
         <div className="p-4 rounded border border-border bg-card font-mono text-xs overflow-x-auto space-y-1" dir="ltr">
           <div className="text-muted-foreground">// Pricing Formula</div>
@@ -169,7 +169,7 @@ export default function DocsPage() {
         <div className="space-y-4 mb-12 border-b border-border pb-8">
           <div className="flex items-center space-x-2 rtl:space-x-reverse">
             <Badge variant="outline" className="border-primary/40 text-primary font-mono text-xs">
-              ENGINEERING MANUAL V2.4
+              ENGINEERING MANUAL 
             </Badge>
             <span className="text-xs text-muted-foreground font-mono">Last updated: Q4 2026</span>
           </div>
@@ -241,3 +241,4 @@ export default function DocsPage() {
     </div>
   );
 }
+

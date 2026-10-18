@@ -3,12 +3,11 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Terminal, Shield, ArrowRight, Lock, Mail, CheckCircle2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { ArrowLeft, Lock, Mail, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { LangThemeToggle } from "@/components/shared/lang-theme-toggle";
+import { RevForgeLogo } from "@/components/shared/revforge-logo";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -23,70 +22,70 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      // Authenticate / mock login session
-      await new Promise((resolve) => setTimeout(resolve, 600));
-      // Store session token in cookie/localStorage
+      await new Promise((resolve) => setTimeout(resolve, 500));
       if (typeof window !== "undefined") {
-        localStorage.setItem("revforge_session", JSON.stringify({ email, authenticated: true, role: "lead_architect" }));
+        localStorage.setItem(
+          "revforge_session",
+          JSON.stringify({ email: email.trim(), name: "مهندس المنظومة", authenticated: true })
+        );
       }
       router.push("/dashboard");
     } catch (err: any) {
-      setError(err.message || "Failed to authenticate session.");
+      setError(err.message || "فشل تسجيل الدخول.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleDemoLogin = () => {
+  const handleQuickDemoLogin = () => {
     if (typeof window !== "undefined") {
-      localStorage.setItem("revforge_session", JSON.stringify({ email: "demo@revforge.ai", authenticated: true, role: "lead_architect" }));
+      localStorage.setItem(
+        "revforge_session",
+        JSON.stringify({ email: "engineer@enterprise.com", name: "مهندس المنظومة", authenticated: true })
+      );
     }
     router.push("/dashboard");
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center px-4 py-12 bg-background text-foreground font-mono">
-      <div className="absolute top-4 end-4">
-        <LangThemeToggle />
-      </div>
-
+    <div className="min-h-screen flex flex-col justify-center items-center px-4 py-12 bg-background text-foreground">
       <div className="w-full max-w-sm space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-2">
-          <Link href="/" className="inline-flex items-center space-x-2 rtl:space-x-reverse group">
-            <div className="h-8 w-8 rounded border border-primary/40 bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary/20 transition">
-              <Terminal className="h-4 w-4" />
+          <Link href="/" className="inline-flex items-center space-x-2.5 rtl:space-x-reverse group">
+            <div className="h-9 w-9 rounded border border-border bg-muted/40 flex items-center justify-center">
+              <RevForgeLogo className="h-5 w-5" />
             </div>
-            <span className="font-mono text-base font-bold tracking-tight text-foreground">
-              RevForge<span className="text-primary">.ai</span>
+            <span className="font-bold text-lg tracking-tight text-foreground">
+              RevForge
             </span>
           </Link>
-          <p className="text-xs text-muted-foreground font-sans">
-            Sign in to access your clean-room projects & sandboxes
+          <p className="text-xs text-muted-foreground">
+            تسجيل الدخول للوصول إلى لوحة الفحص ومشاريع البناء
           </p>
         </div>
 
         {/* Card */}
-        <Card className="border-border bg-card">
+        <Card className="border-border bg-card shadow-sm">
           <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-sm font-bold text-foreground">
-              Authenticate Session
+            <CardTitle className="text-base font-bold text-foreground">
+              تسجيل الدخول
             </CardTitle>
             <CardDescription className="text-xs">
-              Zero-Trust cryptographically verified workspace access.
+              أدخل بريدك الإلكتروني للوصول إلى مشاريعك وتحليلاتك.
             </CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-4">
             {error && (
-              <div className="p-2.5 rounded border border-destructive/40 bg-destructive/10 text-destructive text-xs">
+              <div className="p-2.5 rounded-md border border-destructive/40 bg-destructive/10 text-destructive text-xs">
                 {error}
               </div>
             )}
 
             <form onSubmit={handleLogin} className="space-y-3.5">
               <div className="space-y-1.5">
-                <label className="text-xs font-medium text-foreground">Work Email</label>
+                <label className="text-xs font-semibold text-foreground">البريد الإلكتروني</label>
                 <div className="relative">
                   <Mail className="absolute start-3 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
                   <Input
@@ -94,19 +93,15 @@ export default function LoginPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="architect@enterprise.com"
-                    className="ps-9 font-mono text-xs"
+                    placeholder="name@company.com"
+                    className="ps-9 text-xs"
+                    dir="ltr"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs">
-                  <label className="font-medium text-foreground">Password</label>
-                  <span className="text-[11px] text-muted-foreground hover:text-foreground cursor-pointer">
-                    Reset?
-                  </span>
-                </div>
+                <label className="text-xs font-semibold text-foreground">كلمة المرور</label>
                 <div className="relative">
                   <Lock className="absolute start-3 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
                   <Input
@@ -115,55 +110,55 @@ export default function LoginPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="ps-9 font-mono text-xs"
+                    className="ps-9 text-xs"
+                    dir="ltr"
                   />
                 </div>
               </div>
 
-              <Button type="submit" disabled={isLoading} className="w-full text-xs font-mono">
+              <Button type="submit" disabled={isLoading} className="w-full text-xs font-bold shadow-sm">
                 {isLoading ? (
-                  <span>Authenticating...</span>
+                  <span>جارِ التحقق...</span>
                 ) : (
                   <>
-                    <span>Sign In</span>
-                    <ArrowRight className="ms-1.5 h-3.5 w-3.5 rtl:rotate-180" />
+                    <span>دخول المنصة</span>
+                    <ArrowLeft className="ms-1.5 h-3.5 w-3.5" />
                   </>
                 )}
               </Button>
             </form>
 
-            <div className="relative my-4">
+            <div className="relative my-3">
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-border" />
               </div>
               <div className="relative flex justify-center text-[10px] uppercase">
-                <span className="bg-card px-2 text-muted-foreground">Demo & Testing</span>
+                <span className="bg-card px-2 text-muted-foreground">أو تجربة فورية</span>
               </div>
             </div>
 
             <Button
               type="button"
               variant="outline"
-              onClick={handleDemoLogin}
-              className="w-full text-xs font-mono border-dashed border-primary/40 hover:bg-primary/5 text-primary"
+              onClick={handleQuickDemoLogin}
+              className="w-full text-xs border-dashed text-foreground hover:bg-muted/30"
             >
-              <Terminal className="me-1.5 h-3.5 w-3.5" />
-              <span>One-Click Instant Demo Login</span>
+              <span>دخول تجريبي سريع بنقرة واحدة</span>
             </Button>
           </CardContent>
 
           <CardFooter className="border-t border-border pt-4 text-center justify-center text-xs text-muted-foreground">
-            <span>Don&apos;t have an account? </span>
-            <Link href="/register" className="text-primary hover:underline ms-1 font-semibold">
-              Create Workspace
+            <span>ليس لديك حساب؟ </span>
+            <Link href="/register" className="text-primary hover:underline ms-1 font-bold">
+              إنشاء حساب جديد
             </Link>
           </CardFooter>
         </Card>
 
         {/* Security badge */}
         <div className="text-center text-[11px] text-muted-foreground flex items-center justify-center space-x-1.5 rtl:space-x-reverse">
-          <Shield className="h-3 w-3 text-primary" />
-          <span>Protected by Zero-Trust Ephemeral Authentication</span>
+          <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+          <span>حماية مشفرة ومصادقة معتمدة</span>
         </div>
       </div>
     </div>

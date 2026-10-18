@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { MarketingHeader } from "@/components/shared/marketing-header";
 import { MarketingFooter } from "@/components/shared/marketing-footer";
 import { Badge } from "@/components/ui/badge";
@@ -7,14 +7,14 @@ import { ShieldCheck, Lock, Terminal, Cpu, CheckCircle2, Server, EyeOff, FileCod
 import { CodeViewer } from "@/components/shared/code-viewer";
 
 export const metadata = {
-  title: "Security Architecture — RevForge AI Zero-Trust Controls",
+  title: "Security Architecture — RevForge Zero-Trust Controls",
   description: "Defense-in-depth security specifications: gVisor sandboxing, SSRF guards, prompt injection delimiters, and zero-shell execution.",
 };
 
 const securityLayers = [
   {
     title: "1. Zero-Shell Command Execution",
-    description: "RevForge AI strictly forbids child_process.exec, execSync, or spawn with shell: true. All CLI tools inside host and sandbox environments are invoked strictly via execFile with immutable array arguments and binary allowlists.",
+    description: "RevForge strictly forbids child_process.exec, execSync, or spawn with shell: true. All CLI tools inside host and sandbox environments are invoked strictly via execFile with immutable array arguments and binary allowlists.",
     code: `// sandbox-runner.ts - Strictly shell: false
 const result = await execFileAsync(executable, args, {
   shell: false, // Mandatory: Zero shell injection
@@ -80,7 +80,7 @@ export default function SecurityPage() {
             Defense-in-Depth Security Architecture
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Reverse engineering unknown code and analyzing external web targets introduces severe injection vectors. RevForge AI is built from the kernel up to eliminate command injection, prompt hijacking, SSRF, and data leakage.
+            Reverse engineering unknown code and analyzing external web targets introduces severe injection vectors. RevForge is built from the kernel up to eliminate command injection, prompt hijacking, SSRF, and data leakage.
           </p>
         </div>
 
@@ -136,3 +136,4 @@ export default function SecurityPage() {
     </div>
   );
 }
+

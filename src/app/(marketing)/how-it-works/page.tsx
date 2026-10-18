@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { MarketingHeader } from "@/components/shared/marketing-header";
 import { MarketingFooter } from "@/components/shared/marketing-footer";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +8,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export const metadata = {
-  title: "How It Works — RevForge AI Clean-Room Pipeline",
+  title: "How It Works — RevForge Clean-Room Pipeline",
   description: "End-to-end technical breakdown of the 8-stage reverse engineering and clean-room synthesis pipeline.",
 };
 
@@ -73,7 +73,7 @@ export default function HowItWorksPage() {
         <div className="space-y-4 max-w-2xl">
           <Badge variant="outline">Pipeline Architecture</Badge>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-            How RevForge AI Executes Clean-Room Reverse Engineering
+            How RevForge Executes Clean-Room Reverse Engineering
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Our 8-stage zero-trust pipeline maps observable software boundaries, eliminates prompt and command injections, and synthesizes 100% original, copyright-clean source code in isolated containers.
@@ -166,3 +166,4 @@ export default function HowItWorksPage() {
     </div>
   );
 }
+

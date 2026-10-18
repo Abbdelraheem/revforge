@@ -58,7 +58,7 @@ const config: Config = {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "var(--font-arabic)", "system-ui", "sans-serif"],
+        sans: ["var(--font-sans)", "var(--font-arabic)", "system-ui", "sans-serif"],
         arabic: ["var(--font-arabic)", "system-ui", "sans-serif"],
         mono: ["var(--font-mono)", "ui-monospace", "monospace"],
       },

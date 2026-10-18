@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
-import { Inter, IBM_Plex_Sans_Arabic, JetBrains_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, Alexandria, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
+const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-sans",
   display: "swap",
 });
 
-const ibmPlexArabic = IBM_Plex_Sans_Arabic({
+const alexandria = Alexandria({
   subsets: ["arabic"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700", "800"],
   variable: "--font-arabic",
   display: "swap",
 });
@@ -22,9 +22,9 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RevForge AI — Engineering-Grade Reverse Engineering & Clean-Room Code Synthesis",
+  title: "RevForge — Software Architecture Reconstruction & Clean-Room Code Generation",
   description:
-    "AI-Powered Technical Scoping, Architecture Boundary Extraction, Dynamic Cost Estimation, and Clean-Room Source Code Synthesis.",
+    "Technical Scoping, Architecture Boundary Extraction, Dynamic Cost Estimation, and Clean-Room Source Code Synthesis Platform.",
 };
 
 export default function RootLayout({
@@ -36,10 +36,10 @@ export default function RootLayout({
     <html
       lang="ar"
       dir="rtl"
-      className={`dark ${inter.variable} ${ibmPlexArabic.variable} ${jetbrainsMono.variable}`}
+      className={`light ${plusJakarta.variable} ${alexandria.variable} ${jetbrainsMono.variable}`}
       suppressHydrationWarning
     >
-      <body className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/20 selection:text-primary">
+      <body className="min-h-screen bg-background text-foreground font-sans antialiased selection:bg-primary/20 selection:text-primary">
         {children}
       </body>
     </html>

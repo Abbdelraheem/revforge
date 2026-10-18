@@ -1,11 +1,11 @@
-import React from "react";
+﻿import React from "react";
 import { MarketingHeader } from "@/components/shared/marketing-header";
 import { MarketingFooter } from "@/components/shared/marketing-footer";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 export const metadata = {
-  title: "DMCA & Copyright Takedown Notice — RevForge AI",
+  title: "DMCA & Copyright Takedown Notice — RevForge",
   description: "Digital Millennium Copyright Act compliance, designated agent notification procedures, and counter-notice provisions.",
 };
 
@@ -31,7 +31,7 @@ export default function DmcaPage() {
           <section className="space-y-3">
             <h2 className="text-base font-mono font-bold text-foreground">1. Policy Overview</h2>
             <p>
-              RevForge AI respects the intellectual property rights of creators and adheres strictly to the Digital Millennium Copyright Act (17 U.S.C. § 512) and international copyright directives. If you believe that content hosted on our infrastructure or generated through our service infringes upon a valid copyright you own or control, you may submit a formal notification to our Designated Copyright Agent.
+              RevForge respects the intellectual property rights of creators and adheres strictly to the Digital Millennium Copyright Act (17 U.S.C. § 512) and international copyright directives. If you believe that content hosted on our infrastructure or generated through our service infringes upon a valid copyright you own or control, you may submit a formal notification to our Designated Copyright Agent.
             </p>
           </section>
 
@@ -55,7 +55,7 @@ export default function DmcaPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="font-mono text-[11px] space-y-1 text-muted-foreground">
-              <div>RevForge AI Inc. — Legal Operations Group</div>
+              <div>RevForge Inc. — Legal Operations Group</div>
               <div>Attn: Copyright Agent</div>
               <div>Email: <span className="text-foreground font-semibold">dmca@revforge.ai</span></div>
               <div>Location: Dover, Delaware, USA</div>
@@ -72,7 +72,7 @@ export default function DmcaPage() {
           <section className="space-y-3">
             <h2 className="text-base font-mono font-bold text-foreground">4. Repeat Infringer Policy</h2>
             <p>
-              In accordance with Section 512(i)(1)(A) of the DMCA, RevForge AI maintains a policy that provides for the immediate termination in appropriate circumstances of user accounts found to be repeat infringers of copyright.
+              In accordance with Section 512(i)(1)(A) of the DMCA, RevForge maintains a policy that provides for the immediate termination in appropriate circumstances of user accounts found to be repeat infringers of copyright.
             </p>
           </section>
         </div>
@@ -82,3 +82,4 @@ export default function DmcaPage() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { MarketingHeader } from "@/components/shared/marketing-header";
 import { MarketingFooter } from "@/components/shared/marketing-footer";
 import { Badge } from "@/components/ui/badge";
@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Scale, ShieldCheck, CheckCircle2, Layers } from "lucide-react";
 
 export const metadata = {
-  title: "Clean-Room Reverse Engineering & IP Policy — RevForge AI",
+  title: "Clean-Room Reverse Engineering & IP Policy — RevForge",
   description: "Legal whitepaper and architectural doctrine explaining clean-room isolation, fair use, and copyright compliance.",
 };
 
@@ -56,7 +56,7 @@ export default function CleanRoomIpPolicyPage() {
           <section className="space-y-3">
             <h2 className="text-base font-mono font-bold text-foreground">2. RevForge Dual-Room Automated Isolation Architecture</h2>
             <p>
-              RevForge AI codifies the classic clean-room protocol into an automated, provably decoupled two-stage pipeline:
+              RevForge codifies the classic clean-room protocol into an automated, provably decoupled two-stage pipeline:
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -109,3 +109,4 @@ export default function CleanRoomIpPolicyPage() {
     </div>
   );
 }
+

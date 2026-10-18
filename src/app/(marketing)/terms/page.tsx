@@ -1,11 +1,11 @@
-import React from "react";
+﻿import React from "react";
 import { MarketingHeader } from "@/components/shared/marketing-header";
 import { MarketingFooter } from "@/components/shared/marketing-footer";
 import { Badge } from "@/components/ui/badge";
 
 export const metadata = {
-  title: "Terms of Service — RevForge AI",
-  description: "Terms and conditions governing the use of the RevForge AI reverse engineering and clean-room synthesis platform.",
+  title: "Terms of Service — RevForge",
+  description: "Terms and conditions governing the use of the RevForge reverse engineering and clean-room synthesis platform.",
 };
 
 export default function TermsPage() {
@@ -30,14 +30,14 @@ export default function TermsPage() {
           <section className="space-y-2">
             <h2 className="text-base font-mono font-bold text-foreground">1. Acceptance of Terms</h2>
             <p>
-              By accessing, browsing, or utilizing the RevForge AI platform (&quot;Service&quot;), provided by RevForge AI Inc. (&quot;Company&quot;, &quot;we&quot;, &quot;us&quot;), you (&quot;User&quot; or &quot;Client&quot;) agree to be bound by these Terms of Service. If you do not agree to these terms in their entirety, you must immediately cease all access to the Service.
+              By accessing, browsing, or utilizing the RevForge platform (&quot;Service&quot;), provided by RevForge Inc. (&quot;Company&quot;, &quot;we&quot;, &quot;us&quot;), you (&quot;User&quot; or &quot;Client&quot;) agree to be bound by these Terms of Service. If you do not agree to these terms in their entirety, you must immediately cease all access to the Service.
             </p>
           </section>
 
           <section className="space-y-2">
             <h2 className="text-base font-mono font-bold text-foreground">2. Clean-Room Methodology & IP Ownership</h2>
             <p>
-              RevForge AI operates as an automated clean-room reverse engineering and technical synthesis platform. The Service analyses target binaries, web endpoints, and metadata to generate functional specifications (the &quot;Evidence Ledger&quot;), which are subsequently used to synthesize original, clean-room source code.
+              RevForge operates as an automated clean-room reverse engineering and technical synthesis platform. The Service analyses target binaries, web endpoints, and metadata to generate functional specifications (the &quot;Evidence Ledger&quot;), which are subsequently used to synthesize original, clean-room source code.
             </p>
             <p>
               <strong>Client Ownership:</strong> You retain full, exclusive intellectual property rights and copyright to all clean-room source code, repositories, and documentation generated through paid and completed reconstruction jobs on the platform.
@@ -50,7 +50,7 @@ export default function TermsPage() {
           <section className="space-y-2">
             <h2 className="text-base font-mono font-bold text-foreground">3. Billing, Dynamic Pricing & Refund Policy</h2>
             <p>
-              Pricing on RevForge AI is dynamically calculated per project based on estimated container compute time, model inference token allocations, and technical complexity tier.
+              Pricing on RevForge is dynamically calculated per project based on estimated container compute time, model inference token allocations, and technical complexity tier.
             </p>
             <p>
               <strong>Payment Processing:</strong> Payments are processed via Paddle.com Market Ltd (&quot;Paddle&quot;), our Merchant of Record. Rebuild jobs are unlocked strictly upon server-side verification of signed Paddle webhook notifications.
@@ -70,7 +70,7 @@ export default function TermsPage() {
           <section className="space-y-2">
             <h2 className="text-base font-mono font-bold text-foreground">5. Limitation of Liability</h2>
             <p>
-              To the maximum extent permitted by applicable law, RevForge AI Inc. and its affiliates shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use the Service.
+              To the maximum extent permitted by applicable law, RevForge Inc. and its affiliates shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use the Service.
             </p>
           </section>
 
@@ -87,3 +87,4 @@ export default function TermsPage() {
     </div>
   );
 }
+

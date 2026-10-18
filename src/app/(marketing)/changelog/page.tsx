@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { MarketingHeader } from "@/components/shared/marketing-header";
 import { MarketingFooter } from "@/components/shared/marketing-footer";
 import { Badge } from "@/components/ui/badge";
@@ -7,13 +7,13 @@ import { Terminal, Shield, GitCommit, CheckCircle2, ArrowRight } from "lucide-re
 import Link from "next/link";
 
 export const metadata = {
-  title: "Engineering Changelog — RevForge AI",
+  title: "Engineering Changelog — RevForge",
   description: "Chronological release notes, architecture improvements, security hardening passes, and sandbox runtime updates.",
 };
 
 const releases = [
   {
-    version: "v2.4.0",
+    version: ".0",
     date: "October 2026",
     tag: "Latest Release",
     headline: "Paddle v2 Billing Transition, 90% Unit Pricing Engine & Next.js 15 App Router",
@@ -158,3 +158,4 @@ export default function ChangelogPage() {
     </div>
   );
 }
+

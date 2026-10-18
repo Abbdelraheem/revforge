@@ -25,7 +25,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { LangThemeToggle } from "@/components/shared/lang-theme-toggle";
+import { RevForgeLogo } from "@/components/shared/revforge-logo";
 
 interface FleetJob {
   id: string;
@@ -44,7 +44,7 @@ const INITIAL_JOBS: FleetJob[] = [
   {
     id: "proj-9012a-4f81",
     targetType: "web_app",
-    source: "https://clipzila.com",
+    source: "https://app.enterprise-media.com",
     status: "running",
     progress: 68,
     runtimeSec: 142,
@@ -143,25 +143,29 @@ export default function AdminConsolePage() {
       {/* Top Console Navigation */}
       <header className="border-b border-border bg-card/60 backdrop-blur sticky top-0 z-50 px-6 py-3.5 flex items-center justify-between">
         <div className="flex items-center space-x-3 rtl:space-x-reverse">
-          <Link href="/" className="flex items-center space-x-2 rtl:space-x-reverse">
-            <div className="h-7 w-7 rounded border border-primary/40 bg-primary/10 flex items-center justify-center text-primary">
-              <Terminal className="h-4 w-4" />
+          <Link href="/" className="flex items-center space-x-2.5 rtl:space-x-reverse">
+            <div className="h-8 w-8 rounded border border-border bg-muted/40 flex items-center justify-center">
+              <RevForgeLogo className="h-4 w-4" />
             </div>
             <span className="font-bold text-sm text-foreground">
-              RevForge<span className="text-primary">.ai</span>
+              RevForge
             </span>
           </Link>
           <span className="text-muted-foreground text-xs">•</span>
-          <Badge variant="outline" className="border-primary/40 text-primary text-[10px]">
-            OPERATIONS FLEET CONSOLE
+          <Badge variant="outline" className="border-border text-foreground text-[10px] font-semibold">
+            لوحة إدارة العمليات
           </Badge>
         </div>
 
         <div className="flex items-center space-x-3 rtl:space-x-reverse">
           <Link href="/dashboard" className="text-xs text-muted-foreground hover:text-foreground">
-            User Studio
+            لوحة الاستوديو
           </Link>
-          <LangThemeToggle />
+          <Link href="/">
+            <Button size="sm" variant="outline" className="text-xs">
+              الرئيسية
+            </Button>
+          </Link>
         </div>
       </header>
 

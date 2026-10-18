@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { MarketingHeader } from "@/components/shared/marketing-header";
 import { MarketingFooter } from "@/components/shared/marketing-footer";
 import { Badge } from "@/components/ui/badge";
@@ -6,7 +6,7 @@ import { AlertTriangle, ShieldCheck, Ban, CheckCircle2 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 export const metadata = {
-  title: "Acceptable Use Policy (AUP) — RevForge AI",
+  title: "Acceptable Use Policy (AUP) — RevForge",
   description: "Mandatory security standards, malware prohibitions, and ethical reverse engineering requirements.",
 };
 
@@ -37,7 +37,7 @@ export default function AcceptableUsePage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="text-xs text-muted-foreground leading-normal">
-              RevForge AI exists solely to facilitate architectural modernization, software interoperability, legacy codebase salvation, and clean-room independent re-implementation. The platform shall never be used to reverse engineer, unpack, or weaponize malicious software, ransomware, rootkits, or cyber weapons.
+              RevForge exists solely to facilitate architectural modernization, software interoperability, legacy codebase salvation, and clean-room independent re-implementation. The platform shall never be used to reverse engineer, unpack, or weaponize malicious software, ransomware, rootkits, or cyber weapons.
             </CardContent>
           </Card>
 
@@ -87,3 +87,4 @@ export default function AcceptableUsePage() {
     </div>
   );
 }
+

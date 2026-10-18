@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { MarketingHeader } from "@/components/shared/marketing-header";
 import { MarketingFooter } from "@/components/shared/marketing-footer";
 import { Badge } from "@/components/ui/badge";
@@ -8,7 +8,7 @@ import { ArrowRight, RefreshCw, Archive, Layers, ShieldCheck, FileCheck } from "
 import Link from "next/link";
 
 export const metadata = {
-  title: "Use Cases — RevForge AI Clean-Room Applications",
+  title: "Use Cases — RevForge Clean-Room Applications",
   description: "Enterprise scenarios: legacy software modernization, abandoned repository recovery, and agency technical scoping.",
 };
 
@@ -28,7 +28,7 @@ const useCases = [
   {
     icon: Layers,
     title: "Agency Technical Scoping & Cost Estimation",
-    description: "Software consultancies use RevForge AI to audit prospective client targets, automatically detecting tech stack perimeters and real developer hour benchmarks.",
+    description: "Software consultancies use RevForge to audit prospective client targets, automatically detecting tech stack perimeters and real developer hour benchmarks.",
     benefits: ["Instant Evidence Ledger generation", "Eliminate speculative quoting errors", "Empirically validated project timelines"],
   },
   {
@@ -51,7 +51,7 @@ export default function UseCasesPage() {
             Built for Engineers Modernizing Complex Software
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Whether migrating legacy monolithic portals or salvaging lost source code from production binaries, RevForge AI delivers production-grade clean-room repositories.
+            Whether migrating legacy monolithic portals or salvaging lost source code from production binaries, RevForge delivers production-grade clean-room repositories.
           </p>
         </div>
 
@@ -94,3 +94,4 @@ export default function UseCasesPage() {
     </div>
   );
 }
+
