@@ -1,18 +1,5 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
-
-const plusJakarta = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-  display: "swap",
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "RevForge — Software Architecture Reconstruction & Clean-Room Code Generation",
@@ -29,7 +16,7 @@ export default function RootLayout({
     <html
       lang="en"
       dir="ltr"
-      className={`light ${plusJakarta.variable} ${jetbrainsMono.variable}`}
+      className="light"
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-background text-foreground font-sans antialiased selection:bg-primary/20 selection:text-primary">
