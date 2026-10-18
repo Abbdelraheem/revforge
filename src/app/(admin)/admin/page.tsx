@@ -153,17 +153,17 @@ export default function AdminConsolePage() {
           </Link>
           <span className="text-muted-foreground text-xs">•</span>
           <Badge variant="outline" className="border-border text-foreground text-[10px] font-semibold">
-            لوحة إدارة العمليات
+            Operations Fleet Console
           </Badge>
         </div>
 
-        <div className="flex items-center space-x-3 rtl:space-x-reverse">
+        <div className="flex items-center space-x-3">
           <Link href="/dashboard" className="text-xs text-muted-foreground hover:text-foreground">
-            لوحة الاستوديو
+            Studio Dashboard
           </Link>
           <Link href="/">
             <Button size="sm" variant="outline" className="text-xs">
-              الرئيسية
+              Home
             </Button>
           </Link>
         </div>

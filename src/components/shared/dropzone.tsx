@@ -30,11 +30,7 @@ export function Dropzone({
     if (!file) return;
 
     if (file.size > maxSizeBytes) {
-      setError(
-        isArabic
-          ? `حجم الملف (${(file.size / (1024 * 1024)).toFixed(1)}MB) يتجاوز الحد المسموح (250MB)`
-          : `File size exceeds 250MB limit (${(file.size / (1024 * 1024)).toFixed(1)}MB)`
-      );
+      setError(`File size exceeds 250MB limit (${(file.size / (1024 * 1024)).toFixed(1)}MB)`);
       return;
     }
 
@@ -86,7 +82,7 @@ export function Dropzone({
             <>
               <UploadCloud className="h-8 w-8 text-muted-foreground" />
               <p className="text-sm font-medium text-foreground">
-                {isArabic ? "اسحب الملف هنا أو انقر للاختيار" : "Drop target artifact here or click to browse"}
+                Drop target artifact here or click to browse
               </p>
               <p className="text-xs text-muted-foreground font-mono">
                 {acceptedExtensions.join("  ")} • Max 250MB

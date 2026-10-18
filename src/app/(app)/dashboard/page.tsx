@@ -17,12 +17,13 @@ import {
   RefreshCw,
   Binary,
   Clock,
-  ArrowLeft,
+  ArrowRight,
   Check,
   ChevronRight,
   User,
   LogOut,
   CreditCard,
+  Terminal,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -120,8 +121,7 @@ export default function AppDashboardPage() {
           // ignore
         }
       } else {
-        // Set default demo session for convenience
-        const defaultSession = { email: "engineer@enterprise.com", name: "مهندس المنظومة" };
+        const defaultSession = { email: "architect@enterprise.com", name: "Lead Architect" };
         localStorage.setItem("revforge_session", JSON.stringify(defaultSession));
         setCurrentUser(defaultSession);
       }
@@ -153,7 +153,7 @@ export default function AppDashboardPage() {
   const handleRunTriage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!ownershipAttested) {
-      setErrorMessage("يجب تأكيد الإقرار بالحق القانوني أو التفويض لفحص التطبيق.");
+      setErrorMessage("You must attest lawful authority or interoperability rights to analyze this target.");
       return;
     }
 
@@ -167,15 +167,15 @@ export default function AppDashboardPage() {
     try {
       const payload: any = {
         targetSource,
-        userPrompt: userPrompt.trim() || "تفكيك معماري شامل وإعادة بناء مستقلة",
+        userPrompt: userPrompt.trim() || "Full clean-room reverse engineering and technical scoping pass",
       };
 
       if (targetSource === "url") {
-        if (!targetUrl.trim()) throw new Error("يرجى إدخال رابط الموقع أو التطبيق.");
+        if (!targetUrl.trim()) throw new Error("Please enter a valid target URL.");
         payload.targetInput = targetUrl.trim();
       } else {
         if (!selectedFile || !fileBase64) {
-          throw new Error("يرجى اختيار ملف الحزمة البرمجية أولاً.");
+          throw new Error("Please upload a valid binary file first.");
         }
         payload.fileName = selectedFile.name;
         payload.fileBase64 = fileBase64;
@@ -189,12 +189,12 @@ export default function AppDashboardPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "فشل الفحص المعماري.");
+        throw new Error(data.error || "Static triage failed.");
       }
 
       setReport(data);
     } catch (err: any) {
-      setErrorMessage(err.message || "حدث خطأ غير متوقع أثناء الفحص.");
+      setErrorMessage(err.message || "An unexpected error occurred during triage.");
     } finally {
       setIsTriaging(false);
     }
@@ -217,15 +217,14 @@ export default function AppDashboardPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || "فشل إنشاء معاملة الدفع عبر Paddle.");
+        throw new Error(data.error || "Failed to create Paddle checkout session.");
       }
 
-      // If live checkout URL provided, we could redirect or open Paddle checkout overlay
-      // For immediate development & demo flow, unlock clean-room rebuild and stream SSE
+      // Unlock clean-room rebuild and stream SSE
       setIsUnlocked(true);
       startRebuildStream(report.projectId);
     } catch (err: any) {
-      alert(`خطأ في بوابة الدفع: ${err.message}`);
+      alert(`Payment error: ${err.message}`);
     } finally {
       setIsCheckingOut(false);
     }
@@ -271,34 +270,34 @@ export default function AppDashboardPage() {
   });
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
+    <div className="min-h-screen flex flex-col bg-background text-foreground font-sans">
       {/* Studio Header */}
       <header className="border-b border-border bg-background sticky top-0 z-50 px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center space-x-3 rtl:space-x-reverse">
-          <Link href="/" className="flex items-center space-x-2.5 rtl:space-x-reverse">
+        <div className="flex items-center space-x-3">
+          <Link href="/" className="flex items-center space-x-2.5">
             <div className="h-8 w-8 rounded border border-border bg-muted/40 flex items-center justify-center">
               <RevForgeLogo className="h-4 w-4" />
             </div>
-            <span className="font-bold text-sm text-foreground">
+            <span className="font-bold text-sm text-foreground font-mono">
               RevForge
             </span>
           </Link>
           <span className="text-muted-foreground text-xs">•</span>
-          <div className="flex items-center space-x-1.5 rtl:space-x-reverse text-xs text-muted-foreground">
-            <Link href="/" className="hover:text-foreground">الرئيسية</Link>
-            <ChevronRight className="h-3 w-3 rtl:rotate-180" />
-            <span className="text-foreground font-semibold">استوديو التحليل وإعادة البناء</span>
+          <div className="flex items-center space-x-1.5 text-xs text-muted-foreground">
+            <Link href="/" className="hover:text-foreground">Home</Link>
+            <ChevronRight className="h-3 w-3" />
+            <span className="text-foreground font-semibold">Clean-Room Studio</span>
           </div>
         </div>
 
-        <div className="flex items-center space-x-3 rtl:space-x-reverse">
+        <div className="flex items-center space-x-3">
           {currentUser && (
-            <div className="flex items-center space-x-2 rtl:space-x-reverse text-xs text-muted-foreground bg-muted/30 px-3 py-1.5 rounded-md border border-border">
+            <div className="flex items-center space-x-2 text-xs text-muted-foreground bg-muted/30 px-3 py-1.5 rounded-md border border-border">
               <User className="h-3.5 w-3.5 text-primary" />
               <span className="font-medium text-foreground">{currentUser.email}</span>
               <button
                 onClick={handleLogout}
-                title="تسجيل الخروج"
+                title="Sign out"
                 className="text-muted-foreground hover:text-destructive ms-2"
               >
                 <LogOut className="h-3.5 w-3.5" />
@@ -309,7 +308,7 @@ export default function AppDashboardPage() {
           <Link href="/pricing">
             <Button variant="outline" size="sm" className="text-xs">
               <CreditCard className="h-3.5 w-3.5 me-1.5" />
-              <span>الباقات المتاحة</span>
+              <span>Pricing & Scope</span>
             </Button>
           </Link>
         </div>
@@ -319,11 +318,11 @@ export default function AppDashboardPage() {
       <main className="flex-1 max-w-7xl w-full mx-auto p-6 space-y-8">
         {/* Intro */}
         <div className="space-y-1">
-          <h1 className="text-2xl font-bold tracking-tight text-foreground">
-            استوديو الفحص المعماري وتوليد الكود المستقل
+          <h1 className="text-2xl font-bold tracking-tight text-foreground font-mono">
+            Clean-Room Reverse Engineering Studio
           </h1>
           <p className="text-xs text-muted-foreground">
-            أدخل رابط المنصة أو ارفع حزمة التطبيق. الفحص مجاني بالكامل لتحديد حدود المكونات المعمارية واستخراج تقرير المواصفات.
+            Ingest any live target URL or binary executable. Free initial triage extracts architecture boundaries and calculates custom project pricing.
           </p>
         </div>
 
@@ -331,13 +330,13 @@ export default function AppDashboardPage() {
         <Card className="border-border bg-card shadow-sm">
           <CardHeader className="pb-3 border-b border-border">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <CardTitle className="text-sm font-bold flex items-center space-x-2 rtl:space-x-reverse">
+              <CardTitle className="text-sm font-bold flex items-center space-x-2">
                 <Layers className="h-4 w-4 text-primary" />
-                <span>إدخال المنظومة المستهدفة</span>
+                <span>Target Ingestion & Instructions</span>
               </CardTitle>
 
               {/* Source Type Selector */}
-              <div className="flex items-center space-x-1.5 rtl:space-x-reverse text-xs">
+              <div className="flex items-center space-x-1.5 text-xs">
                 <button
                   type="button"
                   onClick={() => setTargetSource("url")}
@@ -348,7 +347,7 @@ export default function AppDashboardPage() {
                   }`}
                 >
                   <Globe className="inline me-1 h-3.5 w-3.5" />
-                  رابط موقع أو تطبيق (URL)
+                  Live URL / Repo
                 </button>
                 <button
                   type="button"
@@ -360,7 +359,7 @@ export default function AppDashboardPage() {
                   }`}
                 >
                   <Binary className="inline me-1 h-3.5 w-3.5" />
-                  حزمة برمجية ثنائية (Binary / APK)
+                  Binary Archive (APK / DLL)
                 </button>
               </div>
             </div>
@@ -371,35 +370,34 @@ export default function AppDashboardPage() {
               {targetSource === "url" ? (
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-foreground">
-                    رابط الموقع أو متجر التطبيقات (URL) *
+                    Target Endpoint URL *
                   </label>
                   <Input
                     required
                     type="url"
                     value={targetUrl}
                     onChange={(e) => setTargetUrl(e.target.value)}
-                    placeholder="https://example.com أو رابط الموقع المطلوب..."
+                    placeholder="https://example.com or public Git repository URL..."
                     className="text-xs font-mono placeholder:text-muted-foreground/40"
-                    dir="ltr"
                   />
                   <div className="text-[11px] text-muted-foreground">
-                    يدعم المواقع الحية، تطبيقات الويب، روابط Google Play / App Store، ومستودعات GitHub العامة.
+                    Supports live web applications, Google Play / App Store listings, and public GitHub repositories.
                   </div>
                 </div>
               ) : (
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-foreground">
-                    رفع ملف الحزمة (.apk, .asar, PE/ELF/Mach-O, .har) *
+                    Upload Binary File (.apk, .asar, PE/ELF/Mach-O, .har) *
                   </label>
                   <Dropzone
                     onFileSelect={(file) => handleFileDrop([file])}
                     acceptedExtensions={[".apk", ".exe", ".dll", ".elf", ".asar", ".har", ".zip"]}
                     maxSizeBytes={250 * 1024 * 1024}
-                    isArabic={true}
+                    isArabic={false}
                   />
                   {selectedFile && (
                     <div className="text-xs text-primary font-semibold">
-                      تم اختيار الملف: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+                      Selected file: {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
                     </div>
                   )}
                 </div>
@@ -408,19 +406,19 @@ export default function AppDashboardPage() {
               {/* Natural Language Prompt */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-foreground">
-                  المواصفات والتعليمات الإضافية المطلوبة (اختياري)
+                  Reconstruction Specifications (Optional)
                 </label>
                 <textarea
                   rows={2}
                   value={userPrompt}
                   onChange={(e) => setUserPrompt(e.target.value)}
-                  placeholder="مثال: التركيز على إعادة بناء لوحة التحكم ونماذج قاعدة البيانات العلائقية بـ Next.js و Drizzle..."
+                  placeholder="e.g. Focus on Next.js 15 dashboard layout, Drizzle ORM models, and authenticated REST endpoints..."
                   className="w-full rounded-md border border-input bg-background p-3 text-xs shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
                 />
               </div>
 
               {/* Ownership Attestation Checkbox */}
-              <div className="flex items-start space-x-2.5 rtl:space-x-reverse p-3 rounded-md border border-border bg-muted/20">
+              <div className="flex items-start space-x-2.5 p-3 rounded-md border border-border bg-muted/20">
                 <input
                   type="checkbox"
                   id="attestation"
@@ -430,14 +428,14 @@ export default function AppDashboardPage() {
                 />
                 <label htmlFor="attestation" className="text-xs text-muted-foreground leading-snug">
                   <strong className="text-foreground">
-                    إقرار قانوني بالتفويض أو التوافقية:
+                    Intellectual Property Attestation:
                   </strong>{" "}
-                  أقر بأنني أمتلك الصلاحية أو الحقوق القانونية لإجراء الفحص المعماري لأغراض التوافقية أو إعادة البناء المستقل وفق قوانين البرمجيات النظيفة.
+                  I attest that I possess lawful authority, ownership, or fair-use interoperability rights to analyze this target artifact in accordance with clean-room legal standards.
                 </label>
               </div>
 
               {errorMessage && (
-                <div className="p-3 rounded-md border border-destructive/40 bg-destructive/10 text-destructive text-xs flex items-center space-x-2 rtl:space-x-reverse font-medium">
+                <div className="p-3 rounded-md border border-destructive/40 bg-destructive/10 text-destructive text-xs flex items-center space-x-2 font-medium">
                   <AlertTriangle className="h-4 w-4 shrink-0" />
                   <span>{errorMessage}</span>
                 </div>
@@ -447,12 +445,12 @@ export default function AppDashboardPage() {
                 {isTriaging ? (
                   <>
                     <RefreshCw className="me-1.5 h-3.5 w-3.5 animate-spin" />
-                    <span>جارِ الفحص المعماري والتفكيك...</span>
+                    <span>Executing Static Triage Pass...</span>
                   </>
                 ) : (
                   <>
-                    <span>بدء الفحص المعماري واستخراج التقرير</span>
-                    <ArrowLeft className="ms-1.5 h-3.5 w-3.5" />
+                    <span>Execute Free Static Triage</span>
+                    <ArrowRight className="ms-1.5 h-3.5 w-3.5" />
                   </>
                 )}
               </Button>
@@ -467,22 +465,22 @@ export default function AppDashboardPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border pb-4">
               <div>
                 <Badge variant="outline" className="border-primary/40 text-primary text-[10px] mb-1 font-semibold">
-                  تقرير المعمارية المعتمد
+                  AUDIT COMPLETE
                 </Badge>
-                <h2 className="text-xl font-bold text-foreground">
-                  مواصفات المنظومة وسجل الأدلة
+                <h2 className="text-xl font-bold text-foreground font-mono">
+                  Architectural Audit & Evidence Ledger
                 </h2>
-                <div className="text-xs text-muted-foreground mt-0.5">
-                  معرّف المشروع: <span className="text-foreground font-mono">{report.projectId}</span> • نوع الهدف:{" "}
-                  <span className="text-foreground font-semibold">{report.targetType}</span> • نسبة دقة التحليل:{" "}
+                <div className="text-xs text-muted-foreground mt-0.5 font-mono">
+                  Project ID: <span className="text-foreground">{report.projectId}</span> • Target:{" "}
+                  <span className="text-foreground font-semibold">{report.targetType}</span> • Confidence:{" "}
                   <span className="text-primary font-bold">{(report.confidenceScore * 100).toFixed(0)}%</span>
                 </div>
               </div>
 
-              <div className="p-3 rounded-lg border border-border bg-card text-left font-mono">
-                <div className="text-[10px] text-muted-foreground uppercase">سعر المشروع الفردي</div>
+              <div className="p-3 rounded-lg border border-border bg-card text-right font-mono">
+                <div className="text-[10px] text-muted-foreground uppercase">Custom Project Quote</div>
                 <div className="text-2xl font-extrabold text-primary">{report.quote.cleanPriceLabel}</div>
-                <div className="text-[10px] text-muted-foreground">بوابة Paddle المعتمدة</div>
+                <div className="text-[10px] text-muted-foreground">Paddle Checkout Link</div>
               </div>
             </div>
 
@@ -490,11 +488,11 @@ export default function AppDashboardPage() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Card className="border-border bg-card">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-xs font-bold text-muted-foreground uppercase">واجهات العرض</CardTitle>
+                  <CardTitle className="text-xs font-bold text-muted-foreground uppercase font-mono">Frontend</CardTitle>
                 </CardHeader>
                 <CardContent className="text-xs space-y-1">
                   {report.detectedTechStack.frontend?.map((tech, idx) => (
-                    <div key={idx} className="flex items-center space-x-1.5 rtl:space-x-reverse text-foreground font-semibold">
+                    <div key={idx} className="flex items-center space-x-1.5 text-foreground font-semibold">
                       <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                       <span>{tech}</span>
                     </div>
@@ -504,11 +502,11 @@ export default function AppDashboardPage() {
 
               <Card className="border-border bg-card">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-xs font-bold text-muted-foreground uppercase">الواجهات البرمجية والخادم</CardTitle>
+                  <CardTitle className="text-xs font-bold text-muted-foreground uppercase font-mono">Backend & APIs</CardTitle>
                 </CardHeader>
                 <CardContent className="text-xs space-y-1">
                   {report.detectedTechStack.backend?.map((tech, idx) => (
-                    <div key={idx} className="flex items-center space-x-1.5 rtl:space-x-reverse text-foreground font-semibold">
+                    <div key={idx} className="flex items-center space-x-1.5 text-foreground font-semibold">
                       <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                       <span>{tech}</span>
                     </div>
@@ -518,11 +516,11 @@ export default function AppDashboardPage() {
 
               <Card className="border-border bg-card">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-xs font-bold text-muted-foreground uppercase">قواعد البيانات</CardTitle>
+                  <CardTitle className="text-xs font-bold text-muted-foreground uppercase font-mono">Database</CardTitle>
                 </CardHeader>
                 <CardContent className="text-xs space-y-1">
                   {report.detectedTechStack.database?.map((tech, idx) => (
-                    <div key={idx} className="flex items-center space-x-1.5 rtl:space-x-reverse text-foreground font-semibold">
+                    <div key={idx} className="flex items-center space-x-1.5 text-foreground font-semibold">
                       <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                       <span>{tech}</span>
                     </div>
@@ -532,11 +530,11 @@ export default function AppDashboardPage() {
 
               <Card className="border-border bg-card">
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-xs font-bold text-muted-foreground uppercase">بيئة التشغيل النظيفة</CardTitle>
+                  <CardTitle className="text-xs font-bold text-muted-foreground uppercase font-mono">Target Runtime</CardTitle>
                 </CardHeader>
                 <CardContent className="text-xs space-y-1">
                   <div className="text-foreground font-semibold">{report.detectedTechStack.runtime || "Next.js 15 Node Runtime"}</div>
-                  <div className="text-[11px] text-muted-foreground">TypeScript خالي من الأخطاء</div>
+                  <div className="text-[11px] text-muted-foreground">Clean TypeScript Export</div>
                 </CardContent>
               </Card>
             </div>
@@ -546,17 +544,17 @@ export default function AppDashboardPage() {
               <CardHeader className="pb-3 border-b border-border">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <CardTitle className="text-sm font-bold flex items-center space-x-2 rtl:space-x-reverse">
+                    <CardTitle className="text-sm font-bold flex items-center space-x-2">
                       <FileCode className="h-4 w-4 text-primary" />
-                      <span>سجل الأدلة والتصنيف المعماري</span>
+                      <span>Evidence Ledger (Seen vs Inferred vs Unknown)</span>
                     </CardTitle>
                     <CardDescription className="text-xs">
-                      فصل المكونات وفق مبادئ الغرف النظيفة لضمان الملكية الفكرية الكاملة للكود الناتج.
+                      Component categorization guaranteeing clean-room isolation and zero source contamination.
                     </CardDescription>
                   </div>
 
                   {/* Filter Pills */}
-                  <div className="flex items-center space-x-1.5 rtl:space-x-reverse text-[11px]">
+                  <div className="flex items-center space-x-1.5 text-[11px] font-mono">
                     {(["All", "Seen", "Inferred", "UnknownServerSide"] as const).map((filter) => (
                       <button
                         key={filter}
@@ -567,13 +565,7 @@ export default function AppDashboardPage() {
                             : "bg-muted text-muted-foreground hover:text-foreground"
                         }`}
                       >
-                        {filter === "All"
-                          ? "الكل"
-                          : filter === "Seen"
-                          ? "المرئي (Seen)"
-                          : filter === "Inferred"
-                          ? "المستنتج (Inferred)"
-                          : "الخادم وقواعد البيانات"}
+                        {filter === "UnknownServerSide" ? "Unknown (Backend)" : filter}
                       </button>
                     ))}
                   </div>
@@ -585,7 +577,7 @@ export default function AppDashboardPage() {
                   {filteredEvidence?.map((item, idx) => (
                     <div key={idx} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-muted/10 transition">
                       <div className="space-y-1">
-                        <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                        <div className="flex items-center space-x-2">
                           <span className="font-bold text-foreground">{item.component}</span>
                           <span className="text-[11px] text-muted-foreground">({item.category})</span>
                         </div>
@@ -596,7 +588,7 @@ export default function AppDashboardPage() {
 
                       <Badge
                         variant="outline"
-                        className={`text-[10px] shrink-0 font-semibold ${
+                        className={`text-[10px] shrink-0 font-mono ${
                           item.status === "Seen"
                             ? "border-primary/50 text-primary bg-primary/5"
                             : item.status === "Inferred"
@@ -604,7 +596,7 @@ export default function AppDashboardPage() {
                             : "border-border text-foreground bg-muted/40"
                         }`}
                       >
-                        {item.status === "Seen" ? "● مرئي تجريبياً" : item.status === "Inferred" ? "▲ مستنتج سلوكياً" : "■ يُبنى نظيفاً"}
+                        {item.status === "Seen" ? "● SEEN" : item.status === "Inferred" ? "▲ INFERRED" : "■ SYNTHESIS REQUIRED"}
                       </Badge>
                     </div>
                   ))}
@@ -618,27 +610,27 @@ export default function AppDashboardPage() {
               <div className="lg:col-span-2 space-y-4">
                 <Card className="border-border bg-card">
                   <CardHeader className="pb-3 border-b border-border">
-                    <CardTitle className="text-sm font-bold flex items-center space-x-2 rtl:space-x-reverse">
+                    <CardTitle className="text-sm font-bold flex items-center space-x-2">
                       <Clock className="h-4 w-4 text-primary" />
-                      <span>مراحل تسليم الكود المصدري المستقل</span>
+                      <span>Reconstruction Milestones & Deliverables</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-4 space-y-3">
                     {report.quote.milestones.map((m) => (
-                      <div key={m.stepNumber} className="flex items-start space-x-3 rtl:space-x-reverse p-3 rounded-lg border border-border bg-muted/20">
-                        <div className="h-6 w-6 rounded border border-primary/40 bg-primary/10 flex items-center justify-center text-primary text-xs font-bold shrink-0">
+                      <div key={m.stepNumber} className="flex items-start space-x-3 p-3 rounded-lg border border-border bg-muted/20">
+                        <div className="h-6 w-6 rounded border border-primary/40 bg-primary/10 flex items-center justify-center text-primary text-xs font-bold shrink-0 font-mono">
                           0{m.stepNumber}
                         </div>
                         <div className="space-y-0.5 flex-1 text-xs">
                           <div className="font-bold text-foreground">
-                            {m.titleAr}
+                            {m.titleEn}
                           </div>
                           <div className="text-muted-foreground">
-                            {m.deliverableAr}
+                            {m.deliverableEn}
                           </div>
                         </div>
                         <div className="text-[11px] text-muted-foreground font-mono shrink-0">
-                          ~{m.estimatedMinutes} دقيقة
+                          ~{m.estimatedMinutes} min
                         </div>
                       </div>
                     ))}
@@ -651,58 +643,58 @@ export default function AppDashboardPage() {
                 <Card className="border-primary/40 bg-card shadow-sm">
                   <CardHeader className="pb-3 border-b border-border">
                     <Badge variant="outline" className="w-fit text-[10px] border-primary/50 text-primary font-semibold">
-                      سعر المشروع الفردي
+                      DYNAMIC QUOTE
                     </Badge>
                     <CardTitle className="text-3xl font-extrabold text-foreground mt-1 font-mono">
                       {report.quote.cleanPriceLabel}
                     </CardTitle>
                     <CardDescription className="text-xs">
-                      سعر ثابت وشامل لإعادة بناء المنظومة بالكامل دون اشتراك.
+                      Single project price calculated for this target.
                     </CardDescription>
                   </CardHeader>
 
-                  <CardContent className="pt-4 space-y-4 text-xs">
+                  <CardContent className="pt-4 space-y-4 text-xs font-mono">
                     <div className="space-y-2 border-b border-border pb-3">
                       <div className="flex justify-between text-muted-foreground">
-                        <span>نوع المنظومة:</span>
+                        <span>Target Scope:</span>
                         <span className="text-foreground font-semibold">{report.targetType}</span>
                       </div>
                       <div className="flex justify-between text-muted-foreground">
-                        <span>بوابة الدفع:</span>
-                        <span className="text-primary font-bold">Paddle الرسمية المعتمدة</span>
+                        <span>Payment Provider:</span>
+                        <span className="text-primary font-bold">Paddle Verified</span>
                       </div>
                       <div className="flex justify-between text-muted-foreground">
-                        <span>ضمان الاسترداد:</span>
-                        <span className="text-foreground font-semibold">100% عند أي خطأ في الكود</span>
+                        <span>Guarantee:</span>
+                        <span className="text-foreground font-semibold">100% Compilation Pass</span>
                       </div>
                     </div>
 
-                    <div className="text-[11px] text-muted-foreground leading-normal">
-                      يشمل بناء الكود كاملاً بـ Next.js و TypeScript، تجهيز المخططات، واجتياز حزمة الاختبارات الآلية بنجاح 100% مع رابط تحميل ملف ZIP مباشرة.
+                    <div className="text-[11px] text-muted-foreground font-sans leading-normal">
+                      Includes full Next.js 15, Drizzle ORM models, automated test harness execution, and downloadable verified ZIP repository.
                     </div>
 
                     {!isUnlocked ? (
                       <Button
                         onClick={handleCheckout}
                         disabled={isCheckingOut}
-                        className="w-full text-xs font-bold h-11 shadow-sm"
+                        className="w-full text-xs font-bold h-11 shadow-sm font-sans"
                       >
                         {isCheckingOut ? (
                           <>
                             <RefreshCw className="me-1.5 h-3.5 w-3.5 animate-spin" />
-                            <span>الاتصال ببوابة Paddle...</span>
+                            <span>Connecting to Paddle...</span>
                           </>
                         ) : (
                           <>
                             <Lock className="me-1.5 h-3.5 w-3.5" />
-                            <span>تأكيد الشراء وبدء بناء التطبيق ({report.quote.cleanPriceLabel})</span>
+                            <span>Unlock Rebuild & Generate Code ({report.quote.cleanPriceLabel})</span>
                           </>
                         )}
                       </Button>
                     ) : (
-                      <div className="p-3 rounded-lg border border-primary/50 bg-primary/10 text-primary text-xs flex items-center space-x-2 rtl:space-x-reverse font-bold">
+                      <div className="p-3 rounded-lg border border-primary/50 bg-primary/10 text-primary text-xs flex items-center space-x-2 font-bold font-sans">
                         <Unlock className="h-4 w-4" />
-                        <span>تم تأكيد الدفع وجارِ بناء الكود واختباره</span>
+                        <span>Payment Verified • Synthesis Active</span>
                       </div>
                     )}
                   </CardContent>
@@ -712,14 +704,14 @@ export default function AppDashboardPage() {
 
             {/* Rebuild Progress & Terminal Stream */}
             {isUnlocked && (
-              <div className="space-y-4 pt-4 border-t border-border animate-fadeIn">
+              <div className="space-y-4 pt-4 border-t border-border animate-fadeIn font-mono">
                 <div className="flex items-center justify-between">
                   <div>
                     <Badge variant="outline" className="border-primary/40 text-primary text-[10px] font-semibold">
-                      المرحلة المباشرة: بناء وتوليد الكود
+                      STAGE 07: CODE SYNTHESIS
                     </Badge>
                     <h2 className="text-lg font-bold text-foreground">
-                      المتابعة المباشرة لعملية البناء والتحقق
+                      Live Telemetry Stream
                     </h2>
                   </div>
 
@@ -728,10 +720,10 @@ export default function AppDashboardPage() {
                       href={sandboxProgress.downloadUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center space-x-1.5 rtl:space-x-reverse px-4 py-2 rounded-md bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition shadow-sm"
+                      className="inline-flex items-center space-x-1.5 px-4 py-2 rounded-md bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition shadow-sm font-sans"
                     >
                       <Download className="h-3.5 w-3.5" />
-                      <span>تحميل مستودع الكود النظيف (.ZIP)</span>
+                      <span>Download Clean-Room Repository (.ZIP)</span>
                     </a>
                   )}
                 </div>
@@ -740,19 +732,19 @@ export default function AppDashboardPage() {
                 <Stepper
                   currentStep={currentStepIndex}
                   steps={[
-                    { id: 1, title: "التحقق", description: "توثيق المعاملة" },
-                    { id: 2, title: "البيئة", description: "تجهيز الحاوية" },
-                    { id: 3, title: "التفكيك", description: "استخراج الواجهات" },
-                    { id: 4, title: "التوليد", description: "بناء كود Next.js" },
-                    { id: 5, title: "الاختبار", description: "جاهز للتحميل" },
+                    { id: 1, title: "Auth", description: "Webhook verified" },
+                    { id: 2, title: "Container", description: "Sandbox spawn" },
+                    { id: 3, title: "Triage", description: "Symbol extraction" },
+                    { id: 4, title: "Synthesis", description: "Clean code" },
+                    { id: 5, title: "Verified", description: "ZIP ready" },
                   ]}
                 />
 
                 {/* Progress bar */}
                 {sandboxProgress && (
                   <div className="space-y-1.5">
-                    <div className="flex justify-between text-xs text-muted-foreground font-mono">
-                      <span>الحالة: {sandboxProgress.status}</span>
+                    <div className="flex justify-between text-xs text-muted-foreground">
+                      <span>Status: {sandboxProgress.status}</span>
                       <span className="font-bold text-primary">{sandboxProgress.progress}%</span>
                     </div>
                     <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
@@ -765,20 +757,20 @@ export default function AppDashboardPage() {
                 )}
 
                 {/* Terminal Log Console */}
-                <Card className="border-border bg-slate-900 text-slate-100 font-mono text-xs">
+                <Card className="border-border bg-slate-900 text-slate-100 text-xs">
                   <CardHeader className="pb-2 border-b border-slate-800 flex flex-row items-center justify-between">
                     <div className="flex items-center space-x-2 text-slate-300">
-                      <FileCode className="h-4 w-4 text-primary" />
-                      <span>سجل البناء المعماري المباشر</span>
+                      <Terminal className="h-4 w-4 text-primary" />
+                      <span>Container Disassembly Log (/dev/pts/0)</span>
                     </div>
                     <div className="flex items-center space-x-2 text-[11px] text-slate-400">
                       <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-                      <span>تدفق الأحداث نشط</span>
+                      <span>SSE Stream Active</span>
                     </div>
                   </CardHeader>
                   <CardContent className="p-4 h-64 overflow-y-auto space-y-2 select-text" dir="ltr">
                     {logs.length === 0 ? (
-                      <div className="text-slate-500">جاري بدء بيئة البناء...</div>
+                      <div className="text-slate-500">Initializing execution container...</div>
                     ) : (
                       logs.map((log, idx) => (
                         <div key={idx} className="flex items-start space-x-2">

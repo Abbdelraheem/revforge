@@ -3,11 +3,12 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Lock, Mail, ShieldCheck } from "lucide-react";
+import { ArrowRight, Lock, Mail, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { RevForgeLogo } from "@/components/shared/revforge-logo";
+import { GoogleIcon } from "@/components/shared/google-icon";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -26,42 +27,45 @@ export default function LoginPage() {
       if (typeof window !== "undefined") {
         localStorage.setItem(
           "revforge_session",
-          JSON.stringify({ email: email.trim(), name: "مهندس المنظومة", authenticated: true })
+          JSON.stringify({ email: email.trim(), name: "Lead Architect", authenticated: true })
         );
       }
       router.push("/dashboard");
     } catch (err: any) {
-      setError(err.message || "فشل تسجيل الدخول.");
+      setError(err.message || "Failed to authenticate session.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleQuickDemoLogin = () => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem(
-        "revforge_session",
-        JSON.stringify({ email: "engineer@enterprise.com", name: "مهندس المنظومة", authenticated: true })
-      );
-    }
-    router.push("/dashboard");
+  const handleGoogleLogin = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      if (typeof window !== "undefined") {
+        localStorage.setItem(
+          "revforge_session",
+          JSON.stringify({ email: "google.user@revforge.com", name: "Google Verified Architect", authenticated: true })
+        );
+      }
+      router.push("/dashboard");
+    }, 400);
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center px-4 py-12 bg-background text-foreground">
+    <div className="min-h-screen flex flex-col justify-center items-center px-4 py-12 bg-background text-foreground font-sans">
       <div className="w-full max-w-sm space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-2">
-          <Link href="/" className="inline-flex items-center space-x-2.5 rtl:space-x-reverse group">
+          <Link href="/" className="inline-flex items-center space-x-2.5 group">
             <div className="h-9 w-9 rounded border border-border bg-muted/40 flex items-center justify-center">
               <RevForgeLogo className="h-5 w-5" />
             </div>
-            <span className="font-bold text-lg tracking-tight text-foreground">
+            <span className="font-bold text-lg tracking-tight text-foreground font-mono">
               RevForge
             </span>
           </Link>
           <p className="text-xs text-muted-foreground">
-            تسجيل الدخول للوصول إلى لوحة الفحص ومشاريع البناء
+            Sign in to access your projects, analysis reports & code generator
           </p>
         </div>
 
@@ -69,10 +73,10 @@ export default function LoginPage() {
         <Card className="border-border bg-card shadow-sm">
           <CardHeader className="space-y-1 pb-4">
             <CardTitle className="text-base font-bold text-foreground">
-              تسجيل الدخول
+              Sign In
             </CardTitle>
             <CardDescription className="text-xs">
-              أدخل بريدك الإلكتروني للوصول إلى مشاريعك وتحليلاتك.
+              Enter your credentials or authenticate via Google SSO.
             </CardDescription>
           </CardHeader>
 
@@ -83,9 +87,30 @@ export default function LoginPage() {
               </div>
             )}
 
+            {/* Google Sign In Button */}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleGoogleLogin}
+              disabled={isLoading}
+              className="w-full text-xs font-semibold h-10 border-border bg-background hover:bg-muted/30 shadow-sm flex items-center justify-center space-x-2"
+            >
+              <GoogleIcon className="h-4 w-4" />
+              <span>Continue with Google</span>
+            </Button>
+
+            <div className="relative my-3">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-[10px] uppercase">
+                <span className="bg-card px-2 text-muted-foreground font-medium">Or continue with email</span>
+              </div>
+            </div>
+
             <form onSubmit={handleLogin} className="space-y-3.5">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">البريد الإلكتروني</label>
+                <label className="text-xs font-semibold text-foreground">Work Email</label>
                 <div className="relative">
                   <Mail className="absolute start-3 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
                   <Input
@@ -93,15 +118,14 @@ export default function LoginPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="name@company.com"
+                    placeholder="architect@enterprise.com"
                     className="ps-9 text-xs"
-                    dir="ltr"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">كلمة المرور</label>
+                <label className="text-xs font-semibold text-foreground">Password</label>
                 <div className="relative">
                   <Lock className="absolute start-3 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
                   <Input
@@ -111,54 +135,35 @@ export default function LoginPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
                     className="ps-9 text-xs"
-                    dir="ltr"
                   />
                 </div>
               </div>
 
-              <Button type="submit" disabled={isLoading} className="w-full text-xs font-bold shadow-sm">
+              <Button type="submit" disabled={isLoading} className="w-full text-xs font-bold shadow-sm h-10">
                 {isLoading ? (
-                  <span>جارِ التحقق...</span>
+                  <span>Signing in...</span>
                 ) : (
                   <>
-                    <span>دخول المنصة</span>
-                    <ArrowLeft className="ms-1.5 h-3.5 w-3.5" />
+                    <span>Sign In to Workspace</span>
+                    <ArrowRight className="ms-1.5 h-3.5 w-3.5" />
                   </>
                 )}
               </Button>
             </form>
-
-            <div className="relative my-3">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-border" />
-              </div>
-              <div className="relative flex justify-center text-[10px] uppercase">
-                <span className="bg-card px-2 text-muted-foreground">أو تجربة فورية</span>
-              </div>
-            </div>
-
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleQuickDemoLogin}
-              className="w-full text-xs border-dashed text-foreground hover:bg-muted/30"
-            >
-              <span>دخول تجريبي سريع بنقرة واحدة</span>
-            </Button>
           </CardContent>
 
           <CardFooter className="border-t border-border pt-4 text-center justify-center text-xs text-muted-foreground">
-            <span>ليس لديك حساب؟ </span>
+            <span>Don&apos;t have an account? </span>
             <Link href="/register" className="text-primary hover:underline ms-1 font-bold">
-              إنشاء حساب جديد
+              Create an account
             </Link>
           </CardFooter>
         </Card>
 
         {/* Security badge */}
-        <div className="text-center text-[11px] text-muted-foreground flex items-center justify-center space-x-1.5 rtl:space-x-reverse">
+        <div className="text-center text-[11px] text-muted-foreground flex items-center justify-center space-x-1.5">
           <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-          <span>حماية مشفرة ومصادقة معتمدة</span>
+          <span>Encrypted Session • Zero Data Retention</span>
         </div>
       </div>
     </div>

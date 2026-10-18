@@ -13,7 +13,6 @@ import { DiffViewer } from "@/components/shared/diff-viewer";
 import { Stepper } from "@/components/shared/stepper";
 import { Dropzone } from "@/components/shared/dropzone";
 import { EmptyState } from "@/components/shared/empty-state";
-import { LangThemeToggle } from "@/components/shared/lang-theme-toggle";
 import { ArrowLeft, ArrowRight, ShieldCheck, Cpu, Terminal } from "lucide-react";
 import Link from "next/link";
 
@@ -74,12 +73,9 @@ export default function DesignSystemPage() {
           <span className="text-border">|</span>
           <span className="font-mono text-xs font-semibold">Living Design System & Token Catalog</span>
         </div>
-
-        <LangThemeToggle />
       </header>
 
       <main className="max-w-6xl mx-auto p-8 space-y-12">
-        {/* Section 1: Color Palette & Neutrals */}
         <section className="space-y-4">
           <div>
             <h2 className="text-lg font-bold tracking-tight">1. Color Tokens (Restrained Technical Editorial)</h2>
