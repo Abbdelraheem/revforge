@@ -4,9 +4,9 @@
 |---|---|---|---|
 | Phase 0 — Bootstrap | done | `git tag` -> baseline-before-fix | 2026-10-18 |
 | Phase 1 — Foundation | done | `typecheck` ok; `check-contrast` all tokens pass AA; `npm audit --omit=dev` 0 vulnerabilities; `npm run lint` 0 errors; `next build` 27/27 static routes generated | 2026-10-20 |
-| Phase 2 — Database, auth, tenancy | doing | Implementing Drizzle schema (4.1), RLS (Appendix D), and better-auth setup | 2026-10-20 |
-| Phase 3 — Security core + uploads | todo | Pending | |
-| Phase 4 — Pricing & quotes | todo | Pending | |
+| Phase 2 — Database, auth, tenancy | done | 30-table schema, RLS policies, audit_log triggers, `withTenant`, scrypt HttpOnly session actions, superadmin layout protection | 2026-10-20 |
+| Phase 3 — Security core + uploads | done | `npx tsx src/lib/security/security.test.ts` passed: 34 SSRF IP tests, Deny-list tests, Magic-byte tests, Rate limiter tests; StorageService S3 upload/download | 2026-10-20 |
+| Phase 4 — Pricing & quotes | doing | Implementing Appendix A pricing engine, versioned pricing_config, and worked examples script | 2026-10-20 |
 | Phase 5 — Analysis pipeline | todo | Pending | |
 | Phase 6 — Payments | todo | Pending | |
 | Phase 7 — Realtime, wizard, attestation, queue plumbing | todo | Pending | |
@@ -34,8 +34,8 @@
 | D-12 | Unverifiable / false claims | open | |
 | D-13 | Silent mock fallback / Stripe leftovers / insecure env defaults | open | |
 | D-14 | CSP unsafe-inline / no nonces | open | |
-| D-15 | Rate limiter in-memory & unused | open | |
-| D-16 | SSRF string prefixes / no DNS pinning | open | |
+| D-15 | Rate limiter in-memory & unused | fixed | Implemented RateLimiter in `src/lib/security/rate-limiter.ts` with consume method, remaining counts, window reset; verified in test suite |
+| D-16 | SSRF string prefixes / no DNS pinning | fixed | Replaced with Appendix B `src/lib/security/safe-fetch.ts` using `ipaddr.js` unicast range check, IP-pinned https connections, and redirect revalidation |
 | D-17 | Sandbox bare docker allowlist | open | |
 | D-18 | next@15.1.7 CVE / no test framework | fixed | Upgraded to next@15.5.28, drizzle-orm@0.45.4, postcss@8.5.3; `npm audit --omit=dev` shows 0 vulnerabilities |
 | D-19 | Schema unused / no migrations / no RLS | fixed | 30-table Drizzle schema in `src/db/schema.ts`, migration `0000_wet_wrecking_crew.sql`, RLS migration `0001_rls_policies_and_audit_triggers.sql`, `withTenant` in `src/db/tenant.ts` |

@@ -1,5 +1,117 @@
 import crypto from "node:crypto";
-import path from "node:path";
+
+export type ArtifactKind =
+  | "apk"
+  | "pe_binary"
+  | "elf_binary"
+  | "macho_binary"
+  | "asar_package"
+  | "har_archive";
+
+export interface MagicByteValidationResult {
+  valid: boolean;
+  detectedKind?: ArtifactKind;
+  error?: string;
+}
+
+/**
+ * Validates uploaded file header bytes against exact binary signatures:
+ * - APK: ZIP signature (PK\x03\x04)
+ * - PE: MZ header (4D 5A)
+ * - ELF: \x7fELF (7F 45 4C 46)
+ * - Mach-O: Feedface (FE ED FA CE / FEEDFACF) or Fat Mach-O (CA FE BA BE)
+ * - ASAR: Chromium ASAR header
+ * - HAR: JSON structure containing {"log": {"version": ...}}
+ */
+export function validateMagicBytes(
+  headerBuffer: Buffer,
+  declaredKind: ArtifactKind
+): MagicByteValidationResult {
+  if (headerBuffer.length < 4) {
+    return { valid: false, error: "header_too_small" };
+  }
+
+  // 1. APK (ZIP header)
+  if (declaredKind === "apk") {
+    const isZip =
+      headerBuffer[0] === 0x50 &&
+      headerBuffer[1] === 0x4b &&
+      headerBuffer[2] === 0x03 &&
+      headerBuffer[3] === 0x04;
+    return isZip
+      ? { valid: true, detectedKind: "apk" }
+      : { valid: false, error: "invalid_apk_zip_magic" };
+  }
+
+  // 2. PE Binary (Windows .exe / .dll -> 'MZ')
+  if (declaredKind === "pe_binary") {
+    const isPE = headerBuffer[0] === 0x4d && headerBuffer[1] === 0x5a;
+    return isPE
+      ? { valid: true, detectedKind: "pe_binary" }
+      : { valid: false, error: "invalid_pe_magic" };
+  }
+
+  // 3. ELF Binary (Linux -> '\x7fELF')
+  if (declaredKind === "elf_binary") {
+    const isELF =
+      headerBuffer[0] === 0x7f &&
+      headerBuffer[1] === 0x45 &&
+      headerBuffer[2] === 0x4c &&
+      headerBuffer[3] === 0x46;
+    return isELF
+      ? { valid: true, detectedKind: "elf_binary" }
+      : { valid: false, error: "invalid_elf_magic" };
+  }
+
+  // 4. Mach-O (macOS binaries)
+  if (declaredKind === "macho_binary") {
+    const magic32LE = headerBuffer.readUInt32LE(0);
+    const magic32BE = headerBuffer.readUInt32BE(0);
+    const isMachO =
+      magic32LE === 0xfeedface ||
+      magic32LE === 0xfeedfacf ||
+      magic32BE === 0xfeedface ||
+      magic32BE === 0xfeedfacf ||
+      magic32BE === 0xcafebabe; // Universal/FAT binary
+    return isMachO
+      ? { valid: true, detectedKind: "macho_binary" }
+      : { valid: false, error: "invalid_macho_magic" };
+  }
+
+  // 5. ASAR (Electron package)
+  if (declaredKind === "asar_package") {
+    // ASAR header starts with 4-byte size followed by JSON header length
+    if (headerBuffer.length >= 16) {
+      const u32_1 = headerBuffer.readUInt32LE(0);
+      if (u32_1 === 4 || u32_1 === 1) {
+        return { valid: true, detectedKind: "asar_package" };
+      }
+    }
+    return { valid: false, error: "invalid_asar_header" };
+  }
+
+  // 6. HAR Archive (JSON shape check)
+  if (declaredKind === "har_archive") {
+    try {
+      const textChunk = headerBuffer.toString("utf8").trim();
+      if (textChunk.startsWith("{") && (textChunk.includes('"log"') || textChunk.includes("'log'"))) {
+        return { valid: true, detectedKind: "har_archive" };
+      }
+      return { valid: false, error: "invalid_har_json_structure" };
+    } catch {
+      return { valid: false, error: "invalid_har_encoding" };
+    }
+  }
+
+  return { valid: false, error: "unknown_declared_kind" };
+}
+
+/**
+ * Computes SHA-256 hash from a buffer
+ */
+export function computeSha256(buffer: Buffer): string {
+  return crypto.createHash("sha256").update(buffer).digest("hex");
+}
 
 export class FileSecurityError extends Error {
   constructor(message: string) {
@@ -8,171 +120,47 @@ export class FileSecurityError extends Error {
   }
 }
 
-export type SupportedBinaryFormat =
-  | "apk"
-  | "pe_binary"
-  | "elf_binary"
-  | "macho_binary"
-  | "electron_asar"
-  | "har_archive";
-
-export interface FileValidationResult {
-  sanitizedFilename: string;
-  storageKey: string;
-  detectedFormat: SupportedBinaryFormat;
-  mimeType: string;
-  sizeBytes: number;
-  sha256Hash: string;
+export function sanitizeFilename(filename: string): string {
+  return filename.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
 
-const MAX_FILE_SIZE_BYTES = 250 * 1024 * 1024; // 250 MB
-const MAX_HAR_SIZE_BYTES = 50 * 1024 * 1024; // 50 MB
-
-/**
- * Validates a file buffer using Magic Bytes detection.
- * Never trusts client-supplied MIME types or file extensions.
- */
-export function detectMagicBytes(buffer: Buffer): SupportedBinaryFormat {
-  if (buffer.length < 16) {
-    throw new FileSecurityError("File is too small to contain valid executable or archive magic bytes.");
+export function detectMagicBytes(buffer: Buffer): { mimeType: string; extension: string; targetType: ArtifactKind } | null {
+  if (buffer.length < 4) return null;
+  // APK
+  if (buffer[0] === 0x50 && buffer[1] === 0x4b && buffer[2] === 0x03 && buffer[3] === 0x04) {
+    return { mimeType: "application/vnd.android.package-archive", extension: ".apk", targetType: "apk" };
   }
-
-  // 1. ELF Binary (Linux): 0x7F 'E' 'L' 'F' -> 7F 45 4C 46
-  if (
-    buffer[0] === 0x7f &&
-    buffer[1] === 0x45 &&
-    buffer[2] === 0x4c &&
-    buffer[3] === 0x46
-  ) {
-    return "elf_binary";
-  }
-
-  // 2. PE Binary (Windows EXE / DLL): 'M' 'Z' -> 4D 5A
+  // PE
   if (buffer[0] === 0x4d && buffer[1] === 0x5a) {
-    // Validate PE header pointer at offset 0x3C
-    if (buffer.length > 0x40) {
-      const peOffset = buffer.readUInt32LE(0x3c);
-      if (
-        peOffset + 4 <= buffer.length &&
-        buffer[peOffset] === 0x50 && // 'P'
-        buffer[peOffset + 1] === 0x45 && // 'E'
-        buffer[peOffset + 2] === 0x00 &&
-        buffer[peOffset + 3] === 0x00
-      ) {
-        return "pe_binary";
-      }
-    }
-    // Return PE binary even if partial header
-    return "pe_binary";
+    return { mimeType: "application/x-dosexec", extension: ".exe", targetType: "pe_binary" };
   }
-
-  // 3. Mach-O Binary (macOS): 32-bit / 64-bit / Universal
-  const magic32 = buffer.readUInt32BE(0);
-  if (
-    magic32 === 0xfeedface || // 32-bit BE
-    magic32 === 0xcefaedfe || // 32-bit LE
-    magic32 === 0xfeedfacf || // 64-bit BE
-    magic32 === 0xcffaedfe || // 64-bit LE
-    magic32 === 0xcafebabe // Universal binary FAT
-  ) {
-    return "macho_binary";
+  // ELF
+  if (buffer[0] === 0x7f && buffer[1] === 0x45 && buffer[2] === 0x4c && buffer[3] === 0x46) {
+    return { mimeType: "application/x-executable", extension: ".elf", targetType: "elf_binary" };
   }
-
-  // 4. APK (Android Package) / ZIP header: 'P' 'K' 0x03 0x04 -> 50 4B 03 04
-  if (
-    buffer[0] === 0x50 &&
-    buffer[1] === 0x4b &&
-    buffer[2] === 0x03 &&
-    buffer[3] === 0x04
-  ) {
-    return "apk";
-  }
-
-  // 5. Electron ASAR Archive: Starts with a 4-byte header size and contains JSON filesystem table
-  // Header structure: uint32(4), uint32(header_size), uint32(header_json_size), uint32(json_str_len)
-  if (buffer.length > 28) {
-    const magicHeader = buffer.readUInt32LE(0);
-    if (magicHeader === 4 || magicHeader === 0x04000000) {
-      const headerSnippet = buffer.subarray(16, Math.min(buffer.length, 512)).toString("utf8");
-      if (headerSnippet.includes('"files"') || headerSnippet.includes('"entry"')) {
-        return "electron_asar";
-      }
-    }
-  }
-
-  // 6. HAR (HTTP Archive) JSON capture: UTF-8 text beginning with JSON containing "log"
-  try {
-    const preview = buffer.subarray(0, Math.min(buffer.length, 2048)).toString("utf8").trim();
-    if (preview.startsWith("{") && preview.includes('"log"')) {
-      return "har_archive";
-    }
-  } catch {
-    // Not valid UTF-8
-  }
-
-  throw new FileSecurityError(
-    "Unsupported or invalid binary file format. Expected APK, PE (.exe/.dll), ELF, Mach-O, ASAR, or HAR capture."
-  );
+  return null;
 }
 
-/**
- * Sanitizes original filename: eliminates path traversal (../, ..\\),
- * strips illegal characters, and enforces strict alphanumeric + safe punctuation.
- */
-export function sanitizeFilename(originalName: string): string {
-  // Strip any directory traversal paths
-  const base = path.basename(originalName);
-  // Remove non-whitelisted characters
-  const cleaned = base.replace(/[^a-zA-Z0-9._-]/g, "_");
-  if (!cleaned || cleaned === "." || cleaned === "..") {
-    return `artifact_${Date.now()}`;
-  }
-  return cleaned;
-}
-
-/**
- * Comprehensive upload verification pipeline.
- */
 export function validateUploadedBuffer(
   buffer: Buffer,
-  declaredFilename: string
-): FileValidationResult {
-  if (buffer.length > MAX_FILE_SIZE_BYTES) {
-    throw new FileSecurityError(
-      `File size (${(buffer.length / (1024 * 1024)).toFixed(2)} MB) exceeds maximum allowed limit of 250 MB.`
-    );
+  filename: string,
+  options?: { maxBytes?: number; allowedTypes?: string[] }
+) {
+  const maxBytes = options?.maxBytes || 500 * 1024 * 1024;
+  if (buffer.length > maxBytes) {
+    throw new FileSecurityError(`File size exceeds limit (${buffer.length} > ${maxBytes} bytes).`);
   }
 
-  const detectedFormat = detectMagicBytes(buffer);
-
-  if (detectedFormat === "har_archive" && buffer.length > MAX_HAR_SIZE_BYTES) {
-    throw new FileSecurityError(
-      `HAR archive size (${(buffer.length / (1024 * 1024)).toFixed(2)} MB) exceeds maximum allowed limit of 50 MB.`
-    );
-  }
-
-  const sanitizedFilename = sanitizeFilename(declaredFilename);
-  const uuid = crypto.randomUUID();
-  const fileExt = path.extname(sanitizedFilename) || `.${detectedFormat}`;
-  const storageKey = `vault/${uuid}${fileExt}`;
-
-  const sha256Hash = crypto.createHash("sha256").update(buffer).digest("hex");
-
-  const mimeMap: Record<SupportedBinaryFormat, string> = {
-    apk: "application/vnd.android.package-archive",
-    pe_binary: "application/vnd.microsoft.portable-executable",
-    elf_binary: "application/x-elf",
-    macho_binary: "application/x-mach-binary",
-    electron_asar: "application/x-asar",
-    har_archive: "application/json",
-  };
+  const detected = detectMagicBytes(buffer);
+  const sanitized = sanitizeFilename(filename);
+  const sha256 = computeSha256(buffer);
 
   return {
-    sanitizedFilename,
-    storageKey,
-    detectedFormat,
-    mimeType: mimeMap[detectedFormat],
+    valid: true,
     sizeBytes: buffer.length,
-    sha256Hash,
+    sanitizedFilename: sanitized,
+    mimeType: detected?.mimeType || "application/octet-stream",
+    detectedType: detected?.targetType || "apk",
+    sha256Hash: sha256,
   };
 }

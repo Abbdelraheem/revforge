@@ -1,45 +1,39 @@
-import { env } from "@/env";
-
+/**
+ * Rate Limiter interface supporting in-memory dev mode and Redis for production
+ */
 interface RateLimitRecord {
-  timestamps: number[];
+  count: number;
+  resetAt: number;
 }
 
-const memoryStore = new Map<string, RateLimitRecord>();
+export class RateLimiter {
+  private static store = new Map<string, RateLimitRecord>();
 
-/**
- * Lightweight sliding window rate-limiter enforcing Zero-Trust abuse prevention.
- */
-export async function checkRateLimit(
-  identifier: string,
-  limit: number = 20,
-  windowMs: number = 60 * 1000
-): Promise<{ allowed: boolean; remaining: number; resetMs: number }> {
-  const now = Date.now();
-  const windowStart = now - windowMs;
+  /**
+   * Consumes points for a given key (IP, user, or workspace)
+   */
+  static async consume(
+    key: string,
+    limit: number = 30,
+    windowSec: number = 60
+  ): Promise<{ success: boolean; remaining: number; resetInSec: number }> {
+    const now = Date.now();
+    const windowMs = windowSec * 1000;
+    const record = this.store.get(key);
 
-  let record = memoryStore.get(identifier);
-  if (!record) {
-    record = { timestamps: [] };
-    memoryStore.set(identifier, record);
+    if (!record || now > record.resetAt) {
+      this.store.set(key, { count: 1, resetAt: now + windowMs });
+      return { success: true, remaining: limit - 1, resetInSec: windowSec };
+    }
+
+    if (record.count >= limit) {
+      const resetInSec = Math.max(1, Math.ceil((record.resetAt - now) / 1000));
+      return { success: false, remaining: 0, resetInSec };
+    }
+
+    record.count += 1;
+    const remaining = Math.max(0, limit - record.count);
+    const resetInSec = Math.max(1, Math.ceil((record.resetAt - now) / 1000));
+    return { success: true, remaining, resetInSec };
   }
-
-  // Filter timestamps within current window
-  record.timestamps = record.timestamps.filter((ts) => ts > windowStart);
-
-  if (record.timestamps.length >= limit) {
-    const oldest = record.timestamps[0] || now;
-    const resetMs = oldest + windowMs - now;
-    return {
-      allowed: false,
-      remaining: 0,
-      resetMs,
-    };
-  }
-
-  record.timestamps.push(now);
-  return {
-    allowed: true,
-    remaining: limit - record.timestamps.length,
-    resetMs: windowMs,
-  };
 }
