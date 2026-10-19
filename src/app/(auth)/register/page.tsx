@@ -10,6 +10,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { RevForgeLogo } from "@/components/shared/revforge-logo";
 import { GoogleIcon } from "@/components/shared/google-icon";
 
+import { registerAction } from "@/server/actions/auth";
+
 export default function RegisterPage() {
   const router = useRouter();
   const [name, setName] = useState("");
@@ -31,17 +33,21 @@ export default function RegisterPage() {
     setError(null);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      if (typeof window !== "undefined") {
-        localStorage.setItem(
-          "revforge_session",
-          JSON.stringify({ email: email.trim(), name: name.trim(), organization: organization.trim(), authenticated: true })
-        );
+      const formData = new FormData();
+      formData.set("email", email);
+      formData.set("password", password);
+      formData.set("name", name);
+      formData.set("organization", organization);
+      const res = await registerAction(formData);
+      if (res?.error) {
+        setError(res.error);
+        setIsLoading(false);
       }
-      router.push("/dashboard");
     } catch (err: any) {
+      if (err?.message?.includes("NEXT_REDIRECT")) {
+        return;
+      }
       setError(err.message || "Failed to create account.");
-    } finally {
       setIsLoading(false);
     }
   };

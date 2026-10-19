@@ -10,6 +10,8 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { RevForgeLogo } from "@/components/shared/revforge-logo";
 import { GoogleIcon } from "@/components/shared/google-icon";
 
+import { loginAction } from "@/server/actions/auth";
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -23,17 +25,19 @@ export default function LoginPage() {
     setError(null);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      if (typeof window !== "undefined") {
-        localStorage.setItem(
-          "revforge_session",
-          JSON.stringify({ email: email.trim(), name: "Lead Architect", authenticated: true })
-        );
+      const formData = new FormData();
+      formData.set("email", email);
+      formData.set("password", password);
+      const res = await loginAction(formData);
+      if (res?.error) {
+        setError(res.error);
+        setIsLoading(false);
       }
-      router.push("/dashboard");
     } catch (err: any) {
+      if (err?.message?.includes("NEXT_REDIRECT")) {
+        return;
+      }
       setError(err.message || "Failed to authenticate session.");
-    } finally {
       setIsLoading(false);
     }
   };

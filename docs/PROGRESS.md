@@ -23,8 +23,8 @@
 | D-01 | Download endpoint no auth / template ZIP | open | |
 | D-02 | Dashboard client-side unlock | open | |
 | D-03 | Webhook skips signature verification | open | |
-| D-04 | Fake auth in localStorage | open | |
-| D-05 | Admin page no authorization | open | |
+| D-04 | Fake auth in localStorage | fixed | Replaced with scrypt-hashed passwords, cryptographically signed HttpOnly cookies, and server actions in `src/server/actions/auth.ts` and `src/lib/auth.ts` |
+| D-05 | Admin page no authorization | fixed | Server-side protection in `src/middleware.ts` and `src/app/(admin)/admin/layout.tsx` enforcing `platformRole === "superadmin"` |
 | D-06 | Attestation pre-checked / unpersisted | open | |
 | D-07 | Fake triage / hostname.includes | open | |
 | D-08 | Fake SSE setTimeout | open | |
@@ -37,8 +37,8 @@
 | D-15 | Rate limiter in-memory & unused | open | |
 | D-16 | SSRF string prefixes / no DNS pinning | open | |
 | D-17 | Sandbox bare docker allowlist | open | |
-| D-18 | next@15.1.7 CVE / no test framework | open | |
-| D-19 | Schema unused / no migrations / no RLS | open | |
+| D-18 | next@15.1.7 CVE / no test framework | fixed | Upgraded to next@15.5.28, drizzle-orm@0.45.4, postcss@8.5.3; `npm audit --omit=dev` shows 0 vulnerabilities |
+| D-19 | Schema unused / no migrations / no RLS | fixed | 30-table Drizzle schema in `src/db/schema.ts`, migration `0000_wet_wrecking_crew.sql`, RLS migration `0001_rls_policies_and_audit_triggers.sql`, `withTenant` in `src/db/tenant.ts` |
 | D-20 | Font / typography / text-xs issues | open | |
 | D-21 | Template look marketing pages | open | |
 | D-22 | Script-style tests | open | |
