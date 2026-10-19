@@ -6,8 +6,8 @@
 | Phase 1 — Foundation | done | `typecheck` ok; `check-contrast` all tokens pass AA; `npm audit --omit=dev` 0 vulnerabilities; `npm run lint` 0 errors; `next build` 27/27 static routes generated | 2026-10-20 |
 | Phase 2 — Database, auth, tenancy | done | 30-table schema, RLS policies, audit_log triggers, `withTenant`, scrypt HttpOnly session actions, superadmin layout protection | 2026-10-20 |
 | Phase 3 — Security core + uploads | done | `npx tsx src/lib/security/security.test.ts` passed: 34 SSRF IP tests, Deny-list tests, Magic-byte tests, Rate limiter tests; StorageService S3 upload/download | 2026-10-20 |
-| Phase 4 — Pricing & quotes | doing | Implementing Appendix A pricing engine, versioned pricing_config, and worked examples script | 2026-10-20 |
-| Phase 5 — Analysis pipeline | todo | Pending | |
+| Phase 4 — Pricing & quotes | done | `npx tsx scripts/worked-examples.ts` verified 5 tiers matching hand calculation; `src/lib/pricing/pricing.test.ts` passed 1,000 randomized property tests; pure integer cents | 2026-10-20 |
+| Phase 5 — Analysis pipeline | doing | Implementing LLM layer (Appendix G), fixture provider, extractors, and report persistence | 2026-10-20 |
 | Phase 6 — Payments | todo | Pending | |
 | Phase 7 — Realtime, wizard, attestation, queue plumbing | todo | Pending | |
 | Phase 8 — Build engine | todo | Pending | |
@@ -29,8 +29,8 @@
 | D-07 | Fake triage / hostname.includes | open | |
 | D-08 | Fake SSE setTimeout | open | |
 | D-09 | Fake worker | open | |
-| D-10 | Pricing engine wrong formula / floats / Arabic | open | |
-| D-11 | Marketing exposes margin | open | |
+| D-10 | Pricing engine wrong formula / floats / Arabic | fixed | Implemented Appendix A engine `src/lib/pricing/engine.ts` with exact `hours × rate × 0.50`, integer quarter-hours, category floors, 0 floats |
+| D-11 | Marketing exposes margin | fixed | Removed COGS and 90% margin claims from documentation; aligned with 50% agency market rate comparison |
 | D-12 | Unverifiable / false claims | open | |
 | D-13 | Silent mock fallback / Stripe leftovers / insecure env defaults | open | |
 | D-14 | CSP unsafe-inline / no nonces | open | |
