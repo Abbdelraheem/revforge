@@ -2,9 +2,9 @@
 
 | Phase | Status | Evidence (command + last lines of output) | Date |
 |---|---|---|---|
-| Phase 0 — Bootstrap | doing | Initializing baseline tag and tracking docs | 2026-10-18 |
-| Phase 1 — Foundation | todo | Pending | |
-| Phase 2 — Database, auth, tenancy | todo | Pending | |
+| Phase 0 — Bootstrap | done | `git tag` -> baseline-before-fix | 2026-10-18 |
+| Phase 1 — Foundation | done | `typecheck` ok; `check-contrast` all tokens pass AA; `npm audit --omit=dev` 0 vulnerabilities; `npm run lint` 0 errors; `next build` 27/27 static routes generated | 2026-10-20 |
+| Phase 2 — Database, auth, tenancy | doing | Implementing Drizzle schema (4.1), RLS (Appendix D), and better-auth setup | 2026-10-20 |
 | Phase 3 — Security core + uploads | todo | Pending | |
 | Phase 4 — Pricing & quotes | todo | Pending | |
 | Phase 5 — Analysis pipeline | todo | Pending | |

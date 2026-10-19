@@ -4,43 +4,44 @@
 
 @layer base {
   :root {
-    /* Pure Clean Light Theme (Permanent) */
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
-    
+    /* Technical Editorial on Warm Paper per Section 12.3 */
+    --background: 40 30% 97%;        /* paper */
+    --foreground: 28 14% 11%;        /* ink */
+
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 28 14% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
+    --popover-foreground: 28 14% 11%;
 
-    /* Brand Accent: Engineering Emerald */
-    --primary: 160 84% 33%;
-    --primary-foreground: 0 0% 100%;
+    --primary: 16 78% 42%;           /* forge vermilion */
+    --primary-foreground: 40 30% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222 47% 11%;
+    --secondary: 38 20% 93%;
+    --secondary-foreground: 28 14% 15%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 38 18% 94%;
+    --muted-foreground: 28 8% 36%;
+
+    --accent: 38 24% 90%;
+    --accent-foreground: 28 14% 15%;
+
+    --border: 36 16% 85%;
+    --input: 36 16% 80%;
+    --ring: 16 78% 42%;
 
     /* Semantic Status Indicators */
-    --success: 152 76% 36%;
-    --success-foreground: 0 0% 100%;
-    
-    --warning: 38 92% 50%;
-    --warning-foreground: 24 95% 10%;
+    --success: 150 50% 28%;
+    --success-foreground: 40 30% 98%;
 
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 0 0% 100%;
+    --warning: 36 92% 34%;
+    --warning-foreground: 40 30% 98%;
 
-    --info: 212 96% 45%;
-    --info-foreground: 0 0% 100%;
+    --destructive: 0 66% 44%;
+    --destructive-foreground: 40 30% 98%;
 
-    /* 1px Hairline Borders */
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 160 84% 33%;
+    --info: 208 55% 38%;
+    --info-foreground: 40 30% 98%;
 
     --radius: 0.5rem;
   }
@@ -60,27 +61,7 @@
   }
 }
 
-/* RTL Helpers & Logical Flow */
-[dir="rtl"] {
-  text-align: right;
-}
-
-[dir="rtl"] .code-island,
-.ltr-island {
-  direction: ltr !important;
-  text-align: left !important;
-  unicode-bidi: isolate;
-}
-
-/* Subtle Engineering Grid Line Background */
-.bg-blueprint {
-  background-size: 24px 24px;
-  background-image: 
-    linear-gradient(to right, hsl(var(--border) / 0.6) 1px, transparent 1px),
-    linear-gradient(to bottom, hsl(var(--border) / 0.6) 1px, transparent 1px);
-}
-
-/* Hairline 1px Border Precision */
+/* 1px Hairline Borders */
 .border-hairline {
   border-width: 1px;
 }

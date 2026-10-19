@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { MarketingHeader } from "@/components/shared/marketing-header";
 import { MarketingFooter } from "@/components/shared/marketing-footer";
 import { Badge } from "@/components/ui/badge";
@@ -23,9 +23,9 @@ const docSections = [
           All execution passes occur inside ephemeral gVisor (<code className="text-foreground font-mono">runsc</code>) sandboxes with read-only root filesystems, dropped capabilities, and non-root UID execution.
         </p>
         <div className="p-4 rounded border border-border bg-card font-mono text-xs overflow-x-auto" dir="ltr">
-          <div className="text-muted-foreground">// Architectural Dataflow Pipeline</div>
+          <div className="text-muted-foreground">{"// Architectural Dataflow Pipeline"}</div>
           <div className="text-foreground mt-1">
-            Target Ingestion → Magic-Byte Triage → Evidence Ledger (Seen/Inferred/Unknown) → Dynamic Pricing Engine → Paddle Webhook Unlock → Sandbox Ghidra/JADX Worker → Clean-Room Synthesis → Verified ZIP Export
+            Target Ingestion → Magic-Byte Triage → Evidence Ledger (Seen/Inferred/Unknown) → Dynamic Pricing Engine → Paddle Webhook Unlock → Sandbox Clean-Room Worker → Clean-Room Synthesis → Verified ZIP Export
           </div>
         </div>
       </div>
@@ -34,7 +34,7 @@ const docSections = [
   {
     id: "evidence-ledger",
     title: "2. The Evidence Ledger Specification",
-    description: "Classification taxonomy ensuring legal copyright compliance through clean-room isolation.",
+    description: "Classification taxonomy ensuring legal compliance through clean-room isolation.",
     content: (
       <div className="space-y-4 text-sm leading-relaxed text-muted-foreground">
         <p>
@@ -66,20 +66,20 @@ const docSections = [
   {
     id: "pricing-engine",
     title: "3. Dynamic Pricing & Unit Economics Engine",
-    description: "Integer-cent pricing calculation with a 90% gross profit margin and clean psychological rounding.",
+    description: "Transparent market-rate benchmarking: 50% of typical human agency cost.",
     content: (
       <div className="space-y-4 text-sm leading-relaxed text-muted-foreground">
         <p>
-          RevForge eliminates arbitrary subscription lock-in by computing project-specific dynamic quotes based on real-world compute and model token consumption:
+          RevForge computes transparent, itemized quotes based on estimated engineering hours and market hourly rates:
         </p>
         <div className="p-4 rounded border border-border bg-card font-mono text-xs overflow-x-auto space-y-1" dir="ltr">
-          <div className="text-muted-foreground">// Pricing Formula</div>
-          <div className="text-foreground">Technical_COGS = Container_Compute_Cost + LLM_Token_Cost + Storage_Egress_Cost</div>
-          <div className="text-foreground">Target_Price = Technical_COGS / (1 - 0.90)  <span className="text-primary">// 90% Target Margin (10x Multiplier)</span></div>
-          <div className="text-foreground">Final_Quote = roundToCleanPrice(Target_Price) <span className="text-primary">// $29, $49, $99, $149, $249, $499...</span></div>
+          <div className="text-muted-foreground">{"// Pricing Formula"}</div>
+          <div className="text-foreground">Human_Cost = Estimated_Hours × Market_Hourly_Rate</div>
+          <div className="text-foreground">Platform_Price = round(Human_Cost × 0.50) {"// 50% agency benchmark"}</div>
+          <div className="text-foreground">Final_Quote = max(Category_Floor, sum(Selected_Features)) - Credits</div>
         </div>
         <p className="text-xs">
-          Small portfolio sites quote affordably at $29 or $49, while multi-tenant SaaS platforms scale proportionally at $249 or $499, delivering roughly 50% of the cost of a traditional human agency quote.
+          Quotes are itemized by feature and tier with integer cents, allowing you to select and reconstruct exactly what you need.
         </p>
       </div>
     ),

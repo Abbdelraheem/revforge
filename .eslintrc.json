@@ -1,0 +1,12 @@
+{
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "no-restricted-syntax": [
+      "error",
+      {
+        "selector": "CallExpression[callee.name='exec'], CallExpression[callee.name='execSync'], CallExpression[callee.property.name='exec'], CallExpression[callee.property.name='execSync']",
+        "message": "Direct shell exec/execSync is strictly forbidden. Use execFile with explicit argument arrays and shell: false."
+      }
+    ]
+  }
+}

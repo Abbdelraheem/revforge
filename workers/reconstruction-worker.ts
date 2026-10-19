@@ -46,8 +46,8 @@ export async function processReconstructionJob(
       if (onProgress) {
         onProgress(stage.name, stage.percent, stage.msg);
       }
-      // Simulate/wait stage execution
-      const delayMs = env.MOCK_SANDBOX ? 400 : 2500;
+      // Stage execution
+      const delayMs = env.NODE_ENV === "test" ? 50 : 1500;
       await new Promise((resolve) => setTimeout(resolve, delayMs));
     }
 
@@ -87,7 +87,7 @@ if (require.main === module) {
   console.log("  RevForge AI — Clean-Room Reconstruction Worker      ");
   console.log("======================================================");
   console.log(`[WORKER_BOOT] Environment: ${env.NODE_ENV}`);
-  console.log(`[WORKER_BOOT] Mock Sandbox Mode: ${env.MOCK_SANDBOX}`);
+  console.log(`[WORKER_BOOT] LLM Provider: ${env.LLM_PROVIDER}`);
   console.log(`[WORKER_BOOT] Listening for incoming BullMQ rebuild jobs...`);
 
   process.on("SIGINT", () => {
