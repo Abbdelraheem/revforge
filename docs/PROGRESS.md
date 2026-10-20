@@ -13,8 +13,8 @@
 | Phase 8 — Build engine | done | `src/lib/build/build.test.ts` passed: 8-token MinHash shingle leakage gate (< 0.25 threshold), composite parity scoring (0.35 visual + 0.15 structure + 0.35 behavior + 0.15 buildHealth), and stagnation detector | 2026-10-20 |
 | Phase 9 — Delivery, credits, billing UI | done | Download gate `src/app/api/download/[projectId]/route.ts` locked behind real session auth, workspace tenant verification, and paid order status check; D-01 resolved | 2026-10-20 |
 | Phase 10 — Full UI | done | All legacy Arabic strings purged; pricing-engine cleaned; marketing, docs, and checkout updated to 50% market-rate comparison; `next build` compiled 27/27 static/dynamic routes with active Middleware | 2026-10-20 |
-| Phase 11 — Hardening | doing | Nonce CSP verification, security headers audit, and threat model checks | 2026-10-20 |
-| Phase 12 — Docs, deploy artifacts, final audit | todo | Pending | |
+| Phase 11 — Hardening | done | `src/lib/security/headers.test.ts` passed: Nonce CSP (Appendix F), HSTS, frame-ancestors 'none', nosniff, SameSite=Lax HttpOnly Secure session cookies; D-14 resolved | 2026-10-20 |
+| Phase 12 — Docs, deploy artifacts, final audit | doing | Writing FINAL_REPORT.md, LAUNCH_CHECKLIST.md, and completing acceptance gates | 2026-10-20 |
 
 ## Defect Register Fix Tracker
 
@@ -32,8 +32,8 @@
 | D-10 | Pricing engine wrong formula / floats / Arabic | fixed | Implemented Appendix A engine `src/lib/pricing/engine.ts` with exact `hours × rate × 0.50`, integer quarter-hours, category floors, 0 floats |
 | D-11 | Marketing exposes margin | fixed | Removed COGS and 90% margin claims from documentation; aligned with 50% agency market rate comparison |
 | D-12 | Unverifiable / false claims | open | |
-| D-13 | Silent mock fallback / Stripe leftovers / insecure env defaults | open | |
-| D-14 | CSP unsafe-inline / no nonces | open | |
+| D-13 | Silent mock fallback / Stripe leftovers / insecure env defaults | fixed | Upgraded strict Zod schema in `src/env.ts` rejecting fake fallbacks at runtime |
+| D-14 | CSP unsafe-inline / no nonces | fixed | Implemented dynamic per-request Nonce CSP and strict headers in `src/middleware.ts` |
 | D-15 | Rate limiter in-memory & unused | fixed | Implemented RateLimiter in `src/lib/security/rate-limiter.ts` with consume method, remaining counts, window reset; verified in test suite |
 | D-16 | SSRF string prefixes / no DNS pinning | fixed | Replaced with Appendix B `src/lib/security/safe-fetch.ts` using `ipaddr.js` unicast range check, IP-pinned https connections, and redirect revalidation |
 | D-17 | Sandbox bare docker allowlist | open | |
