@@ -7,3 +7,4 @@
 - 2026-10-18: English only, Light theme only (warm paper technical editorial aesthetic).
 - 2026-10-20: Task 1: Purged 10 legacy files/folders, migrated dashboard to DB-reading server component, removed all localStorage/fake personas/COGS talk/false guarantees/misused statute claims, added verify-email/forgot-password/reset-password pages.
 - 2026-10-20: Task 2: Wired end-to-end data flow (queues, outbox dispatcher, analysis worker, pipeline with structured LLM and graceful degradation, DB-driven checkout with zero client price tampering, free-trial atomic entitlement, projects UI, dev fake checkout).
+- 2026-10-20: Task 3: Implemented sandboxing primitives (profiles with gVisor/runsc, Zod-validated args, teardown labels, shell:false runner), egress proxy (host allowlist, DNS IP pinning, blocked IP protection), and extractors (playwright web crawler with 375px mobile viewport, HAR parser, APK manifest extractor, Electron ASAR unpacker, native binary extractor).

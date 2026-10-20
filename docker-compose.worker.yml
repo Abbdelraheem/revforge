@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: ["npm", "run", "workers"]
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/revforge
+      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=production
+      - HTTP_PROXY=http://egress-proxy:8888
+      - HTTPS_PROXY=http://egress-proxy:8888
+    depends_on:
+      - redis
+      - egress-proxy
+    restart: unless-stopped
+
+  egress-proxy:
+    build:
+      context: .
+      dockerfile: docker/sandbox-verify.Dockerfile
+    command: ["npx", "tsx", "docker/egress-proxy/index.ts"]
+    environment:
+      - PORT=8888
+      - RUN_EGRESS_PROXY=true
+    networks:
+      - default
+      - egress_net
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
+
+networks:
+  egress_net:

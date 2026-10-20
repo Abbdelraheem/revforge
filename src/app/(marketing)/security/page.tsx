@@ -14,7 +14,7 @@ export const metadata = {
 const securityLayers = [
   {
     title: "1. Zero-Shell Command Execution",
-    description: "RevForge strictly forbids child_process.exec, execSync, or spawn with shell: true. All CLI tools inside host and sandbox environments are invoked strictly via execFile with immutable array arguments and binary allowlists.",
+    description: "RevForge strictly forbids child_process.exec, execSync, or spawning with an intermediate shell. All CLI tools inside host and sandbox environments are invoked strictly via execFile with immutable array arguments and binary allowlists.",
     code: `// runner.ts - Strictly shell: false
 const result = await execFileAsync(executable, args, {
   shell: false, // Mandatory: Zero shell injection
