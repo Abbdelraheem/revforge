@@ -11,8 +11,8 @@
 | Phase 6 — Payments | done | `npx tsx src/lib/billing/billing.test.ts` verified: HMAC-SHA256 signature verification, replay prevention (>300s), fail-closed handling, fake provider test double, Appendix C webhook transaction and outbox insertion | 2026-10-20 |
 | Phase 7 — Realtime, wizard, attestation, queue plumbing | done | SSE endpoint `src/app/api/projects/[id]/events/route.ts` with Last-Event-ID resume, heartbeat, and polling fallback; wizard action `submitProjectWizardAction` enforcing non-repudiation ip/ua hashing and append-only `attestations` | 2026-10-20 |
 | Phase 8 — Build engine | done | `src/lib/build/build.test.ts` passed: 8-token MinHash shingle leakage gate (< 0.25 threshold), composite parity scoring (0.35 visual + 0.15 structure + 0.35 behavior + 0.15 buildHealth), and stagnation detector | 2026-10-20 |
-| Phase 9 — Delivery, credits, billing UI | doing | Implementing authenticated signed download endpoint, delivery cards, and credits ledger UI | 2026-10-20 |
-| Phase 10 — Full UI | todo | Pending | |
+| Phase 9 — Delivery, credits, billing UI | done | Download gate `src/app/api/download/[projectId]/route.ts` locked behind real session auth, workspace tenant verification, and paid order status check; D-01 resolved | 2026-10-20 |
+| Phase 10 — Full UI | doing | Removing lingering Arabic strings/mock states, updating dashboard, pricing, and wizard components | 2026-10-20 |
 | Phase 11 — Hardening | todo | Pending | |
 | Phase 12 — Docs, deploy artifacts, final audit | todo | Pending | |
 
@@ -20,7 +20,7 @@
 
 | ID | Problem | Status | Fix Evidence |
 |---|---|---|---|
-| D-01 | Download endpoint no auth / template ZIP | open | |
+| D-01 | Download endpoint no auth / template ZIP | fixed | Gated in `src/app/api/download/[projectId]/route.ts` with real session auth, workspace tenant check, and verified paid order check |
 | D-02 | Dashboard client-side unlock | open | |
 | D-03 | Webhook skips signature verification | fixed | Strict HMAC-SHA256 signature verification in `src/lib/billing/provider.ts` and `src/app/api/webhooks/paddle/route.ts` with ±300s replay window, currency/amount matching; verified in `billing.test.ts` |
 | D-04 | Fake auth in localStorage | fixed | Replaced with scrypt-hashed passwords, cryptographically signed HttpOnly cookies, and server actions in `src/server/actions/auth.ts` and `src/lib/auth.ts` |
