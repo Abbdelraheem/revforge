@@ -12,8 +12,8 @@
 | Phase 7 — Realtime, wizard, attestation, queue plumbing | done | SSE endpoint `src/app/api/projects/[id]/events/route.ts` with Last-Event-ID resume, heartbeat, and polling fallback; wizard action `submitProjectWizardAction` enforcing non-repudiation ip/ua hashing and append-only `attestations` | 2026-10-20 |
 | Phase 8 — Build engine | done | `src/lib/build/build.test.ts` passed: 8-token MinHash shingle leakage gate (< 0.25 threshold), composite parity scoring (0.35 visual + 0.15 structure + 0.35 behavior + 0.15 buildHealth), and stagnation detector | 2026-10-20 |
 | Phase 9 — Delivery, credits, billing UI | done | Download gate `src/app/api/download/[projectId]/route.ts` locked behind real session auth, workspace tenant verification, and paid order status check; D-01 resolved | 2026-10-20 |
-| Phase 10 — Full UI | doing | Removing lingering Arabic strings/mock states, updating dashboard, pricing, and wizard components | 2026-10-20 |
-| Phase 11 — Hardening | todo | Pending | |
+| Phase 10 — Full UI | done | All legacy Arabic strings purged; pricing-engine cleaned; marketing, docs, and checkout updated to 50% market-rate comparison; `next build` compiled 27/27 static/dynamic routes with active Middleware | 2026-10-20 |
+| Phase 11 — Hardening | doing | Nonce CSP verification, security headers audit, and threat model checks | 2026-10-20 |
 | Phase 12 — Docs, deploy artifacts, final audit | todo | Pending | |
 
 ## Defect Register Fix Tracker

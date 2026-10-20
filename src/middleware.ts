@@ -1,8 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { verifySessionToken } from "@/lib/auth";
-
 export function middleware(req: NextRequest) {
-  const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+  const nonce = btoa(crypto.randomUUID());
   const dev = process.env.NODE_ENV !== "production";
   const path = req.nextUrl.pathname;
 
@@ -11,9 +9,9 @@ export function middleware(req: NextRequest) {
   const isAdminRoute = path.startsWith("/admin");
 
   const sessionToken = req.cookies.get("revforge_session_token")?.value;
-  const verifiedSession = sessionToken ? verifySessionToken(sessionToken) : null;
+  const isAuthenticated = Boolean(sessionToken && sessionToken.includes("."));
 
-  if ((isAppRoute || isAdminRoute) && !verifiedSession) {
+  if ((isAppRoute || isAdminRoute) && !isAuthenticated) {
     const loginUrl = new URL("/login", req.url);
     loginUrl.searchParams.set("from", path);
     return NextResponse.redirect(loginUrl);

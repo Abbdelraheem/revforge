@@ -13,6 +13,7 @@ import { transitionProject } from "@/db/state-machine";
 import { eq, and } from "drizzle-orm";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   const rawBody = await req.text(); // Raw body before any parsing

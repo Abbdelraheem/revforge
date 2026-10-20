@@ -60,8 +60,9 @@ function parseEnv() {
     }
   }
 
-  // Production safety guards
-  if (process.env.NODE_ENV === "production") {
+  // Production safety guards (only active at actual server runtime, not during static next build evaluation)
+  const isBuilding = process.env.NEXT_PHASE === "phase-production-build";
+  if (process.env.NODE_ENV === "production" && !isBuilding) {
     const data = result.success ? result.data : ({} as any);
     if (data.PAYMENT_PROVIDER === "fake") {
       throw new Error("FATAL: PAYMENT_PROVIDER cannot be 'fake' in production mode.");
