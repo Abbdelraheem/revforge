@@ -14,7 +14,7 @@
 | Phase 9 — Delivery, credits, billing UI | done | Download gate `src/app/api/download/[projectId]/route.ts` locked behind real session auth, workspace tenant verification, and paid order status check; D-01 resolved | 2026-10-20 |
 | Phase 10 — Full UI | done | All legacy Arabic strings purged; pricing-engine cleaned; marketing, docs, and checkout updated to 50% market-rate comparison; `next build` compiled 27/27 static/dynamic routes with active Middleware | 2026-10-20 |
 | Phase 11 — Hardening | done | `src/lib/security/headers.test.ts` passed: Nonce CSP (Appendix F), HSTS, frame-ancestors 'none', nosniff, SameSite=Lax HttpOnly Secure session cookies; D-14 resolved | 2026-10-20 |
-| Phase 12 — Docs, deploy artifacts, final audit | doing | Writing FINAL_REPORT.md, LAUNCH_CHECKLIST.md, and completing acceptance gates | 2026-10-20 |
+| Phase 12 — Docs, deploy artifacts, final audit | done | `docs/FINAL_REPORT.md` written with all quality gates verified green; `docs/LAUNCH_CHECKLIST.md` ready for production deployment | 2026-10-20 |
 
 ## Defect Register Fix Tracker
 
