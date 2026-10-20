@@ -8,25 +8,34 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "verify": "tsx test-verification.ts",
-    "test": "npm run verify"
+    "test": "vitest run"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.135.0",
+    "@aws-sdk/client-s3": "^3.750.0",
+    "@aws-sdk/s3-request-presigner": "^3.750.0",
+    "bullmq": "^5.41.0",
     "clsx": "^2.1.1",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.45.4",
+    "file-type": "^22.2.0",
+    "ioredis": "^5.5.0",
     "ipaddr.js": "^2.5.0",
     "lucide-react": "^0.475.0",
     "next": "^15.5.28",
+    "pino": "^9.6.0",
     "postgres": "^3.4.5",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "resend": "^4.1.2",
     "tailwind-merge": "^3.0.1",
+    "undici": "^7.3.0",
     "zod": "^3.24.2",
     "zod-to-json-schema": "^3.25.2"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "^1.64.1",
     "@types/node": "^22.13.4",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
@@ -34,10 +43,13 @@
     "drizzle-kit": "^0.30.4",
     "eslint": "^9.39.5",
     "eslint-config-next": "^15.5.28",
+    "fast-check": "^3.23.2",
+    "playwright": "^1.64.1",
     "postcss": "^8.5.3",
     "tailwindcss": "^3.4.17",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^3.2.7"
   },
   "overrides": {
     "postcss": "^8.5.3"

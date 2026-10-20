@@ -25,7 +25,7 @@ const docSections = [
         <div className="p-4 rounded border border-border bg-card font-mono text-xs overflow-x-auto" dir="ltr">
           <div className="text-muted-foreground">{"// Architectural Dataflow Pipeline"}</div>
           <div className="text-foreground mt-1">
-            Target Ingestion → Magic-Byte Triage → Evidence Ledger (Seen/Inferred/Unknown) → Dynamic Pricing Engine → Paddle Webhook Unlock → Sandbox Clean-Room Worker → Clean-Room Synthesis → Verified ZIP Export
+            Target Ingestion → Magic-Byte Validation → Evidence Ledger (Seen/Inferred/Unknown) → Dynamic Pricing Formula → Verified Checkout → Sandbox Clean-Room Worker → Clean-Room Synthesis → Verified ZIP Export
           </div>
         </div>
       </div>
@@ -64,8 +64,8 @@ const docSections = [
     ),
   },
   {
-    id: "pricing-engine",
-    title: "3. Dynamic Pricing & Unit Economics Engine",
+    id: "pricing",
+    title: "3. Dynamic Pricing & Estimation Methodology",
     description: "Transparent market-rate benchmarking: 50% of typical human agency cost.",
     content: (
       <div className="space-y-4 text-sm leading-relaxed text-muted-foreground">
@@ -94,40 +94,20 @@ const docSections = [
           <div className="p-3 rounded border border-border bg-card">
             <div className="flex items-center space-x-2 text-foreground font-bold">
               <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/30">POST</span>
-              <span>/api/triage</span>
+              <span>/api/webhooks/paddle</span>
             </div>
             <p className="text-muted-foreground mt-1 text-[11px] font-sans">
-              Safely ingests target URL or binary Base64, verifies magic bytes, and returns structured TechReportData.
-            </p>
-          </div>
-
-          <div className="p-3 rounded border border-border bg-card">
-            <div className="flex items-center space-x-2 text-foreground font-bold">
-              <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/30">POST</span>
-              <span>/api/checkout</span>
-            </div>
-            <p className="text-muted-foreground mt-1 text-[11px] font-sans">
-              Generates a verified Paddle v2 custom-priced checkout link for the given project ID and verified quote.
-            </p>
-          </div>
-
-          <div className="p-3 rounded border border-border bg-card">
-            <div className="flex items-center space-x-2 text-foreground font-bold">
-              <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/30">POST</span>
-              <span>/api/webhook/paddle</span>
-            </div>
-            <p className="text-muted-foreground mt-1 text-[11px] font-sans">
-              Cryptographically verifies HMAC-SHA256 signature from Paddle, confirms transaction, and enqueues BullMQ synthesis worker.
+              Cryptographically verifies HMAC signature from billing provider, confirms transaction, and enqueues BullMQ worker.
             </p>
           </div>
 
           <div className="p-3 rounded border border-border bg-card">
             <div className="flex items-center space-x-2 text-foreground font-bold">
               <span className="px-1.5 py-0.5 rounded bg-muted text-foreground border border-border">GET</span>
-              <span>/api/stream/:projectId</span>
+              <span>/api/projects/:id/events</span>
             </div>
             <p className="text-muted-foreground mt-1 text-[11px] font-sans">
-              Server-Sent Events (SSE) channel streaming live stage updates, telemetry logs, test results, and final download tokens.
+              Server-Sent Events (SSE) channel streaming stage transitions and telemetry logs.
             </p>
           </div>
         </div>

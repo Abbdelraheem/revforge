@@ -18,6 +18,7 @@ export interface ButtonProps
     | "link";
   size?: "sm" | "md" | "lg" | "icon";
   isLoading?: boolean;
+  asChild?: boolean;
 }
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -27,6 +28,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       variant = "default",
       size = "md",
       isLoading = false,
+      asChild = false,
       children,
       disabled,
       ...props
@@ -57,16 +59,26 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       icon: "h-9 w-9 p-0",
     };
 
+    const combinedClassName = cn(
+      baseStyles,
+      variantStyles[variant],
+      sizeStyles[size],
+      className
+    );
+
+    if (asChild && React.isValidElement(children)) {
+      const child = children as React.ReactElement<any>;
+      return React.cloneElement(child, {
+        className: cn(combinedClassName, child.props.className),
+        ...props,
+      });
+    }
+
     return (
       <button
         ref={ref}
         disabled={disabled || isLoading}
-        className={cn(
-          baseStyles,
-          variantStyles[variant],
-          sizeStyles[size],
-          className
-        )}
+        className={combinedClassName}
         {...props}
       >
         {isLoading && <Loader2 className="me-2 h-4 w-4 animate-spin" />}

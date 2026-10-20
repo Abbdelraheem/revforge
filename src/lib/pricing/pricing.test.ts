@@ -42,7 +42,7 @@ assert.strictEqual(
   DEFAULT_PRICING_CONFIG_V1.tiers.portfolio.minOrderCents,
   "Order minimum floor not respected!"
 );
-console.log("✓ Floor guarantees passed.");
+console.log("✓ Floor enforcements passed.");
 
 // 3. Integer invariants and 0.5x ratio check
 for (let i = 0; i < 1000; i++) {

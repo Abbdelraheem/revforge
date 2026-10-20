@@ -8,40 +8,30 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check, ArrowRight, ShieldCheck, Sliders, DollarSign, Clock, HelpCircle } from "lucide-react";
+import { priceQuote, DEFAULT_PRICING_CONFIG_V1, TierKey } from "@/lib/pricing/engine";
 
 export default function PricingPage() {
-  // Dynamic Scope Estimator State
   const [estimatedHours, setEstimatedHours] = useState(24);
-  const [targetType, setTargetType] = useState<"portfolio" | "web_app" | "mobile_app" | "enterprise_saas">("web_app");
+  const [targetType, setTargetType] = useState<TierKey>("web_app");
 
-  // Dynamic calculation matching src/lib/pricing/pricing-engine.ts
-  const getDynamicQuote = (type: string, hours: number) => {
-    let rate = 65; // standard web app agency hourly rate
-    if (type === "portfolio") rate = 45;
-    else if (type === "mobile_app") rate = 85;
-    else if (type === "enterprise_saas") rate = 110;
+  const quoteResult = priceQuote(
+    [
+      {
+        id: "core-architecture",
+        name: "Core Architecture Reconstruction",
+        tier: targetType,
+        estimatedHours,
+        selected: true,
+      },
+    ],
+    DEFAULT_PRICING_CONFIG_V1
+  );
 
-    const standardAgencyCost = hours * rate;
-    // Platform is 50% of standard agency human cost
-    const rawTargetPrice = standardAgencyCost * 0.5;
-
-    // Clean psychological rounding
-    let cleanPrice = 99;
-    if (rawTargetPrice <= 35) cleanPrice = 29;
-    else if (rawTargetPrice <= 65) cleanPrice = 49;
-    else if (rawTargetPrice <= 120) cleanPrice = 99;
-    else if (rawTargetPrice <= 180) cleanPrice = 149;
-    else if (rawTargetPrice <= 300) cleanPrice = 249;
-    else cleanPrice = 499;
-
-    return {
-      cleanPrice,
-      standardAgencyCost,
-      savings: Math.round(((standardAgencyCost - cleanPrice) / standardAgencyCost) * 100),
-    };
-  };
-
-  const currentQuote = getDynamicQuote(targetType, estimatedHours);
+  const tierCfg = DEFAULT_PRICING_CONFIG_V1.tiers[targetType];
+  const rateDollars = tierCfg.hourlyRateCents / 100;
+  const humanAgencyCost = Math.round(estimatedHours * rateDollars);
+  const platformPrice = quoteResult.totalCents / 100;
+  const savings = humanAgencyCost > 0 ? Math.round(((humanAgencyCost - platformPrice) / humanAgencyCost) * 100) : 50;
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground font-sans">
@@ -51,154 +41,156 @@ export default function PricingPage() {
         {/* Header */}
         <div className="text-center space-y-4 max-w-3xl mx-auto">
           <Badge variant="outline" className="border-primary/40 text-primary text-xs font-semibold">
-            DYNAMIC SCOPE QUOTING
+            TRANSPARENT BENCHMARKED PRICING
           </Badge>
-          <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground">
-            Dynamic, Need-Based Pricing Per Project
+          <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground font-serif">
+            Honest, Scope-Based Pricing Per Project
           </h1>
           <p className="text-muted-foreground text-sm md:text-base leading-relaxed">
-            Every software target is unique. We calculate custom project pricing based on real architectural scope—with 100% free initial triage for every target.
+            Every target is unique. Quotes are calculated directly as <code>hours × market rate × 0.5</code>—benchmarked at 50% of traditional human agency costs, with a complimentary first analysis.
           </p>
         </div>
 
-        {/* Dynamic Pricing Engine Showcase */}
+        {/* Dynamic Pricing Showcase */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          {/* Free Triage Box */}
+          {/* Complimentary Analysis Box */}
           <Card className="border-border bg-card shadow-sm lg:col-span-1">
             <CardHeader className="pb-3 border-b border-border">
-              <Badge variant="outline" className="w-fit text-[10px] text-primary border-primary/40 font-semibold">
-                ALWAYS FREE
+              <Badge variant="outline" className="w-fit text-xs text-primary border-primary/40 font-semibold">
+                FIRST ANALYSIS FREE
               </Badge>
-              <CardTitle className="text-xl font-bold text-foreground mt-1">
-                Static Triage & Audit
-              </CardTitle>
-              <CardDescription className="text-xs leading-relaxed">
-                Run safe static analysis on any target URL or binary before committing to rebuild.
+              <CardTitle className="text-xl font-bold font-serif">Architectural Analysis</CardTitle>
+              <CardDescription className="text-xs">
+                Inspect and generate a formal specification for your target
               </CardDescription>
             </CardHeader>
-            <CardContent className="pt-5 space-y-4 text-xs text-muted-foreground">
-              <div className="text-3xl font-extrabold text-foreground font-mono">$0</div>
-              <ul className="space-y-2.5">
-                <li className="flex items-start space-x-2">
-                  <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                  <span className="text-foreground">Full architecture boundary extraction</span>
+            <CardContent className="pt-5 space-y-4">
+              <div className="flex items-baseline space-x-1">
+                <span className="text-4xl font-extrabold text-foreground font-mono">$0</span>
+                <span className="text-xs text-muted-foreground">first run ($5 credit thereafter)</span>
+              </div>
+              <ul className="space-y-2 text-xs text-muted-foreground">
+                <li className="flex items-center space-x-2">
+                  <Check className="h-3.5 w-3.5 text-primary shrink-0" />
+                  <span>Full AST disassembly & network trace extraction</span>
                 </li>
-                <li className="flex items-start space-x-2">
-                  <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                  <span className="text-foreground">Detected tech stack fingerprinting</span>
+                <li className="flex items-center space-x-2">
+                  <Check className="h-3.5 w-3.5 text-primary shrink-0" />
+                  <span>Evidence Ledger (Seen vs. Inferred boundaries)</span>
                 </li>
-                <li className="flex items-start space-x-2">
-                  <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                  <span className="text-foreground">Evidence Ledger categorization (Seen / Inferred)</span>
-                </li>
-                <li className="flex items-start space-x-2">
-                  <Check className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                  <span className="text-foreground">Itemized project quote calculation</span>
+                <li className="flex items-center space-x-2">
+                  <Check className="h-3.5 w-3.5 text-primary shrink-0" />
+                  <span>Itemized complexity quote & milestone schedule</span>
                 </li>
               </ul>
-              <Link href="/dashboard" className="block pt-2">
+            </CardContent>
+            <CardFooter className="border-t border-border pt-4">
+              <Link href="/projects/new" className="w-full">
                 <Button variant="outline" className="w-full text-xs font-semibold">
-                  <span>Start Free Analysis</span>
-                  <ArrowRight className="ms-1.5 h-3.5 w-3.5" />
+                  Start Complimentary Analysis
                 </Button>
               </Link>
-            </CardContent>
+            </CardFooter>
           </Card>
 
-          {/* Dynamic Estimator Box */}
-          <Card className="border-primary/40 bg-card shadow-md ring-1 ring-primary/20 lg:col-span-2">
-            <CardHeader className="pb-3 border-b border-border">
-              <div className="flex justify-between items-center">
-                <Badge variant="default" className="text-[10px] font-semibold">
-                  LIVE DYNAMIC ESTIMATOR
-                </Badge>
-                <span className="text-xs text-muted-foreground font-mono">Custom Paddle Invoice</span>
+          {/* Interactive Calculator */}
+          <Card className="border-border bg-card shadow-sm lg:col-span-2">
+            <CardHeader className="border-b border-border pb-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-xl font-bold font-serif">Interactive Scope Estimator</CardTitle>
+                  <CardDescription className="text-xs">
+                    Formula: hours × rate × 0.5 (integer cents, platform floor applied)
+                  </CardDescription>
+                </div>
+                <Sliders className="h-5 w-5 text-muted-foreground" />
               </div>
-              <CardTitle className="text-xl font-bold text-foreground mt-1">
-                Need-Based Reconstruction Quote
-              </CardTitle>
-              <CardDescription className="text-xs">
-                Prices adjust automatically based on project scope, API routes, and database complexity.
-              </CardDescription>
             </CardHeader>
-
-            <CardContent className="p-6 space-y-6">
-              {/* Target Type Selector */}
+            <CardContent className="pt-6 space-y-6">
+              {/* Type selector */}
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-foreground">Select Target Category:</label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono text-xs">
+                <label className="text-xs font-semibold text-foreground">Project Complexity Tier</label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {[
-                    { id: "portfolio", label: "Landing / Static" },
-                    { id: "web_app", label: "Web App (CRUD)" },
-                    { id: "mobile_app", label: "Mobile APK" },
-                    { id: "enterprise_saas", label: "Full SaaS Platform" },
+                    { id: "portfolio", label: "Static / Landing", defaultHours: 12 },
+                    { id: "web_app", label: "Web Application", defaultHours: 24 },
+                    { id: "mobile_app", label: "Mobile Binary", defaultHours: 40 },
+                    { id: "enterprise_saas", label: "Complex SaaS", defaultHours: 80 },
                   ].map((t) => (
                     <button
                       key={t.id}
                       type="button"
-                      onClick={() => setTargetType(t.id as any)}
-                      className={`p-2.5 rounded border text-center transition ${
+                      onClick={() => {
+                        setTargetType(t.id as TierKey);
+                        setEstimatedHours(t.defaultHours);
+                      }}
+                      className={`p-3 rounded border text-left transition-colors ${
                         targetType === t.id
-                          ? "border-primary bg-primary/10 text-primary font-bold"
-                          : "border-border bg-background hover:bg-muted text-muted-foreground"
+                          ? "border-primary bg-primary/5 text-primary font-semibold"
+                          : "border-border bg-card text-muted-foreground hover:bg-muted/30"
                       }`}
                     >
-                      {t.label}
+                      <div className="text-xs">{t.label}</div>
+                      <div className="text-[11px] text-muted-foreground mt-0.5">
+                        ${DEFAULT_PRICING_CONFIG_V1.tiers[t.id as TierKey].hourlyRateCents / 100}/hr market
+                      </div>
                     </button>
                   ))}
                 </div>
               </div>
 
-              {/* Scope Slider */}
+              {/* Sliders */}
               <div className="space-y-2">
-                <div className="flex justify-between text-xs font-semibold">
-                  <span className="text-foreground">Estimated Human Developer Effort:</span>
-                  <span className="text-primary font-mono font-bold">{estimatedHours} Hours</span>
+                <div className="flex justify-between text-xs">
+                  <span className="font-semibold text-foreground">Estimated Engineering Hours:</span>
+                  <span className="font-mono font-bold text-primary">{estimatedHours} hrs</span>
                 </div>
                 <input
                   type="range"
-                  min={8}
-                  max={80}
-                  step={4}
+                  min="4"
+                  max="160"
+                  step="2"
                   value={estimatedHours}
                   onChange={(e) => setEstimatedHours(Number(e.target.value))}
                   className="w-full accent-primary cursor-pointer"
                 />
                 <div className="flex justify-between text-[11px] text-muted-foreground">
-                  <span>Simple Scope (8 hrs)</span>
-                  <span>Medium Scope (36 hrs)</span>
-                  <span>Enterprise Scope (80+ hrs)</span>
+                  <span>4 hrs (Minimal)</span>
+                  <span>80 hrs (Standard)</span>
+                  <span>160 hrs (Large Scope)</span>
                 </div>
               </div>
 
-              {/* Output Result Comparison */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-lg border border-border bg-muted/20 text-center font-mono">
+              {/* Price Breakdown */}
+              <div className="p-4 rounded border border-border bg-muted/20 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
                 <div className="space-y-1">
-                  <div className="text-[10px] text-muted-foreground uppercase">RevForge Dynamic Quote</div>
-                  <div className="text-3xl font-extrabold text-primary">${currentQuote.cleanPrice}</div>
-                  <div className="text-[10px] text-muted-foreground">Paddle Checkout Link</div>
-                </div>
-
-                <div className="space-y-1">
-                  <div className="text-[10px] text-muted-foreground uppercase">Human Agency Equivalent</div>
-                  <div className="text-2xl font-bold text-muted-foreground line-through">
-                    ${currentQuote.standardAgencyCost}
+                  <div className="text-xs text-muted-foreground uppercase">Market Agency Estimate</div>
+                  <div className="text-xl font-bold line-through text-muted-foreground font-mono">
+                    ${humanAgencyCost}
                   </div>
-                  <div className="text-[10px] text-muted-foreground">Traditional Retainer</div>
+                  <div className="text-xs text-muted-foreground">{estimatedHours} hrs @ ${rateDollars}/hr</div>
+                </div>
+
+                <div className="space-y-1 border-x border-border/60 px-2">
+                  <div className="text-xs text-primary font-bold uppercase tracking-wider">Clean-Room Price</div>
+                  <div className="text-3xl font-extrabold text-foreground font-mono">
+                    ${platformPrice}
+                  </div>
+                  <div className="text-xs text-muted-foreground">50% market benchmark</div>
                 </div>
 
                 <div className="space-y-1">
-                  <div className="text-[10px] text-muted-foreground uppercase">Total Client Savings</div>
-                  <div className="text-3xl font-extrabold text-emerald-600">~{currentQuote.savings}%</div>
-                  <div className="text-[10px] text-muted-foreground">Delivered in Minutes</div>
+                  <div className="text-xs text-muted-foreground uppercase">Estimated Client Savings</div>
+                  <div className="text-3xl font-extrabold text-foreground font-mono">~{savings}%</div>
+                  <div className="text-xs text-muted-foreground">Delivered via automated build</div>
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
                 <div className="text-xs text-muted-foreground">
-                  Includes full Next.js 15, Drizzle ORM, and 100% test pass guarantee.
+                  Includes full Next.js 15, Drizzle ORM, and verified test suites.
                 </div>
-                <Link href="/dashboard">
+                <Link href="/projects/new">
                   <Button className="text-xs font-bold shadow-sm w-full sm:w-auto">
                     <span>Analyze Your Target Now</span>
                     <ArrowRight className="ms-1.5 h-3.5 w-3.5" />
@@ -212,8 +204,8 @@ export default function PricingPage() {
         {/* Complexity Range Benchmarks */}
         <section className="space-y-6">
           <div className="text-center space-y-2 max-w-xl mx-auto">
-            <h2 className="text-2xl font-bold text-foreground">
-              Real-World Project Scope Benchmarks
+            <h2 className="text-2xl font-bold text-foreground font-serif">
+              Project Scope Benchmarks
             </h2>
             <p className="text-xs text-muted-foreground">
               Representative examples of dynamic prices generated across different project sizes.
@@ -236,13 +228,13 @@ export default function PricingPage() {
               },
               {
                 title: "Mobile App (Android APK)",
-                range: "$149 – $249",
+                range: "$199 – $249",
                 turnaround: "~10 minutes",
                 desc: "Decompiled DEX bytecode synthesized into clean React Native and TypeScript interfaces.",
               },
               {
                 title: "Full SaaS Ecosystem",
-                range: "$249 – $499",
+                range: "$299 – $499",
                 turnaround: "~15 minutes",
                 desc: "Multi-tenant routing, worker job queues, relational migrations, and automated test harnesses.",
               },
@@ -260,20 +252,20 @@ export default function PricingPage() {
           </div>
         </section>
 
-        {/* Guarantee Banner */}
+        {/* Verification Banner */}
         <div className="p-6 rounded-lg border border-border bg-muted/20 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
           <div className="flex items-center space-x-3">
             <ShieldCheck className="h-8 w-8 text-primary shrink-0" />
             <div>
-              <div className="font-bold text-foreground text-sm">100% Automated Test Pass Guarantee</div>
+              <div className="font-bold text-foreground text-sm">Automated Test Verification & Parity Scoring</div>
               <div className="text-muted-foreground text-xs mt-0.5">
-                Every generated repository is compiled and executed against automated verification tests before release. If compilation fails, an automatic refund is processed via Paddle.
+                Every generated repository is compiled and verified in an isolated sandbox before delivery. If delivery falls below quality thresholds, platform credits are automatically issued.
               </div>
             </div>
           </div>
           <Link href="/contact" className="shrink-0">
             <Button variant="outline" size="sm" className="text-xs">
-              Contact Sales
+              Contact Support
             </Button>
           </Link>
         </div>

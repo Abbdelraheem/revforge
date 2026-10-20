@@ -2,18 +2,15 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ArrowRight, Lock, Mail, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { RevForgeLogo } from "@/components/shared/revforge-logo";
 import { GoogleIcon } from "@/components/shared/google-icon";
-
 import { loginAction } from "@/server/actions/auth";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -42,19 +39,6 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleLogin = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      if (typeof window !== "undefined") {
-        localStorage.setItem(
-          "revforge_session",
-          JSON.stringify({ email: "google.user@revforge.com", name: "Google Verified Architect", authenticated: true })
-        );
-      }
-      router.push("/dashboard");
-    }, 400);
-  };
-
   return (
     <div className="min-h-screen flex flex-col justify-center items-center px-4 py-12 bg-background text-foreground font-sans">
       <div className="w-full max-w-sm space-y-6">
@@ -64,12 +48,12 @@ export default function LoginPage() {
             <div className="h-9 w-9 rounded border border-border bg-muted/40 flex items-center justify-center">
               <RevForgeLogo className="h-5 w-5" />
             </div>
-            <span className="font-bold text-lg tracking-tight text-foreground font-mono">
+            <span className="font-bold text-lg tracking-tight text-foreground font-serif">
               RevForge
             </span>
           </Link>
-          <p className="text-xs text-muted-foreground">
-            Sign in to access your projects, analysis reports & code generator
+          <p className="text-sm text-muted-foreground">
+            Sign in to access your projects and analysis reports
           </p>
         </div>
 
@@ -79,25 +63,23 @@ export default function LoginPage() {
             <CardTitle className="text-base font-bold text-foreground">
               Sign In
             </CardTitle>
-            <CardDescription className="text-xs">
-              Enter your credentials or authenticate via Google SSO.
+            <CardDescription className="text-sm">
+              Enter your credentials to continue.
             </CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-4">
             {error && (
-              <div className="p-2.5 rounded-md border border-destructive/40 bg-destructive/10 text-destructive text-xs">
+              <div className="p-3 rounded-md border border-destructive/40 bg-destructive/10 text-destructive text-sm">
                 {error}
               </div>
             )}
 
-            {/* Google Sign In Button */}
             <Button
               type="button"
               variant="outline"
-              onClick={handleGoogleLogin}
-              disabled={isLoading}
-              className="w-full text-xs font-semibold h-10 border-border bg-background hover:bg-muted/30 shadow-sm flex items-center justify-center space-x-2"
+              onClick={() => setError("Google OAuth requires GOOGLE_CLIENT_ID configuration. Please sign in with email and password.")}
+              className="w-full text-sm font-semibold h-10 border-border bg-background hover:bg-muted/30 shadow-sm flex items-center justify-center space-x-2"
             >
               <GoogleIcon className="h-4 w-4" />
               <span>Continue with Google</span>
@@ -107,67 +89,72 @@ export default function LoginPage() {
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-border" />
               </div>
-              <div className="relative flex justify-center text-[10px] uppercase">
+              <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-card px-2 text-muted-foreground font-medium">Or continue with email</span>
               </div>
             </div>
 
             <form onSubmit={handleLogin} className="space-y-3.5">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">Work Email</label>
+                <label className="text-sm font-semibold text-foreground">Work Email</label>
                 <div className="relative">
-                  <Mail className="absolute start-3 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+                  <Mail className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     required
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="architect@enterprise.com"
-                    className="ps-9 text-xs"
+                    placeholder="engineer@company.com"
+                    className="ps-9 text-sm"
                   />
                 </div>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-foreground">Password</label>
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-semibold text-foreground">Password</label>
+                  <Link href="/forgot-password" className="text-xs text-primary hover:underline">
+                    Forgot password?
+                  </Link>
+                </div>
                 <div className="relative">
-                  <Lock className="absolute start-3 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+                  <Lock className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
                     required
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
-                    className="ps-9 text-xs"
+                    className="ps-9 text-sm"
                   />
                 </div>
               </div>
 
-              <Button type="submit" disabled={isLoading} className="w-full text-xs font-bold shadow-sm h-10">
+              <Button type="submit" disabled={isLoading} className="w-full text-sm font-bold shadow-sm h-10">
                 {isLoading ? (
                   <span>Signing in...</span>
                 ) : (
                   <>
                     <span>Sign In to Workspace</span>
-                    <ArrowRight className="ms-1.5 h-3.5 w-3.5" />
+                    <ArrowRight className="ms-1.5 h-4 w-4" />
                   </>
                 )}
               </Button>
             </form>
           </CardContent>
 
-          <CardFooter className="border-t border-border pt-4 text-center justify-center text-xs text-muted-foreground">
+          <CardFooter className="border-t border-border pt-4 text-center justify-center text-sm text-muted-foreground">
             <span>Don&apos;t have an account? </span>
-            <Link href="/register" className="text-primary hover:underline ms-1 font-bold">
+            <Link href="/register" className="text-primary hover:underline ms-1 font-semibold">
               Create an account
             </Link>
           </CardFooter>
         </Card>
 
-        {/* Security badge */}
-        <div className="text-center text-[11px] text-muted-foreground flex items-center justify-center space-x-1.5">
-          <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-          <span>Encrypted Session • Zero Data Retention</span>
+        {/* Security notice */}
+        <div className="text-center text-xs text-muted-foreground flex items-center justify-center space-x-1.5">
+          <ShieldCheck className="h-4 w-4 text-primary" />
+          <span>Encrypted Session • Strict Access Controls</span>
         </div>
       </div>
     </div>

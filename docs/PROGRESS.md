@@ -1,47 +1,45 @@
-# Project Progress & Verification Ledger
+# Project Progress & Acceptance Ledger
 
-| Phase | Status | Evidence (command + last lines of output) | Date |
+## Master Task Acceptance Status (`scripts/audit.mjs`)
+
+| Task | Status | Evidence (audit output tail) | Date |
 |---|---|---|---|
-| Phase 0 — Bootstrap | done | `git tag` -> baseline-before-fix | 2026-10-18 |
-| Phase 1 — Foundation | done | `typecheck` ok; `check-contrast` all tokens pass AA; `npm audit --omit=dev` 0 vulnerabilities; `npm run lint` 0 errors; `next build` 27/27 static routes generated | 2026-10-20 |
-| Phase 2 — Database, auth, tenancy | done | 30-table schema, RLS policies, audit_log triggers, `withTenant`, scrypt HttpOnly session actions, superadmin layout protection | 2026-10-20 |
-| Phase 3 — Security core + uploads | done | `npx tsx src/lib/security/security.test.ts` passed: 34 SSRF IP tests, Deny-list tests, Magic-byte tests, Rate limiter tests; StorageService S3 upload/download | 2026-10-20 |
-| Phase 4 — Pricing & quotes | done | `npx tsx scripts/worked-examples.ts` verified 5 tiers matching hand calculation; `src/lib/pricing/pricing.test.ts` passed 1,000 randomized property tests; pure integer cents | 2026-10-20 |
-| Phase 5 — Analysis pipeline | done | `npx tsx src/lib/analysis/analysis.test.ts` passed: demo-site, har, asar fixtures verified against TechnicalReportOutput schema, empirical confidence calculation unit-tested, zero-trust injection defence active | 2026-10-20 |
-| Phase 6 — Payments | done | `npx tsx src/lib/billing/billing.test.ts` verified: HMAC-SHA256 signature verification, replay prevention (>300s), fail-closed handling, fake provider test double, Appendix C webhook transaction and outbox insertion | 2026-10-20 |
-| Phase 7 — Realtime, wizard, attestation, queue plumbing | done | SSE endpoint `src/app/api/projects/[id]/events/route.ts` with Last-Event-ID resume, heartbeat, and polling fallback; wizard action `submitProjectWizardAction` enforcing non-repudiation ip/ua hashing and append-only `attestations` | 2026-10-20 |
-| Phase 8 — Build engine | done | `src/lib/build/build.test.ts` passed: 8-token MinHash shingle leakage gate (< 0.25 threshold), composite parity scoring (0.35 visual + 0.15 structure + 0.35 behavior + 0.15 buildHealth), and stagnation detector | 2026-10-20 |
-| Phase 9 — Delivery, credits, billing UI | done | Download gate `src/app/api/download/[projectId]/route.ts` locked behind real session auth, workspace tenant verification, and paid order status check; D-01 resolved | 2026-10-20 |
-| Phase 10 — Full UI | done | All legacy Arabic strings purged; pricing-engine cleaned; marketing, docs, and checkout updated to 50% market-rate comparison; `next build` compiled 27/27 static/dynamic routes with active Middleware | 2026-10-20 |
-| Phase 11 — Hardening | done | `src/lib/security/headers.test.ts` passed: Nonce CSP (Appendix F), HSTS, frame-ancestors 'none', nosniff, SameSite=Lax HttpOnly Secure session cookies; D-14 resolved | 2026-10-20 |
-| Phase 12 — Docs, deploy artifacts, final audit | done | `docs/FINAL_REPORT.md` written with all quality gates verified green; `docs/LAUNCH_CHECKLIST.md` ready for production deployment | 2026-10-20 |
+| Task 0 — Foundation & Environment | done | `node scripts/audit.mjs --task 0`<br><pre>T0: 32/32&#10;commit=4970e5f&#10;ALL SELECTED CHECKS PASSED</pre> | 2026-10-20 |
+| Task 1 — Purge Legacy, Real Auth & Honest Copy | done | `node scripts/audit.mjs --task 1`<br><pre>T1: 29/29&#10;commit=4970e5f&#10;ALL SELECTED CHECKS PASSED</pre> | 2026-10-20 |
+| Task 2 — Real Data Flow (Wizard → Analysis → Quote → Checkout → Webhook → Queue) | todo | Pending task run | 2026-10-20 |
+| Task 3 — Sandbox, Egress Proxy, Extractors | todo | Pending task run | 2026-10-20 |
+| Task 4 — Build Engine | todo | Pending task run | 2026-10-20 |
+| Task 5 — UI / Design Tokens | todo | Pending task run | 2026-10-20 |
+| Task 6 — Tests & Property Suites | todo | Pending task run | 2026-10-20 |
+| Task 7 — Docs & Honesty Audit | todo | Pending task run | 2026-10-20 |
 
-## Defect Register Fix Tracker
+---
 
-| ID | Problem | Status | Fix Evidence |
-|---|---|---|---|
-| D-01 | Download endpoint no auth / template ZIP | fixed | Gated in `src/app/api/download/[projectId]/route.ts` with real session auth, workspace tenant check, and verified paid order check |
-| D-02 | Dashboard client-side unlock | open | |
-| D-03 | Webhook skips signature verification | fixed | Strict HMAC-SHA256 signature verification in `src/lib/billing/provider.ts` and `src/app/api/webhooks/paddle/route.ts` with ±300s replay window, currency/amount matching; verified in `billing.test.ts` |
-| D-04 | Fake auth in localStorage | fixed | Replaced with scrypt-hashed passwords, cryptographically signed HttpOnly cookies, and server actions in `src/server/actions/auth.ts` and `src/lib/auth.ts` |
-| D-05 | Admin page no authorization | fixed | Server-side protection in `src/middleware.ts` and `src/app/(admin)/admin/layout.tsx` enforcing `platformRole === "superadmin"` |
-| D-06 | Attestation pre-checked / unpersisted | fixed | Mandatory attestation radios (none pre-checked), IP and UserAgent hashing stored in append-only `attestations` table via `submitProjectWizardAction` |
-| D-07 | Fake triage / hostname.includes | open | |
-| D-08 | Fake SSE setTimeout | fixed | Replaced fake setTimeout script with real SSE ReadableStream endpoint in `src/app/api/projects/[id]/events/route.ts` backed by `job_events` table and Last-Event-ID |
-| D-09 | Fake worker | open | |
-| D-10 | Pricing engine wrong formula / floats / Arabic | fixed | Implemented Appendix A engine `src/lib/pricing/engine.ts` with exact `hours × rate × 0.50`, integer quarter-hours, category floors, 0 floats |
-| D-11 | Marketing exposes margin | fixed | Removed COGS and 90% margin claims from documentation; aligned with 50% agency market rate comparison |
-| D-12 | Unverifiable / false claims | open | |
-| D-13 | Silent mock fallback / Stripe leftovers / insecure env defaults | fixed | Upgraded strict Zod schema in `src/env.ts` rejecting fake fallbacks at runtime |
-| D-14 | CSP unsafe-inline / no nonces | fixed | Implemented dynamic per-request Nonce CSP and strict headers in `src/middleware.ts` |
-| D-15 | Rate limiter in-memory & unused | fixed | Implemented RateLimiter in `src/lib/security/rate-limiter.ts` with consume method, remaining counts, window reset; verified in test suite |
-| D-16 | SSRF string prefixes / no DNS pinning | fixed | Replaced with Appendix B `src/lib/security/safe-fetch.ts` using `ipaddr.js` unicast range check, IP-pinned https connections, and redirect revalidation |
-| D-17 | Sandbox bare docker allowlist | open | |
-| D-18 | next@15.1.7 CVE / no test framework | fixed | Upgraded to next@15.5.28, drizzle-orm@0.45.4, postcss@8.5.3; `npm audit --omit=dev` shows 0 vulnerabilities |
-| D-19 | Schema unused / no migrations / no RLS | fixed | 30-table Drizzle schema in `src/db/schema.ts`, migration `0000_wet_wrecking_crew.sql`, RLS migration `0001_rls_policies_and_audit_triggers.sql`, `withTenant` in `src/db/tenant.ts` |
-| D-20 | Font / typography / text-xs issues | open | |
-| D-21 | Template look marketing pages | open | |
-| D-22 | Script-style tests | open | |
-| D-23 | Docs claim non-existent work | open | |
-| D-24 | Upload base64 JSON / no S3 storage | open | |
-| D-25 | No real sandbox images / egress proxy | open | |
+## Detailed Task 1 Exit Summary
+
+- **Removed 10 legacy files/folders**:
+  - `src/app/api/triage/route.ts`
+  - `src/app/api/checkout/route.ts`
+  - `src/app/api/stream`
+  - `src/app/api/webhook`
+  - `src/lib/security/ssrf-guard.ts`
+  - `src/lib/security/sandbox-runner.ts`
+  - `src/lib/pricing/pricing-engine.ts`
+  - `src/lib/paddle`
+  - `src/lib/storage/storage-service.ts`
+  - `workers/reconstruction-worker.ts`
+- **Dashboard Refactored to Server Component**:
+  - `src/app/(app)/dashboard/page.tsx` reads directly from `@/db` and session auth.
+  - Purged all `localStorage`, client-side unlock state (`isUnlocked`), fake personas (`architect@enterprise`).
+- **Real Server Auth & Added Missing Auth Pages**:
+  - `src/app/(auth)/login/page.tsx`: Uses `loginAction`, zero `setTimeout`/fake logins.
+  - `src/app/(auth)/register/page.tsx`: Uses `registerAction`, attestation checkbox default `false`.
+  - Added `src/app/(auth)/verify-email/page.tsx`
+  - Added `src/app/(auth)/forgot-password/page.tsx`
+  - Added `src/app/(auth)/reset-password/page.tsx`
+- **Honest Copy & Purged Prohibited Strings**:
+  - Purged all `COGS`, `90% margin`, `gross profit`, `unit economics` talk across marketing, admin, docs, and home.
+  - Purged false guarantees (`100% test pass guarantee`, `mathematically and legally`, `zero-CVE`).
+  - Purged misused statute citations (`17 U.S.C. § 1201(f)`, `Directive 2009/24/EC`).
+  - Purged fake status labels (`Sandbox: Online`, `SSRF Guard: Active`, `Cryptographic HMAC`).
+  - Purged mock leftovers (`MOCK_SANDBOX`).

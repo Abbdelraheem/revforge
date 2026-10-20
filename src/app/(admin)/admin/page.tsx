@@ -35,7 +35,7 @@ interface FleetJob {
   progress: number;
   runtimeSec: number;
   memoryMb: number;
-  cogsUsd: number;
+  computeCostUsd: number;
   priceUsd: number;
   sandboxId: string;
 }
@@ -49,7 +49,7 @@ const INITIAL_JOBS: FleetJob[] = [
     progress: 68,
     runtimeSec: 142,
     memoryMb: 412,
-    cogsUsd: 4.85,
+    computeCostUsd: 4.85,
     priceUsd: 49.0,
     sandboxId: "gvisor-worker-04",
   },
@@ -61,7 +61,7 @@ const INITIAL_JOBS: FleetJob[] = [
     progress: 100,
     runtimeSec: 284,
     memoryMb: 820,
-    cogsUsd: 9.40,
+    computeCostUsd: 9.40,
     priceUsd: 99.0,
     sandboxId: "gvisor-worker-02",
   },
@@ -73,7 +73,7 @@ const INITIAL_JOBS: FleetJob[] = [
     progress: 100,
     runtimeSec: 410,
     memoryMb: 1150,
-    cogsUsd: 22.10,
+    computeCostUsd: 22.10,
     priceUsd: 249.0,
     sandboxId: "gvisor-worker-01",
   },
@@ -85,7 +85,7 @@ const INITIAL_JOBS: FleetJob[] = [
     progress: 12,
     runtimeSec: 8,
     memoryMb: 95,
-    cogsUsd: 0.15,
+    computeCostUsd: 0.15,
     priceUsd: 0.0,
     sandboxId: "gvisor-worker-08",
   },
@@ -134,9 +134,9 @@ export default function AdminConsolePage() {
     );
   };
 
-  const totalCogs = jobs.reduce((acc, j) => acc + j.cogsUsd, 0);
+  const totalCompute = jobs.reduce((acc, j) => acc + j.computeCostUsd, 0);
   const totalRevenue = jobs.reduce((acc, j) => acc + (j.status === "completed" ? j.priceUsd : 0), 0);
-  const aggregateMargin = totalRevenue > 0 ? (((totalRevenue - totalCogs) / totalRevenue) * 100).toFixed(1) : "90.0";
+  const completionRate = jobs.length > 0 ? (((jobs.filter(j => j.status === "completed").length) / jobs.length) * 100).toFixed(1) : "100.0";
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground font-mono">
@@ -191,30 +191,30 @@ export default function AdminConsolePage() {
           <Card className="border-border bg-card">
             <CardHeader className="pb-2">
               <div className="text-[10px] text-muted-foreground uppercase flex items-center justify-between">
-                <span>Blended Gross Margin</span>
+                <span>Job Completion Rate</span>
                 <TrendingUp className="h-3.5 w-3.5 text-primary" />
               </div>
               <CardTitle className="text-2xl font-bold font-mono text-primary">
-                {aggregateMargin}%
+                {completionRate}%
               </CardTitle>
             </CardHeader>
             <CardContent className="text-[11px] text-muted-foreground">
-              Target: 90.0% (Integer-Cent Engine)
+              Fleet execution reliability
             </CardContent>
           </Card>
 
           <Card className="border-border bg-card">
             <CardHeader className="pb-2">
               <div className="text-[10px] text-muted-foreground uppercase flex items-center justify-between">
-                <span>Total Technical COGS</span>
+                <span>Infrastructure Compute Cost</span>
                 <DollarSign className="h-3.5 w-3.5 text-foreground" />
               </div>
               <CardTitle className="text-2xl font-bold font-mono text-foreground">
-                ${totalCogs.toFixed(2)}
+                ${totalCompute.toFixed(2)}
               </CardTitle>
             </CardHeader>
             <CardContent className="text-[11px] text-muted-foreground">
-              Groq + R2 + gVisor container compute
+              Anthropic API + gVisor sandbox runtimes
             </CardContent>
           </Card>
 
@@ -280,7 +280,7 @@ export default function AdminConsolePage() {
                       <th className="p-3">Sandbox Node</th>
                       <th className="p-3">Status</th>
                       <th className="p-3">Progress</th>
-                      <th className="p-3">COGS / Price</th>
+                      <th className="p-3">Compute / Price</th>
                       <th className="p-3 text-right">Actions</th>
                     </tr>
                   </thead>
@@ -320,7 +320,7 @@ export default function AdminConsolePage() {
                         </td>
                         <td className="p-3">
                           <div className="text-foreground">${job.priceUsd.toFixed(2)}</div>
-                          <div className="text-[10px] text-muted-foreground">COGS: ${job.cogsUsd.toFixed(2)}</div>
+                          <div className="text-[10px] text-muted-foreground">Compute: ${job.computeCostUsd.toFixed(2)}</div>
                         </td>
                         <td className="p-3 text-right">
                           {job.status === "running" ? (

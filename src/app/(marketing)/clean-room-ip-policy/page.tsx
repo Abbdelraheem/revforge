@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { MarketingHeader } from "@/components/shared/marketing-header";
 import { MarketingFooter } from "@/components/shared/marketing-footer";
 import { Badge } from "@/components/ui/badge";
@@ -48,7 +48,7 @@ export default function CleanRoomIpPolicyPage() {
                 <strong className="text-foreground">Google LLC v. Oracle America, Inc. (141 S. Ct. 1183):</strong> The U.S. Supreme Court held that reimplementing API declaring code and software interface hierarchies is a transformative fair use.
               </li>
               <li>
-                <strong className="text-foreground">EU Software Directive 2009/24/EC (Articles 5(3) & 6):</strong> Authorizes decompilation without the rightholder&apos;s permission when indispensable to obtain information necessary to achieve interoperability of an independently created program.
+                <strong className="text-foreground">International Interoperability Doctrines:</strong> Recognizes technical interface analysis and clean-room implementation when performed to achieve software interoperability.
               </li>
             </ul>
           </section>
@@ -89,7 +89,7 @@ export default function CleanRoomIpPolicyPage() {
                 <CardContent className="text-[11px] space-y-1.5 text-muted-foreground">
                   <p>• Operates with zero access to the original uploaded binary or decompiled byte sequences.</p>
                   <p>• Receives solely the abstract Evidence Ledger and typed Zod specifications.</p>
-                  <p>• Synthesizes 100% original Next.js 15, React 19, and TypeScript source files from scratch.</p>
+                  <p>• Synthesizes original Next.js 15, React 19, and TypeScript source files from scratch.</p>
                   <p>• Verifies clean-room source with automated compile and test suites.</p>
                 </CardContent>
               </Card>
@@ -97,9 +97,9 @@ export default function CleanRoomIpPolicyPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-base font-mono font-bold text-foreground">3. Guarantee of Non-Infringing Output</h2>
+            <h2 className="text-base font-mono font-bold text-foreground">3. Independent Clean-Room Synthesis</h2>
             <p>
-              Because the Room 2 synthesis worker has zero access to the original source code or decompiled bytecode, the generated code constitutes an independent creation under 17 U.S.C. § 101. The resulting codebase is mathematically and legally distinct from the target software, guaranteeing clean title of intellectual property to the client.
+              Because the Room 2 synthesis worker has zero access to the original source code or decompiled bytecode, the generated code constitutes an independent creation under 17 U.S.C. § 101. The resulting codebase is synthesized solely from abstract functional specifications, conferring clean title of intellectual property to the client.
             </p>
           </section>
         </div>

@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { MarketingHeader } from "@/components/shared/marketing-header";
 import { MarketingFooter } from "@/components/shared/marketing-footer";
 import { Badge } from "@/components/ui/badge";
@@ -57,7 +57,7 @@ export default function AcceptableUsePage() {
             <p>Before submitting any target URL or binary executable, you represent and warrant that:</p>
             <ul className="list-disc ps-5 space-y-1.5">
               <li>You are the rightful owner, licensee, or designated security evaluator of the submitted software.</li>
-              <li>Your reverse engineering activity qualifies as lawful interoperability analysis under 17 U.S.C. § 1201(f) or Directive 2009/24/EC.</li>
+              <li>Your reverse engineering activity qualifies as lawful interoperability analysis or research under applicable law.</li>
               <li>You will not use the clean-room synthesized output to infringe trademarks, patents, or trade secrets.</li>
             </ul>
           </section>

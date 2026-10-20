@@ -197,7 +197,7 @@ export default function DesignSystemPage() {
           </div>
 
           <CodeViewer
-            filename="sandbox-runner.ts"
+            filename="runner.ts"
             language="typescript"
             code={`// Zero-Shell Execution via execFile
 export async function runIsolatedContainer(image: string, args: string[]) {
