@@ -53,7 +53,7 @@ export function MiniTriageDemo() {
           { component: "Database Schema & Models", status: "UnknownServerSide", evidenceOrObligation: "Synthesize relational tables cleanly from observable API boundaries." },
         ],
         quote: {
-          cleanPriceLabel: "$99",
+          estimatedLabel: "$99",
           marketComparisonUsd: "$1,800",
         },
       });
@@ -104,7 +104,7 @@ export function MiniTriageDemo() {
                   <span className="font-bold text-foreground">{demoResult.targetType}</span>
                 </div>
                 <div className="text-muted-foreground text-[11px]">
-                  Estimated Benchmark: <span className="font-bold text-foreground">{demoResult.quote.cleanPriceLabel}</span>
+                  Estimated Benchmark: <span className="font-bold text-foreground">{demoResult.quote.estimatedLabel}</span>
                 </div>
               </div>
 

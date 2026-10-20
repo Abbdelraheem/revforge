@@ -179,6 +179,12 @@ export class PaddleProvider implements PaymentProvider {
   }
 }
 
+export function signFakeWebhook(payload: any, secret = process.env.FAKE_WEBHOOK_SECRET || "dev_fake_webhook_secret_key"): { body: string; signature: string } {
+  const body = typeof payload === "string" ? payload : JSON.stringify(payload);
+  const signature = crypto.createHmac("sha256", secret).update(body).digest("hex");
+  return { body, signature };
+}
+
 /**
  * Returns active PaymentProvider based on configuration
  */

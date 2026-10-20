@@ -32,7 +32,7 @@ export interface StructuredCallParams<T> {
   task: string;
   tool: {
     name: string;
-    schema: z.ZodType<T>;
+    schema: z.ZodType<any, any, any>;
   };
   maxTokens?: number;
 }

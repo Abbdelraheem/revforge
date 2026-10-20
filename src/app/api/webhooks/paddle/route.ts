@@ -10,6 +10,7 @@ import {
   auditLog,
 } from "@/db/schema";
 import { transitionProject } from "@/db/state-machine";
+import { dispatchOutbox } from "@/lib/queue/outbox";
 import { eq, and } from "drizzle-orm";
 
 export const runtime = "nodejs";
@@ -158,6 +159,9 @@ export async function POST(req: NextRequest) {
           .where(eq(orders.id, event.orderId));
       }
     });
+
+    // Dispatch outbox records to BullMQ queues
+    await dispatchOutbox();
 
     // Mark event processed
     await db
