@@ -7,8 +7,8 @@
 | Phase 2 — Database, auth, tenancy | done | 30-table schema, RLS policies, audit_log triggers, `withTenant`, scrypt HttpOnly session actions, superadmin layout protection | 2026-10-20 |
 | Phase 3 — Security core + uploads | done | `npx tsx src/lib/security/security.test.ts` passed: 34 SSRF IP tests, Deny-list tests, Magic-byte tests, Rate limiter tests; StorageService S3 upload/download | 2026-10-20 |
 | Phase 4 — Pricing & quotes | done | `npx tsx scripts/worked-examples.ts` verified 5 tiers matching hand calculation; `src/lib/pricing/pricing.test.ts` passed 1,000 randomized property tests; pure integer cents | 2026-10-20 |
-| Phase 5 — Analysis pipeline | doing | Implementing LLM layer (Appendix G), fixture provider, extractors, and report persistence | 2026-10-20 |
-| Phase 6 — Payments | todo | Pending | |
+| Phase 5 — Analysis pipeline | done | `npx tsx src/lib/analysis/analysis.test.ts` passed: demo-site, har, asar fixtures verified against TechnicalReportOutput schema, empirical confidence calculation unit-tested, zero-trust injection defence active | 2026-10-20 |
+| Phase 6 — Payments | doing | Implementing PaymentProvider interface, PaddleProvider, FakeProvider, signed webhook verification, orders & outbox dispatch | 2026-10-20 |
 | Phase 7 — Realtime, wizard, attestation, queue plumbing | todo | Pending | |
 | Phase 8 — Build engine | todo | Pending | |
 | Phase 9 — Delivery, credits, billing UI | todo | Pending | |

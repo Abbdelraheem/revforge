@@ -57,6 +57,8 @@ export function sanitizeDelimitedContent(content: string): string {
     .trim();
 }
 
+export const sanitizeDelimited = sanitizeDelimitedContent;
+
 /**
  * Wraps untrusted target artifacts (DOM, binary strings, headers, decompiled code)
  * in strict XML delimiters with defense-in-depth system guardrails.
