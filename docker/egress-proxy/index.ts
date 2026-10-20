@@ -20,7 +20,7 @@ export const ALLOWED_HOSTS = new Set([
  * Checks if a destination hostname is permitted on the egress proxy.
  */
 export function isAllowedHost(host: string): boolean {
-  const normalized = host.toLowerCase().split(":")[0];
+  const normalized = host.toLowerCase().split(":")[0] || "";
   if (ALLOWED_HOSTS.has(normalized)) return true;
   for (const allowed of ALLOWED_HOSTS) {
     if (normalized.endsWith("." + allowed)) return true;
@@ -44,7 +44,9 @@ export async function resolvePinnedIp(hostname: string): Promise<string> {
   }
 
   // Pin first safe public address
-  return records[0].address;
+  const first = records[0];
+  if (!first) throw new Error("No DNS records resolved");
+  return first.address;
 }
 
 export function createEgressProxy(port = 8888): http.Server {
@@ -57,7 +59,8 @@ export function createEgressProxy(port = 8888): http.Server {
       return;
     }
 
-    resolvePinnedIp(hostHeader.split(":")[0])
+    const targetHost = hostHeader.split(":")[0] || "";
+    resolvePinnedIp(targetHost)
       .then((pinnedIp) => {
         const proxyReq = http.request(
           {
@@ -88,10 +91,12 @@ export function createEgressProxy(port = 8888): http.Server {
 
   // Handle HTTPS CONNECT tunneling
   server.on("connect", (req, clientSocket, head) => {
-    const [destHost, destPort] = (req.url || "").split(":");
-    const portNum = parseInt(destPort || "443", 10);
+    const rawUrl = req.url || "";
+    const parts = rawUrl.split(":");
+    const destHost = parts[0] || "";
+    const portNum = parseInt(parts[1] || "443", 10);
 
-    if (!isAllowedHost(destHost)) {
+    if (!destHost || !isAllowedHost(destHost)) {
       clientSocket.write("HTTP/1.1 403 Forbidden\r\n\r\nHost not in egress allowlist");
       clientSocket.destroy();
       return;

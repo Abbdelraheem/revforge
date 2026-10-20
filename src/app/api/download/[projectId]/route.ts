@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { db } from "@/db";
-import { projects, orders, deliveries, auditLog } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
-import crypto from "node:crypto";
-import { buildZipArchive } from "@/lib/storage/zip-builder";
+import { projects, orders, buildJobs, deliveries, auditLog } from "@/db/schema";
+import { eq, and, desc } from "drizzle-orm";
+import { StorageService } from "@/lib/storage/service";
 
 export const runtime = "nodejs";
 
 /**
- * Phase 9 / Defect D-01: Authenticated, paid-only download gate.
+ * Authenticated, paid-only download gate.
  * 1. Checks user session.
  * 2. Checks tenant ownership of project.
- * 3. Checks that the project has a 'paid' order and status is 'delivered' or 'delivered_partial'.
- * 4. Verifies signed token or generates signed download stream.
+ * 3. Checks that the project has a 'paid' or 'paid_by_credit' order.
+ * 4. Checks project status is 'delivered' or 'delivered_partial'.
+ * 5. Serves delivery from storage via signed URL (presigned download).
  */
 export async function GET(
   req: NextRequest,
@@ -70,9 +70,7 @@ export async function GET(
   // 3. Verify project status allows delivery
   const isDelivered =
     project.status === "delivered" ||
-    project.status === "delivered_partial" ||
-    project.status === "building" || // allow development preview if paid
-    project.status === "queued";
+    project.status === "delivered_partial";
 
   if (!isDelivered) {
     return NextResponse.json(
@@ -81,7 +79,44 @@ export async function GET(
     );
   }
 
-  // 4. Record download in audit log
+  // 4. Fetch the delivery record for this project
+  const [job] = await db
+    .select()
+    .from(buildJobs)
+    .where(
+      and(
+        eq(buildJobs.projectId, projectId),
+        eq(buildJobs.workspaceId, session.workspace.id)
+      )
+    )
+    .orderBy(desc(buildJobs.createdAt))
+    .limit(1);
+
+  if (!job) {
+    return NextResponse.json(
+      { error: "No build job found for this project." },
+      { status: 404 }
+    );
+  }
+
+  const [delivery] = await db
+    .select()
+    .from(deliveries)
+    .where(
+      and(
+        eq(deliveries.jobId, job.id),
+        eq(deliveries.workspaceId, session.workspace.id)
+      )
+    )
+    .orderBy(desc(deliveries.createdAt))
+    .limit(1);
+
+  const storageKey = delivery?.storageKey || `deliveries/${session.workspace.id}/${projectId}.zip`;
+
+  // 5. Generate secure signed URL for delivery (presigned download)
+  const downloadUrl = await StorageService.createDeliverySignedUrl(storageKey, 300);
+
+  // 6. Record download in audit log
   await db.insert(auditLog).values({
     workspaceId: session.workspace.id,
     userId: session.user.id,
@@ -92,44 +127,11 @@ export async function GET(
     metadata: {
       orderId: paidOrder.id,
       amountCents: paidOrder.amountCents,
+      storageKey,
+      deliveryId: delivery?.id,
     },
   });
 
-  // 5. Build clean-room ZIP archive
-  const zipBuffer = buildZipArchive([
-    {
-      path: "README.md",
-      content: `# RevForge Clean-Room Rebuilt Repository\n\nProject ID: ${projectId}\nGenerated de-novo under clean-room engineering controls.\n`,
-    },
-    {
-      path: "package.json",
-      content: JSON.stringify(
-        {
-          name: `revforge-${projectId.slice(0, 8)}`,
-          version: "1.0.0",
-          private: true,
-          scripts: {
-            dev: "next dev",
-            build: "next build",
-            start: "next start",
-          },
-        },
-        null,
-        2
-      ),
-    },
-    {
-      path: "PARITY_REPORT.md",
-      content: `# Parity Verification Report\n\nProject: ${projectId}\nStatus: Verified\nComposite Parity Score: 0.98\n`,
-    },
-  ]);
-
-  return new NextResponse(new Uint8Array(zipBuffer), {
-    status: 200,
-    headers: {
-      "Content-Type": "application/zip",
-      "Content-Disposition": `attachment; filename="revforge-rebuild-${projectId.slice(0, 8)}.zip"`,
-      "Content-Length": zipBuffer.length.toString(),
-    },
-  });
+  // Redirect client to presigned download URL
+  return NextResponse.redirect(downloadUrl, { status: 302 });
 }

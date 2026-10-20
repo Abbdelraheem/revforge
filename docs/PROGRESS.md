@@ -8,7 +8,7 @@
 | Task 1 — Purge Legacy, Real Auth & Honest Copy | done | `node scripts/audit.mjs --task 1`<br><pre>T1: 29/29&#10;commit=685cf18&#10;ALL SELECTED CHECKS PASSED</pre> | 2026-10-20 |
 | Task 2 — Real Data Flow (Wizard → Analysis → Quote → Checkout → Webhook → Queue) | done | `node scripts/audit.mjs --task 2`<br><pre>T2: 33/33&#10;commit=685cf18&#10;ALL SELECTED CHECKS PASSED</pre> | 2026-10-20 |
 | Task 3 — Sandbox, Egress Proxy, Extractors | done | `node scripts/audit.mjs --task 3`<br><pre>T3: 39/39&#10;commit=3003924 date=2026-10-20T22:45:14.730Z&#10;ALL SELECTED CHECKS PASSED</pre> | 2026-10-20 |
-| Task 4 — Build Engine | todo | Pending task run | 2026-10-20 |
+| Task 4 — Build Engine | done | `node scripts/audit.mjs --task 4`<br><pre>T4: 44/44&#10;commit=3e76a8d date=2026-10-20T23:06:19.878Z&#10;ALL SELECTED CHECKS PASSED</pre> | 2026-10-20 |
 | Task 5 — UI / Design Tokens | todo | Pending task run | 2026-10-20 |
 | Task 6 — Tests & Property Suites | todo | Pending task run | 2026-10-20 |
 | Task 7 — Docs & Honesty Audit | todo | Pending task run | 2026-10-20 |
