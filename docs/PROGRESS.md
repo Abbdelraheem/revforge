@@ -9,8 +9,8 @@
 | Phase 4 — Pricing & quotes | done | `npx tsx scripts/worked-examples.ts` verified 5 tiers matching hand calculation; `src/lib/pricing/pricing.test.ts` passed 1,000 randomized property tests; pure integer cents | 2026-10-20 |
 | Phase 5 — Analysis pipeline | done | `npx tsx src/lib/analysis/analysis.test.ts` passed: demo-site, har, asar fixtures verified against TechnicalReportOutput schema, empirical confidence calculation unit-tested, zero-trust injection defence active | 2026-10-20 |
 | Phase 6 — Payments | done | `npx tsx src/lib/billing/billing.test.ts` verified: HMAC-SHA256 signature verification, replay prevention (>300s), fail-closed handling, fake provider test double, Appendix C webhook transaction and outbox insertion | 2026-10-20 |
-| Phase 7 — Realtime, wizard, attestation, queue plumbing | doing | Implementing SSE endpoint (Appendix E), job events emitter, attestation persistence, and wizard step validation | 2026-10-20 |
-| Phase 8 — Build engine | todo | Pending | |
+| Phase 7 — Realtime, wizard, attestation, queue plumbing | done | SSE endpoint `src/app/api/projects/[id]/events/route.ts` with Last-Event-ID resume, heartbeat, and polling fallback; wizard action `submitProjectWizardAction` enforcing non-repudiation ip/ua hashing and append-only `attestations` | 2026-10-20 |
+| Phase 8 — Build engine | doing | Implementing clean-room isolation gate, obligations ledger, and verification parity loop | 2026-10-20 |
 | Phase 9 — Delivery, credits, billing UI | todo | Pending | |
 | Phase 10 — Full UI | todo | Pending | |
 | Phase 11 — Hardening | todo | Pending | |
@@ -25,9 +25,9 @@
 | D-03 | Webhook skips signature verification | fixed | Strict HMAC-SHA256 signature verification in `src/lib/billing/provider.ts` and `src/app/api/webhooks/paddle/route.ts` with ±300s replay window, currency/amount matching; verified in `billing.test.ts` |
 | D-04 | Fake auth in localStorage | fixed | Replaced with scrypt-hashed passwords, cryptographically signed HttpOnly cookies, and server actions in `src/server/actions/auth.ts` and `src/lib/auth.ts` |
 | D-05 | Admin page no authorization | fixed | Server-side protection in `src/middleware.ts` and `src/app/(admin)/admin/layout.tsx` enforcing `platformRole === "superadmin"` |
-| D-06 | Attestation pre-checked / unpersisted | open | |
+| D-06 | Attestation pre-checked / unpersisted | fixed | Mandatory attestation radios (none pre-checked), IP and UserAgent hashing stored in append-only `attestations` table via `submitProjectWizardAction` |
 | D-07 | Fake triage / hostname.includes | open | |
-| D-08 | Fake SSE setTimeout | open | |
+| D-08 | Fake SSE setTimeout | fixed | Replaced fake setTimeout script with real SSE ReadableStream endpoint in `src/app/api/projects/[id]/events/route.ts` backed by `job_events` table and Last-Event-ID |
 | D-09 | Fake worker | open | |
 | D-10 | Pricing engine wrong formula / floats / Arabic | fixed | Implemented Appendix A engine `src/lib/pricing/engine.ts` with exact `hours × rate × 0.50`, integer quarter-hours, category floors, 0 floats |
 | D-11 | Marketing exposes margin | fixed | Removed COGS and 90% margin claims from documentation; aligned with 50% agency market rate comparison |
