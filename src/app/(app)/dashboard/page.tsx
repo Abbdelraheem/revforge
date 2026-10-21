@@ -100,7 +100,7 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="border-border bg-card shadow-sm">
           <CardHeader className="pb-2">
-            <CardDescription className="text-xs font-medium uppercase tracking-wider text-muted-foreground flex items-center justify-between">
+            <CardDescription className="text-sm font-medium uppercase tracking-wider text-muted-foreground flex items-center justify-between">
               <span>Total Projects</span>
               <FolderGit2 className="h-4 w-4 text-primary" />
             </CardDescription>
@@ -109,7 +109,7 @@ export default async function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Across your active workspace
             </p>
           </CardContent>
@@ -117,7 +117,7 @@ export default async function DashboardPage() {
 
         <Card className="border-border bg-card shadow-sm">
           <CardHeader className="pb-2">
-            <CardDescription className="text-xs font-medium uppercase tracking-wider text-muted-foreground flex items-center justify-between">
+            <CardDescription className="text-sm font-medium uppercase tracking-wider text-muted-foreground flex items-center justify-between">
               <span>Active Builds</span>
               <Cpu className="h-4 w-4 text-primary" />
             </CardDescription>
@@ -126,7 +126,7 @@ export default async function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               {activeBuildCount === 0 ? "No active jobs in queue" : `${activeBuildCount} builds running`}
             </p>
           </CardContent>
@@ -134,7 +134,7 @@ export default async function DashboardPage() {
 
         <Card className="border-border bg-card shadow-sm">
           <CardHeader className="pb-2">
-            <CardDescription className="text-xs font-medium uppercase tracking-wider text-muted-foreground flex items-center justify-between">
+            <CardDescription className="text-sm font-medium uppercase tracking-wider text-muted-foreground flex items-center justify-between">
               <span>Platform Credits</span>
               <Coins className="h-4 w-4 text-primary" />
             </CardDescription>
@@ -143,7 +143,7 @@ export default async function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Available for rebuild orders
             </p>
           </CardContent>
@@ -151,7 +151,7 @@ export default async function DashboardPage() {
 
         <Card className="border-border bg-card shadow-sm">
           <CardHeader className="pb-2">
-            <CardDescription className="text-xs font-medium uppercase tracking-wider text-muted-foreground flex items-center justify-between">
+            <CardDescription className="text-sm font-medium uppercase tracking-wider text-muted-foreground flex items-center justify-between">
               <span>Free Analysis Status</span>
               <Activity className="h-4 w-4 text-primary" />
             </CardDescription>
@@ -160,7 +160,7 @@ export default async function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               {freeAnalysisRemaining > 0 ? "First architectural analysis is complimentary" : "Credited towards rebuild checkout"}
             </p>
           </CardContent>
@@ -177,7 +177,7 @@ export default async function DashboardPage() {
             </h2>
             <Link
               href="/projects"
-              className="text-xs font-semibold text-primary hover:underline flex items-center"
+              className="text-sm font-semibold text-primary hover:underline flex items-center"
             >
               <span>View all projects</span>
               <ArrowRight className="ms-1 h-3 w-3" />
@@ -192,7 +192,7 @@ export default async function DashboardPage() {
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm font-semibold text-foreground">No projects yet</p>
-                  <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                  <p className="text-sm text-muted-foreground max-w-sm mx-auto">
                     Start by submitting a web URL, binary, or archive to generate an architectural report and quote.
                   </p>
                 </div>
@@ -217,15 +217,15 @@ export default async function DashboardPage() {
                       >
                         <span>{p.name}</span>
                       </Link>
-                      <p className="text-xs text-muted-foreground line-clamp-1">
+                      <p className="text-sm text-muted-foreground line-clamp-1">
                         {p.description || "Architectural analysis target"}
                       </p>
                     </div>
                     <div className="flex items-center space-x-3">
-                      <Badge variant="outline" className="text-xs font-mono capitalize">
+                      <Badge variant="outline" className="text-sm font-mono capitalize">
                         {p.status.replace(/_/g, " ")}
                       </Badge>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-sm text-muted-foreground">
                         {new Date(p.createdAt).toLocaleDateString()}
                       </span>
                     </div>
@@ -248,7 +248,7 @@ export default async function DashboardPage() {
                 <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                 <div>
                   <p className="font-medium text-foreground">Organization Created</p>
-                  <p className="text-xs text-muted-foreground">{session.workspace.name} is configured.</p>
+                  <p className="text-sm text-muted-foreground">{session.workspace.name} is configured.</p>
                 </div>
               </div>
 
@@ -260,7 +260,7 @@ export default async function DashboardPage() {
                 )}
                 <div>
                   <p className="font-medium text-foreground">Email Verification</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-sm text-muted-foreground">
                     {user.emailVerified ? "Account email verified" : "Check inbox to verify your email address"}
                   </p>
                 </div>
@@ -274,7 +274,7 @@ export default async function DashboardPage() {
                 )}
                 <div>
                   <p className="font-medium text-foreground">Run First Analysis</p>
-                  <p className="text-xs text-muted-foreground">Ingest an app or binary into the clean-room pipeline.</p>
+                  <p className="text-sm text-muted-foreground">Ingest an app or binary into the clean-room pipeline.</p>
                 </div>
               </div>
 
@@ -282,13 +282,13 @@ export default async function DashboardPage() {
                 <Clock className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                 <div>
                   <p className="font-medium text-foreground">Review Parity Report</p>
-                  <p className="text-xs text-muted-foreground">Inspect evidence ledger and clean-room architecture.</p>
+                  <p className="text-sm text-muted-foreground">Inspect evidence ledger and clean-room architecture.</p>
                 </div>
               </div>
             </div>
 
             <div className="pt-2 border-t border-border">
-              <div className="flex items-center space-x-2 text-xs text-muted-foreground">
+              <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                 <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
                 <span>Clean-room isolation &bull; Multi-tenant row security</span>
               </div>

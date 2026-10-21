@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Terminal, ArrowLeft, ArrowRight, ShieldAlert } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { BRAND } from "@/config/brand";
 
 export default function NotFound() {
   return (
@@ -13,18 +14,18 @@ export default function NotFound() {
         </div>
 
         <div className="space-y-2">
-          <Badge variant="outline" className="border-border text-muted-foreground text-[10px]">
+          <Badge variant="outline" className="border-border text-muted-foreground text-sm">
             ERR_404: RESOURCE_NOT_FOUND
           </Badge>
           <h1 className="text-xl font-bold text-foreground">
             Specified Endpoint Does Not Exist
           </h1>
-          <p className="text-xs text-muted-foreground font-sans leading-relaxed">
-            The requested route or target archive was not found within the RevForge registry or has been purged per zero-retention policies.
+          <p className="text-sm text-muted-foreground font-sans leading-relaxed">
+            The requested route or target archive was not found within the {BRAND.name} registry or has been purged per zero-retention policies.
           </p>
         </div>
 
-        <div className="p-3 rounded border border-border bg-background text-left text-[11px] text-muted-foreground space-y-1">
+        <div className="p-3 rounded border border-border bg-background text-left text-sm text-muted-foreground space-y-1">
           <div>$ status: 404 Not Found</div>
           <div>$ perimeter: public_gateway</div>
           <div>$ action: reroute_to_origin</div>
@@ -32,15 +33,15 @@ export default function NotFound() {
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
           <Link href="/" className="w-full sm:w-auto">
-            <Button size="sm" variant="outline" className="w-full text-xs">
-              <ArrowLeft className="me-1.5 h-3.5 w-3.5 rtl:rotate-180" />
+            <Button size="sm" variant="outline" className="w-full text-sm">
+              <ArrowLeft className="me-1.5 h-3.5 w-3.5" />
               <span>Return Home</span>
             </Button>
           </Link>
           <Link href="/docs" className="w-full sm:w-auto">
-            <Button size="sm" className="w-full text-xs">
+            <Button size="sm" className="w-full text-sm">
               <span>View Docs</span>
-              <ArrowRight className="ms-1.5 h-3.5 w-3.5 rtl:rotate-180" />
+              <ArrowRight className="ms-1.5 h-3.5 w-3.5" />
             </Button>
           </Link>
         </div>

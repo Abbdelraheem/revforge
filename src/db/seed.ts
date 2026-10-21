@@ -3,11 +3,13 @@ import { pricingConfig, users, workspaces, workspaceMembers } from "./schema";
 import { eq } from "drizzle-orm";
 import crypto from "node:crypto";
 
+const log = (msg: string) => process.stdout.write(msg + "\n");
+
 /**
  * Seed initial pricing configuration v1 and superadmin account
  */
 export async function seed() {
-  console.log("[SEED] Initializing RevForge database seed...");
+  log("[SEED] Initializing database seed...");
 
   // 1. Seed Pricing Config v1 per Section 5
   const existingConfig = await db
@@ -16,7 +18,7 @@ export async function seed() {
     .where(eq(pricingConfig.version, 1));
 
   if (existingConfig.length === 0) {
-    console.log("[SEED] Inserting Pricing Config v1...");
+    log("[SEED] Inserting Pricing Config v1...");
     await db.insert(pricingConfig).values({
       version: 1,
       factorBp: 5000, // 0.50 factor
@@ -49,20 +51,20 @@ export async function seed() {
         },
       },
     });
-    console.log("[SEED] ✓ Pricing Config v1 inserted successfully.");
+    log("[SEED] ✓ Pricing Config v1 inserted successfully.");
   } else {
-    console.log("[SEED] Pricing Config v1 already present.");
+    log("[SEED] Pricing Config v1 already present.");
   }
 
   // 2. Seed Default Admin Workspace & Superadmin user
-  const adminEmail = process.env.SUPERADMIN_EMAIL || "admin@revforge.ai";
+  const adminEmail = process.env.SUPERADMIN_EMAIL || "admin@example.com";
   const existingAdmin = await db
     .select()
     .from(users)
     .where(eq(users.email, adminEmail));
 
   if (existingAdmin.length === 0) {
-    console.log(`[SEED] Seeding superadmin user (${adminEmail})...`);
+    log(`[SEED] Seeding superadmin user (${adminEmail})...`);
     // Default salt:hash for dev/seeding
     const defaultSalt = crypto.randomBytes(16).toString("hex");
     const defaultHash = crypto.scryptSync("AdminRevForge2026!", defaultSalt, 64).toString("hex");
@@ -71,7 +73,7 @@ export async function seed() {
       .insert(users)
       .values({
         email: adminEmail,
-        name: "RevForge Superadmin",
+        name: "Platform Superadmin",
         emailVerified: true,
         passwordHash: `${defaultSalt}:${defaultHash}`,
         platformRole: "superadmin",
@@ -80,7 +82,7 @@ export async function seed() {
       .returning();
 
     if (adminUser) {
-      console.log(`[SEED] Creating admin root workspace...`);
+      log(`[SEED] Creating admin root workspace...`);
       const [adminWs] = await db
         .insert(workspaces)
         .values({
@@ -98,10 +100,10 @@ export async function seed() {
         });
       }
     }
-    console.log("[SEED] ✓ Superadmin user & workspace seeded.");
+    log("[SEED] ✓ Superadmin user & workspace seeded.");
   }
 
-  console.log("[SEED] RevForge database seeding complete.");
+  log("[SEED] Database seeding complete.");
 }
 
 // Direct CLI invocation

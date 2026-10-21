@@ -38,7 +38,7 @@ function TreeItem({
         <button
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
-            "flex w-full items-center py-1 px-2 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/30 rounded transition",
+            "flex w-full items-center py-1 px-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/30 rounded transition",
             depth > 0 && "ps-[calc(var(--depth)*14px)]"
           )}
           style={{ "--depth": depth } as React.CSSProperties}
@@ -77,7 +77,7 @@ function TreeItem({
     <button
       onClick={() => onSelectFile?.(node)}
       className={cn(
-        "flex w-full items-center py-1 px-2 text-xs rounded transition text-start",
+        "flex w-full items-center py-1 px-2 text-sm rounded transition text-start",
         isSelected
           ? "bg-primary/10 text-primary font-medium"
           : "text-foreground/80 hover:text-foreground hover:bg-muted/30",
@@ -88,7 +88,7 @@ function TreeItem({
       <FileCode className="me-1.5 h-3.5 w-3.5 text-muted-foreground/60 flex-shrink-0" />
       <span className="font-mono truncate">{node.name}</span>
       {node.sizeBytes && (
-        <span className="ms-auto font-mono text-[10px] text-muted-foreground/50 tabular-nums">
+        <span className="ms-auto font-mono text-sm text-muted-foreground/50 tabular-nums">
           {(node.sizeBytes / 1024).toFixed(1)}k
         </span>
       )}
@@ -102,7 +102,7 @@ export function FileTreeViewer({
   onSelectFile,
 }: FileTreeViewerProps) {
   return (
-    <div className="rounded-lg border border-border bg-card p-2 text-xs font-mono space-y-0.5 max-h-[400px] overflow-y-auto">
+    <div className="rounded-lg border border-border bg-card p-2 text-sm font-mono space-y-0.5 max-h-[400px] overflow-y-auto">
       {tree.map((node) => (
         <TreeItem
           key={node.path}

@@ -98,7 +98,7 @@ function FakeCheckoutContent() {
     <div className="min-h-screen flex flex-col justify-center items-center px-4 py-12 bg-background text-foreground font-sans">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2">
-          <Badge variant="outline" className="border-amber-500/40 text-amber-600 font-mono text-xs">
+          <Badge variant="outline" className="border-amber-500/40 text-amber-600 font-mono text-sm">
             DEV TEST DOUBLE &bull; NOT FOR PRODUCTION
           </Badge>
           <h1 className="text-2xl font-bold font-serif">Simulated Merchant Checkout</h1>
@@ -110,10 +110,10 @@ function FakeCheckoutContent() {
         <Card className="border-border bg-card shadow-sm">
           <CardHeader className="space-y-1 pb-4">
             <CardTitle className="text-base font-bold text-foreground">Order Summary</CardTitle>
-            <CardDescription className="text-xs font-mono">Order ID: {orderId || "N/A"}</CardDescription>
+            <CardDescription className="text-sm font-mono">Order ID: {orderId || "N/A"}</CardDescription>
           </CardHeader>
 
-          <CardContent className="space-y-4 font-mono text-xs">
+          <CardContent className="space-y-4 font-mono text-sm">
             <div className="p-3 rounded border border-border bg-muted/20 space-y-1.5">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Transaction ID:</span>
@@ -130,13 +130,13 @@ function FakeCheckoutContent() {
             </div>
 
             {error && (
-              <div className="p-3 rounded border border-destructive/40 bg-destructive/10 text-destructive text-xs">
+              <div className="p-3 rounded border border-destructive/40 bg-destructive/10 text-destructive text-sm">
                 {error}
               </div>
             )}
 
             {isSuccess && (
-              <div className="p-3 rounded border border-emerald-500/40 bg-emerald-500/10 text-emerald-600 text-xs flex items-center space-x-2">
+              <div className="p-3 rounded border border-emerald-500/40 bg-emerald-500/10 text-emerald-600 text-sm flex items-center space-x-2">
                 <CheckCircle2 className="h-4 w-4 shrink-0" />
                 <span>Signed webhook verified and accepted. Redirecting...</span>
               </div>
@@ -145,7 +145,7 @@ function FakeCheckoutContent() {
             <Button
               onClick={handleSimulatePayment}
               disabled={isLoading || isSuccess}
-              className="w-full text-xs font-bold shadow-sm h-10"
+              className="w-full text-sm font-bold shadow-sm h-10"
             >
               {isLoading ? (
                 <span>Signing & Submitting Webhook...</span>
@@ -160,7 +160,7 @@ function FakeCheckoutContent() {
             </Button>
           </CardContent>
 
-          <CardFooter className="border-t border-border pt-4 text-center justify-center text-xs text-muted-foreground">
+          <CardFooter className="border-t border-border pt-4 text-center justify-center text-sm text-muted-foreground">
             <ShieldCheck className="h-3.5 w-3.5 text-primary me-1" />
             <span>Strict HMAC-SHA256 signature verification enforced</span>
           </CardFooter>
@@ -172,7 +172,7 @@ function FakeCheckoutContent() {
 
 export default function FakeCheckoutPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center p-6 text-xs font-mono">Loading checkout session...</div>}>
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center p-6 text-sm font-mono">Loading checkout session...</div>}>
       <FakeCheckoutContent />
     </Suspense>
   );

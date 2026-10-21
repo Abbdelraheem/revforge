@@ -75,10 +75,10 @@ export function MiniTriageDemo() {
                   value={targetInput}
                   onChange={(e) => setTargetInput(e.target.value)}
                   placeholder="https://example-saas.com or github.com/owner/repo"
-                  className="ps-9 text-xs font-mono h-11"
+                  className="ps-9 text-sm font-mono h-11"
                 />
               </div>
-              <Button type="submit" disabled={isDemoRunning} className="text-xs font-bold shadow-sm h-11 px-6">
+              <Button type="submit" disabled={isDemoRunning} className="text-sm font-bold shadow-sm h-11 px-6">
                 {isDemoRunning ? (
                   <span>Inspecting Target...</span>
                 ) : (
@@ -90,20 +90,20 @@ export function MiniTriageDemo() {
               </Button>
             </div>
             {errorMessage && (
-              <p className="text-xs text-destructive">{errorMessage}</p>
+              <p className="text-sm text-destructive">{errorMessage}</p>
             )}
           </form>
 
           {demoResult && (
-            <div className="mt-6 pt-6 border-t border-border space-y-4 font-mono text-xs animate-in fade-in duration-300">
+            <div className="mt-6 pt-6 border-t border-border space-y-4 font-mono text-sm animate-in fade-in duration-300">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center space-x-2">
-                  <Badge variant="outline" className="border-primary/40 text-primary text-[10px]">
+                  <Badge variant="outline" className="border-primary/40 text-primary text-sm">
                     ANALYSIS GENERATED
                   </Badge>
                   <span className="font-bold text-foreground">{demoResult.targetType}</span>
                 </div>
-                <div className="text-muted-foreground text-[11px]">
+                <div className="text-muted-foreground text-sm">
                   Estimated Benchmark: <span className="font-bold text-foreground">{demoResult.quote.estimatedLabel}</span>
                 </div>
               </div>
@@ -111,31 +111,31 @@ export function MiniTriageDemo() {
               {/* Detected Tech Stack */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 <div className="p-3 rounded border border-border bg-background">
-                  <div className="text-[10px] text-muted-foreground uppercase flex items-center space-x-1">
+                  <div className="text-sm text-muted-foreground uppercase flex items-center space-x-1">
                     <Code2 className="h-3 w-3 text-primary me-1" />
                     <span>Frontend</span>
                   </div>
-                  <div className="text-foreground text-[11px] font-bold mt-1">
+                  <div className="text-foreground text-sm font-bold mt-1">
                     {demoResult.detectedTechStack?.frontend?.join(", ") || "Next.js / React"}
                   </div>
                 </div>
 
                 <div className="p-3 rounded border border-border bg-background">
-                  <div className="text-[10px] text-muted-foreground uppercase flex items-center space-x-1">
+                  <div className="text-sm text-muted-foreground uppercase flex items-center space-x-1">
                     <Terminal className="h-3 w-3 text-primary me-1" />
                     <span>Backend</span>
                   </div>
-                  <div className="text-foreground text-[11px] font-bold mt-1">
+                  <div className="text-foreground text-sm font-bold mt-1">
                     {demoResult.detectedTechStack?.backend?.join(", ") || "Node.js / REST"}
                   </div>
                 </div>
 
                 <div className="p-3 rounded border border-border bg-background">
-                  <div className="text-[10px] text-muted-foreground uppercase flex items-center space-x-1">
+                  <div className="text-sm text-muted-foreground uppercase flex items-center space-x-1">
                     <Database className="h-3 w-3 text-primary me-1" />
                     <span>Database</span>
                   </div>
-                  <div className="text-foreground text-[11px] font-bold mt-1">
+                  <div className="text-foreground text-sm font-bold mt-1">
                     {demoResult.detectedTechStack?.database?.join(", ") || "PostgreSQL"}
                   </div>
                 </div>
@@ -143,15 +143,15 @@ export function MiniTriageDemo() {
 
               {/* Evidence Ledger Preview */}
               <div className="p-3.5 rounded border border-border bg-background space-y-2">
-                <div className="text-[10px] text-muted-foreground uppercase font-bold">Evidence Ledger Extraction</div>
+                <div className="text-sm text-muted-foreground uppercase font-bold">Evidence Ledger Extraction</div>
                 <div className="space-y-1.5 font-sans">
                   {demoResult.evidenceLedger?.map((item: any, idx: number) => (
-                    <div key={idx} className="flex items-start justify-between text-xs py-1 border-b border-border/50 last:border-0">
+                    <div key={idx} className="flex items-start justify-between text-sm py-1 border-b border-border/50 last:border-0">
                       <div>
                         <span className="font-semibold text-foreground">{item.component}</span>
-                        <p className="text-[11px] text-muted-foreground">{item.evidenceOrObligation}</p>
+                        <p className="text-sm text-muted-foreground">{item.evidenceOrObligation}</p>
                       </div>
-                      <Badge variant="outline" className="text-[10px] shrink-0 ms-2 font-mono">
+                      <Badge variant="outline" className="text-sm shrink-0 ms-2 font-mono">
                         {item.status}
                       </Badge>
                     </div>
@@ -160,7 +160,7 @@ export function MiniTriageDemo() {
               </div>
 
               <div className="text-center pt-2">
-                <Button asChild size="sm" className="font-semibold text-xs">
+                <Button asChild size="sm" className="font-semibold text-sm">
                   <Link href="/projects/new">
                     <span>Create Full Project from this Target</span>
                     <ArrowRight className="ms-1.5 h-3.5 w-3.5" />

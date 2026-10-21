@@ -30,7 +30,7 @@ async function recordHeartbeat(): Promise<void> {
 }
 
 async function startWorkers(): Promise<void> {
-  console.log(`[Worker] Starting RevForge worker daemon with ID: ${WORKER_ID}`);
+  process.stdout.write(`[Worker] Starting RevForge worker daemon with ID: ${WORKER_ID}\n`);
 
   // 1. Initial heartbeat
   await recordHeartbeat();
@@ -54,7 +54,7 @@ async function startWorkers(): Promise<void> {
 
   // Graceful shutdown
   const shutdown = async () => {
-    console.log("[Worker] Shutting down workers gracefully...");
+    process.stdout.write("[Worker] Shutting down workers gracefully...\n");
     clearInterval(heartbeatTimer);
     clearInterval(outboxTimer);
     await analysisWorker.close();

@@ -1,3 +1,4 @@
+import { BRAND } from "@/config/brand";
 import React from "react";
 import { MarketingHeader } from "@/components/shared/marketing-header";
 import { MarketingFooter } from "@/components/shared/marketing-footer";
@@ -6,7 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Scale, ShieldCheck, CheckCircle2, Layers } from "lucide-react";
 
 export const metadata = {
-  title: "Clean-Room Reverse Engineering & IP Policy — RevForge",
+  title: `Clean-Room Reverse Engineering & IP Policy — ${BRAND.name}`,
   description: "Legal whitepaper and architectural doctrine explaining clean-room isolation, fair use, and copyright compliance.",
 };
 
@@ -17,20 +18,20 @@ export default function CleanRoomIpPolicyPage() {
 
       <main className="flex-1 py-16 px-6 max-w-4xl mx-auto w-full">
         <div className="space-y-4 mb-10 border-b border-border pb-6">
-          <Badge variant="outline" className="border-primary/40 text-primary font-mono text-xs">
+          <Badge variant="outline" className="border-primary/40 text-primary font-mono text-sm">
             LEGAL WHITEPAPER & DOCTRINE
           </Badge>
-          <h1 className="text-3xl md:text-5xl font-mono font-bold tracking-tight">
+          <h1 className="text-3xl md:text-5xl font-serif font-bold tracking-tight">
             Clean-Room Reverse Engineering Policy
           </h1>
-          <div className="text-xs text-muted-foreground font-mono">
-            Published: October 2026 • RevForge Legal & Architectural Compliance Group
+          <div className="text-sm text-muted-foreground font-mono">
+            Published: October 2026 • {BRAND.name} Legal & Architectural Compliance Group
           </div>
         </div>
 
-        <div className="space-y-8 text-xs leading-relaxed text-muted-foreground">
+        <div className="space-y-8 text-sm leading-relaxed text-muted-foreground">
           <section className="space-y-3">
-            <h2 className="text-base font-mono font-bold text-foreground">1. Executive Summary & Legal Precedents</h2>
+            <h2 className="text-base font-serif font-bold text-foreground">1. Executive Summary & Legal Precedents</h2>
             <p>
               Clean-room software engineering (also known as the &quot;Chinese wall technique&quot;) is a rigorous engineering methodology specifically designed to prevent copyright infringement. Under established United States and international intellectual property law, computer software enjoys copyright protection solely over its <em>creative expression</em>, not its underlying <em>functional ideas, systems, or interface specifications</em> (17 U.S.C. § 102(b)).
             </p>
@@ -54,22 +55,22 @@ export default function CleanRoomIpPolicyPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-base font-mono font-bold text-foreground">2. RevForge Dual-Room Automated Isolation Architecture</h2>
+            <h2 className="text-base font-serif font-bold text-foreground">2. {BRAND.name} Dual-Room Automated Isolation Architecture</h2>
             <p>
-              RevForge codifies the classic clean-room protocol into an automated, provably decoupled two-stage pipeline:
+              {BRAND.name} codifies the classic clean-room protocol into an automated, provably decoupled two-stage pipeline:
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card className="border-border bg-card">
                 <CardHeader className="pb-2">
-                  <Badge variant="outline" className="w-fit text-[10px] font-mono border-amber-500/50 text-amber-500">
+                  <Badge variant="outline" className="w-fit text-sm font-mono border-amber-500/50 text-amber-500">
                     ROOM 1: DIRTY ROOM (ANALYSIS)
                   </Badge>
-                  <CardTitle className="text-xs font-mono font-bold text-foreground mt-1">
+                  <CardTitle className="text-sm font-mono font-bold text-foreground mt-1">
                     Static Triage & Spec Extraction
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="text-[11px] space-y-1.5 text-muted-foreground">
+                <CardContent className="text-sm space-y-1.5 text-muted-foreground">
                   <p>• Runs inside an air-gapped gVisor sandbox container.</p>
                   <p>• Analyzes binary headers, symbols, manifest files, and client-side web DOM structures.</p>
                   <p>• Emits <em>only</em> high-level functional interface contracts, route structures, and data schemas.</p>
@@ -79,14 +80,14 @@ export default function CleanRoomIpPolicyPage() {
 
               <Card className="border-border bg-card">
                 <CardHeader className="pb-2">
-                  <Badge variant="outline" className="w-fit text-[10px] font-mono border-primary/50 text-primary">
+                  <Badge variant="outline" className="w-fit text-sm font-mono border-primary/50 text-primary">
                     ROOM 2: CLEAN ROOM (SYNTHESIS)
                   </Badge>
-                  <CardTitle className="text-xs font-mono font-bold text-foreground mt-1">
+                  <CardTitle className="text-sm font-mono font-bold text-foreground mt-1">
                     Clean-Room Source Generation
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="text-[11px] space-y-1.5 text-muted-foreground">
+                <CardContent className="text-sm space-y-1.5 text-muted-foreground">
                   <p>• Operates with zero access to the original uploaded binary or decompiled byte sequences.</p>
                   <p>• Receives solely the abstract Evidence Ledger and typed Zod specifications.</p>
                   <p>• Synthesizes original Next.js 15, React 19, and TypeScript source files from scratch.</p>
@@ -97,7 +98,7 @@ export default function CleanRoomIpPolicyPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-base font-mono font-bold text-foreground">3. Independent Clean-Room Synthesis</h2>
+            <h2 className="text-base font-serif font-bold text-foreground">3. Independent Clean-Room Synthesis</h2>
             <p>
               Because the Room 2 synthesis worker has zero access to the original source code or decompiled bytecode, the generated code constitutes an independent creation under 17 U.S.C. § 101. The resulting codebase is synthesized solely from abstract functional specifications, conferring clean title of intellectual property to the client.
             </p>

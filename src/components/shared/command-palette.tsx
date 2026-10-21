@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Search, Globe, Moon, Sun, Plus, FileText, Shield, CreditCard, LayoutDashboard, X } from "lucide-react";
+import { Search, Plus, FileText, Shield, CreditCard, FolderKanban, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { cn } from "@/components/ui/button";
 
 export function CommandPalette() {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,33 +24,12 @@ export function CommandPalette() {
   }, []);
 
   const commands = [
-    { label: "New Target Analysis", icon: Plus, action: () => router.push("/#new-analysis") },
-    { label: "Dashboard Overview", icon: LayoutDashboard, action: () => router.push("/") },
-    { label: "Design System Tokens", icon: FileText, action: () => router.push("/design-system") },
-    { label: "Security Architecture", icon: Shield, action: () => router.push("/docs#security") },
-    { label: "Billing & Invoices", icon: CreditCard, action: () => router.push("/#pricing") },
-    {
-      label: "Toggle Language (Arabic / English)",
-      icon: Globe,
-      action: () => {
-        const html = document.documentElement;
-        const currentLang = html.getAttribute("lang");
-        if (currentLang === "ar") {
-          html.setAttribute("lang", "en");
-          html.setAttribute("dir", "ltr");
-        } else {
-          html.setAttribute("lang", "ar");
-          html.setAttribute("dir", "rtl");
-        }
-      },
-    },
-    {
-      label: "Toggle Theme (Light / Dark)",
-      icon: Sun,
-      action: () => {
-        document.documentElement.classList.toggle("dark");
-      },
-    },
+    { label: "New Project Analysis", icon: Plus, action: () => router.push("/projects/new") },
+    { label: "View All Projects", icon: FolderKanban, action: () => router.push("/projects") },
+    { label: "Search Projects", icon: Search, action: () => router.push("/projects") },
+    { label: "Billing & platform credits", icon: CreditCard, action: () => router.push("/billing") },
+    { label: "Security Architecture", icon: Shield, action: () => router.push("/security") },
+    { label: "Documentation", icon: FileText, action: () => router.push("/docs") },
   ];
 
   const filteredCommands = commands.filter((cmd) =>
@@ -61,20 +39,20 @@ export function CommandPalette() {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm flex items-start justify-center pt-24 p-4">
-      <div className="w-full max-w-lg rounded-lg border border-border bg-card shadow-2xl overflow-hidden font-sans">
+    <div className="fixed inset-0 z-50 bg-background/80 flex items-start justify-center pt-24 p-4">
+      <div className="w-full max-w-lg rounded-lg border border-border bg-card shadow-lg overflow-hidden font-sans">
         <div className="flex items-center px-4 py-3 border-b border-border bg-muted/20">
           <Search className="h-4 w-4 text-muted-foreground me-2" />
           <input
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search commands or jump to section... (Esc to exit)"
+            placeholder="Search projects, navigation or commands... (Esc to exit)"
             className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
           />
           <button
             onClick={() => setIsOpen(false)}
-            className="text-muted-foreground hover:text-foreground text-xs"
+            className="text-muted-foreground hover:text-foreground text-sm"
           >
             <X className="h-4 w-4" />
           </button>
@@ -82,8 +60,8 @@ export function CommandPalette() {
 
         <div className="max-h-72 overflow-y-auto p-2 space-y-1">
           {filteredCommands.length === 0 ? (
-            <div className="p-4 text-center text-xs text-muted-foreground">
-              No matching commands found.
+            <div className="p-4 text-center text-sm text-muted-foreground">
+              No matching commands or projects found.
             </div>
           ) : (
             filteredCommands.map((cmd, idx) => (
@@ -93,18 +71,13 @@ export function CommandPalette() {
                   cmd.action();
                   setIsOpen(false);
                 }}
-                className="w-full flex items-center px-3 py-2 text-xs rounded-md text-foreground hover:bg-muted transition text-start"
+                className="w-full flex items-center px-3 py-2 text-sm rounded-md text-foreground hover:bg-muted transition text-start"
               >
                 <cmd.icon className="me-2.5 h-4 w-4 text-primary" />
                 <span>{cmd.label}</span>
               </button>
             ))
           )}
-        </div>
-
-        <div className="px-4 py-2 border-t border-border bg-muted/30 flex items-center justify-between text-[11px] text-muted-foreground font-mono">
-          <span>Navigation Quick Jump</span>
-          <span>Press ESC to close</span>
         </div>
       </div>
     </div>

@@ -10,7 +10,7 @@ export function createAnalysisWorker(): Worker<AnalysisJobPayload> {
     ANALYSIS_QUEUE_NAME,
     async (job: Job<AnalysisJobPayload>) => {
       const { projectId } = job.data;
-      console.log(`[AnalysisWorker] Processing analysis for project ${projectId} (Job ID: ${job.id})`);
+      process.stdout.write(`[AnalysisWorker] Processing analysis for project ${projectId} (Job ID: ${job.id})\n`);
 
       // Update project status to analyzing
       await db
@@ -20,7 +20,7 @@ export function createAnalysisWorker(): Worker<AnalysisJobPayload> {
 
       try {
         const report = await analysisPipeline(projectId);
-        console.log(`[AnalysisWorker] Completed analysis for project ${projectId}`);
+        process.stdout.write(`[AnalysisWorker] Completed analysis for project ${projectId}\n`);
         return { success: true, classification: report.classification };
       } catch (err: any) {
         console.error(`[AnalysisWorker] Failed analysis for project ${projectId}:`, err);

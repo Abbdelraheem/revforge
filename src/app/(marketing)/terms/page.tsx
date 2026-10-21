@@ -1,11 +1,12 @@
+import { BRAND } from "@/config/brand";
 import React from "react";
 import { MarketingHeader } from "@/components/shared/marketing-header";
 import { MarketingFooter } from "@/components/shared/marketing-footer";
 import { Badge } from "@/components/ui/badge";
 
 export const metadata = {
-  title: "Terms of Service — RevForge",
-  description: "Terms and conditions governing the use of the RevForge reverse engineering and clean-room synthesis platform.",
+  title: `Terms of Service — ${BRAND.name}`,
+  description: `Terms and conditions governing the use of the ${BRAND.name} reverse engineering and clean-room synthesis platform.`,
 };
 
 export default function TermsPage() {
@@ -15,29 +16,29 @@ export default function TermsPage() {
 
       <main className="flex-1 py-16 px-6 max-w-4xl mx-auto w-full">
         <div className="space-y-4 mb-10 border-b border-border pb-6">
-          <Badge variant="outline" className="border-primary/40 text-primary font-mono text-xs">
+          <Badge variant="outline" className="border-primary/40 text-primary font-mono text-sm">
             LEGAL & GOVERNANCE
           </Badge>
-          <h1 className="text-3xl md:text-4xl font-mono font-bold tracking-tight">
+          <h1 className="text-3xl md:text-4xl font-serif font-bold tracking-tight">
             Terms of Service
           </h1>
-          <div className="text-xs text-muted-foreground font-mono">
+          <div className="text-sm text-muted-foreground font-mono">
             Effective Date: October 17, 2026 • Version 2.4
           </div>
         </div>
 
-        <div className="prose prose-sm dark:prose-invert max-w-none space-y-8 text-xs leading-relaxed text-muted-foreground">
+        <div className="prose prose-sm  max-w-none space-y-8 text-sm leading-relaxed text-muted-foreground">
           <section className="space-y-2">
-            <h2 className="text-base font-mono font-bold text-foreground">1. Acceptance of Terms</h2>
+            <h2 className="text-base font-serif font-bold text-foreground">1. Acceptance of Terms</h2>
             <p>
-              By accessing, browsing, or utilizing the RevForge platform (&quot;Service&quot;), provided by RevForge Inc. (&quot;Company&quot;, &quot;we&quot;, &quot;us&quot;), you (&quot;User&quot; or &quot;Client&quot;) agree to be bound by these Terms of Service. If you do not agree to these terms in their entirety, you must immediately cease all access to the Service.
+              By accessing, browsing, or utilizing the {BRAND.name} platform (&quot;Service&quot;), provided by {BRAND.name} Inc. (&quot;Company&quot;, &quot;we&quot;, &quot;us&quot;), you (&quot;User&quot; or &quot;Client&quot;) agree to be bound by these Terms of Service. If you do not agree to these terms in their entirety, you must immediately cease all access to the Service.
             </p>
           </section>
 
           <section className="space-y-2">
-            <h2 className="text-base font-mono font-bold text-foreground">2. Clean-Room Methodology & IP Ownership</h2>
+            <h2 className="text-base font-serif font-bold text-foreground">2. Clean-Room Methodology & IP Ownership</h2>
             <p>
-              RevForge operates as an automated clean-room reverse engineering and technical synthesis platform. The Service analyses target binaries, web endpoints, and metadata to generate functional specifications (the &quot;Evidence Ledger&quot;), which are subsequently used to synthesize original, clean-room source code.
+              {BRAND.name} operates as an automated clean-room reverse engineering and technical synthesis platform. The Service analyses target binaries, web endpoints, and metadata to generate functional specifications (the &quot;Evidence Ledger&quot;), which are subsequently used to synthesize original, clean-room source code.
             </p>
             <p>
               <strong>Client Ownership:</strong> You retain full, exclusive intellectual property rights and copyright to all clean-room source code, repositories, and documentation generated through paid and completed reconstruction jobs on the platform.
@@ -48,9 +49,9 @@ export default function TermsPage() {
           </section>
 
           <section className="space-y-2">
-            <h2 className="text-base font-mono font-bold text-foreground">3. Billing, Dynamic Pricing & Platform Credits</h2>
+            <h2 className="text-base font-serif font-bold text-foreground">3. Billing, Dynamic Pricing & Platform Credits</h2>
             <p>
-              Pricing on RevForge is dynamically calculated per project based on estimated engineering hours and market rates at 50% of traditional human agency costs.
+              Pricing on {BRAND.name} is dynamically calculated per project based on estimated engineering hours and market rates at 50% of traditional human agency costs.
             </p>
             <p>
               <strong>Payment Processing:</strong> Payments are processed via our authorized billing merchant. Rebuild jobs are dispatched strictly upon server-side verification of signed billing webhook notifications.
@@ -61,21 +62,21 @@ export default function TermsPage() {
           </section>
 
           <section className="space-y-2">
-            <h2 className="text-base font-mono font-bold text-foreground">4. Strict Zero-Trust & Sandboxing Rules</h2>
+            <h2 className="text-base font-serif font-bold text-foreground">4. Strict Zero-Trust & Sandboxing Rules</h2>
             <p>
               All binary submissions are isolated in ephemeral gVisor (<code className="font-mono">runsc</code>) containers with air-gapped networking (<code className="font-mono">--network=none</code>) and strict compute quotas. Any attempt to exploit, bypass sandboxing, probe internal networks, perform SSRF, or submit malicious payloads intended to compromise infrastructure will result in immediate termination, IP banning, and reporting to relevant cyber authorities.
             </p>
           </section>
 
           <section className="space-y-2">
-            <h2 className="text-base font-mono font-bold text-foreground">5. Limitation of Liability</h2>
+            <h2 className="text-base font-serif font-bold text-foreground">5. Limitation of Liability</h2>
             <p>
-              To the maximum extent permitted by applicable law, RevForge Inc. and its affiliates shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use the Service.
+              To the maximum extent permitted by applicable law, {BRAND.name} Inc. and its affiliates shall not be liable for any indirect, incidental, special, consequential, or punitive damages resulting from your use of or inability to use the Service.
             </p>
           </section>
 
           <section className="space-y-2">
-            <h2 className="text-base font-mono font-bold text-foreground">6. Contact & Legal Inquiries</h2>
+            <h2 className="text-base font-serif font-bold text-foreground">6. Contact & Legal Inquiries</h2>
             <p>
               Legal inquiries regarding these terms should be addressed to <span className="font-mono text-foreground font-semibold">legal@revforge.ai</span>.
             </p>

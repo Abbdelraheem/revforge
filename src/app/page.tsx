@@ -17,7 +17,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { MarketingHeader } from "@/components/shared/marketing-header";
 import { MarketingFooter } from "@/components/shared/marketing-footer";
-import { RevForgeLogo } from "@/components/shared/revforge-logo";
 import { PricingCalculator } from "@/components/shared/pricing-calculator";
 import { MiniTriageDemo } from "@/components/shared/mini-triage-demo";
 
@@ -29,7 +28,7 @@ export default function LandingPage() {
       <main className="flex-1 space-y-24 pb-20">
         {/* Hero Section */}
         <section className="pt-20 pb-12 px-6 max-w-7xl mx-auto text-center space-y-8">
-          <div className="inline-flex items-center space-x-2 border border-primary/30 bg-primary/5 px-3 py-1 rounded text-xs font-mono text-primary">
+          <div className="inline-flex items-center space-x-2 border border-primary/30 bg-primary/5 px-3 py-1 rounded text-sm font-mono text-primary">
             <span>Clean-Room Architecture &bull; Next.js 15 Synthesis</span>
           </div>
 
@@ -42,13 +41,13 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <Button asChild size="lg" className="text-xs font-bold h-12 px-7 shadow-sm">
+            <Button asChild size="lg" className="text-sm font-bold h-12 px-7 shadow-sm">
               <Link href="/projects/new">
                 <span>Start Free Analysis</span>
                 <ArrowRight className="ms-2 h-4 w-4" />
               </Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="text-xs font-semibold h-12 px-6">
+            <Button asChild size="lg" variant="outline" className="text-sm font-semibold h-12 px-6">
               <Link href="/how-it-works">
                 <span>Explore 8-Stage Pipeline</span>
               </Link>
@@ -56,7 +55,7 @@ export default function LandingPage() {
           </div>
 
           {/* Telemetry Strip */}
-          <div className="pt-8 flex flex-wrap items-center justify-center gap-6 text-xs font-mono text-muted-foreground">
+          <div className="pt-8 flex flex-wrap items-center justify-center gap-6 text-sm font-mono text-muted-foreground">
             <div className="flex items-center space-x-2">
               <span className="h-2 w-2 rounded-full bg-primary" />
               <span>Runtime: gVisor MicroVM</span>
@@ -78,13 +77,13 @@ export default function LandingPage() {
         <section id="triage-console" className="py-16 px-6 bg-muted/20 border-y border-border">
           <div className="max-w-4xl mx-auto space-y-6">
             <div className="text-center space-y-2">
-              <Badge variant="outline" className="border-primary/40 text-primary text-xs font-semibold">
+              <Badge variant="outline" className="border-primary/40 text-primary text-sm font-semibold">
                 INTERACTIVE DEMO
               </Badge>
               <h2 className="text-2xl sm:text-3xl font-bold text-foreground font-serif">
                 Test Static Inspection & Scope Quoting
               </h2>
-              <p className="text-xs sm:text-sm text-muted-foreground max-w-xl mx-auto">
+              <p className="text-sm sm:text-sm text-muted-foreground max-w-xl mx-auto">
                 Enter any public URL or repository. We evaluate observable interfaces and estimate clean-room scope without copying private code.
               </p>
             </div>
@@ -96,18 +95,18 @@ export default function LandingPage() {
         {/* 8-Stage Clean-Room Methodology */}
         <section className="py-8 px-6 max-w-7xl mx-auto space-y-12">
           <div className="text-center space-y-3 max-w-2xl mx-auto">
-            <Badge variant="outline" className="border-primary/40 text-primary text-xs font-semibold">
+            <Badge variant="outline" className="border-primary/40 text-primary text-sm font-semibold">
               RIGOROUS ISOLATION PROTOCOL
             </Badge>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground font-serif">
               8-Stage Clean-Room Pipeline
             </h2>
-            <p className="text-xs sm:text-sm text-muted-foreground">
+            <p className="text-sm sm:text-sm text-muted-foreground">
               Strict isolation decoupling empirical observation from clean-room synthesis.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-sans">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm font-sans">
             {[
               { step: "01", name: "Target Ingestion", desc: "Magic-byte validation, secure storage, and pre-DNS SSRF security filter." },
               { step: "02", name: "Static Triage", desc: "Automated scanning of ASTs, routes, symbols, and exported manifest interfaces." },
@@ -121,10 +120,10 @@ export default function LandingPage() {
               <div key={st.step} className="p-5 rounded-lg border border-border bg-card space-y-2 shadow-sm">
                 <div className="flex items-center justify-between text-muted-foreground font-mono">
                   <span className="text-primary font-bold">{st.step}</span>
-                  <span className="text-[10px] uppercase">Stage</span>
+                  <span className="text-sm uppercase">Stage</span>
                 </div>
                 <h3 className="font-bold text-foreground text-sm font-serif">{st.name}</h3>
-                <p className="text-muted-foreground text-xs leading-relaxed">{st.desc}</p>
+                <p className="text-muted-foreground text-sm leading-relaxed">{st.desc}</p>
               </div>
             ))}
           </div>
@@ -134,13 +133,13 @@ export default function LandingPage() {
         <section className="py-16 px-6 bg-muted/20 border-y border-border">
           <div className="max-w-4xl mx-auto space-y-8">
             <div className="text-center space-y-2">
-              <Badge variant="outline" className="border-primary/40 text-primary text-xs font-semibold">
+              <Badge variant="outline" className="border-primary/40 text-primary text-sm font-semibold">
                 TRANSPARENT SCOPE QUOTING
               </Badge>
               <h2 className="text-2xl sm:text-3xl font-bold text-foreground font-serif">
                 50% Market Benchmark Pricing Formula
               </h2>
-              <p className="text-xs sm:text-sm text-muted-foreground max-w-xl mx-auto">
+              <p className="text-sm sm:text-sm text-muted-foreground max-w-xl mx-auto">
                 No recurring subscription lock-in. You pay on-demand based on the actual scope and architectural complexity required by your target.
               </p>
             </div>

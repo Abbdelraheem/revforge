@@ -25,7 +25,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { RevForgeLogo } from "@/components/shared/revforge-logo";
+import { BrandLogo } from "@/components/shared/brand-logo";
+import { BRAND } from "@/config/brand";
 
 interface FleetJob {
   id: string;
@@ -141,28 +142,26 @@ export default function AdminConsolePage() {
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground font-mono">
       {/* Top Console Navigation */}
-      <header className="border-b border-border bg-card/60 backdrop-blur sticky top-0 z-50 px-6 py-3.5 flex items-center justify-between">
+      <header className="border-b border-border bg-card sticky top-0 z-50 px-6 py-3.5 flex items-center justify-between">
         <div className="flex items-center space-x-3 rtl:space-x-reverse">
           <Link href="/" className="flex items-center space-x-2.5 rtl:space-x-reverse">
             <div className="h-8 w-8 rounded border border-border bg-muted/40 flex items-center justify-center">
-              <RevForgeLogo className="h-4 w-4" />
+              <BrandLogo className="h-4 w-4" />
             </div>
-            <span className="font-bold text-sm text-foreground">
-              RevForge
-            </span>
+            <span className="font-bold text-sm text-foreground">{BRAND.name}</span>
           </Link>
-          <span className="text-muted-foreground text-xs">•</span>
-          <Badge variant="outline" className="border-border text-foreground text-[10px] font-semibold">
+          <span className="text-muted-foreground text-sm">•</span>
+          <Badge variant="outline" className="border-border text-foreground text-sm font-semibold">
             Operations Fleet Console
           </Badge>
         </div>
 
         <div className="flex items-center space-x-3">
-          <Link href="/dashboard" className="text-xs text-muted-foreground hover:text-foreground">
+          <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
             Studio Dashboard
           </Link>
           <Link href="/">
-            <Button size="sm" variant="outline" className="text-xs">
+            <Button size="sm" variant="outline" className="text-sm">
               Home
             </Button>
           </Link>
@@ -175,7 +174,7 @@ export default function AdminConsolePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Card className="border-border bg-card">
             <CardHeader className="pb-2">
-              <div className="text-[10px] text-muted-foreground uppercase flex items-center justify-between">
+              <div className="text-sm text-muted-foreground uppercase flex items-center justify-between">
                 <span>Active Sandboxes</span>
                 <Cpu className="h-3.5 w-3.5 text-primary" />
               </div>
@@ -183,14 +182,14 @@ export default function AdminConsolePage() {
                 3 / 16 Nodes
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-[11px] text-muted-foreground">
+            <CardContent className="text-sm text-muted-foreground">
               gVisor runsc runtime • 18.7% CPU quota
             </CardContent>
           </Card>
 
           <Card className="border-border bg-card">
             <CardHeader className="pb-2">
-              <div className="text-[10px] text-muted-foreground uppercase flex items-center justify-between">
+              <div className="text-sm text-muted-foreground uppercase flex items-center justify-between">
                 <span>Job Completion Rate</span>
                 <TrendingUp className="h-3.5 w-3.5 text-primary" />
               </div>
@@ -198,14 +197,14 @@ export default function AdminConsolePage() {
                 {completionRate}%
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-[11px] text-muted-foreground">
+            <CardContent className="text-sm text-muted-foreground">
               Fleet execution reliability
             </CardContent>
           </Card>
 
           <Card className="border-border bg-card">
             <CardHeader className="pb-2">
-              <div className="text-[10px] text-muted-foreground uppercase flex items-center justify-between">
+              <div className="text-sm text-muted-foreground uppercase flex items-center justify-between">
                 <span>Infrastructure Compute Cost</span>
                 <DollarSign className="h-3.5 w-3.5 text-foreground" />
               </div>
@@ -213,14 +212,14 @@ export default function AdminConsolePage() {
                 ${totalCompute.toFixed(2)}
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-[11px] text-muted-foreground">
+            <CardContent className="text-sm text-muted-foreground">
               Anthropic API + gVisor sandbox runtimes
             </CardContent>
           </Card>
 
           <Card className="border-border bg-card">
             <CardHeader className="pb-2">
-              <div className="text-[10px] text-muted-foreground uppercase flex items-center justify-between">
+              <div className="text-sm text-muted-foreground uppercase flex items-center justify-between">
                 <span>Avg Turnaround Time</span>
                 <Clock className="h-3.5 w-3.5 text-foreground" />
               </div>
@@ -228,14 +227,14 @@ export default function AdminConsolePage() {
                 4.2 min
               </CardTitle>
             </CardHeader>
-            <CardContent className="text-[11px] text-muted-foreground">
+            <CardContent className="text-sm text-muted-foreground">
               Across all complexity tiers
             </CardContent>
           </Card>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-border space-x-4 rtl:space-x-reverse text-xs font-semibold">
+        <div className="flex border-b border-border space-x-4 rtl:space-x-reverse text-sm font-semibold">
           <button
             onClick={() => setActiveTab("fleet")}
             className={`pb-2.5 transition border-b-2 -mb-px ${
@@ -266,15 +265,15 @@ export default function AdminConsolePage() {
                 <Server className="h-4 w-4 text-primary" />
                 <span>Isolated Container Jobs</span>
               </CardTitle>
-              <CardDescription className="text-xs">
+              <CardDescription className="text-sm">
                 Ephemeral gVisor containers executing headless Ghidra, JADX, and clean-room synthesis workers.
               </CardDescription>
             </CardHeader>
 
             <CardContent className="p-0">
               <div className="overflow-x-auto" dir="ltr">
-                <table className="w-full text-xs text-left divide-y divide-border font-mono">
-                  <thead className="bg-muted/40 text-muted-foreground uppercase text-[10px]">
+                <table className="w-full text-sm text-left divide-y divide-border font-mono">
+                  <thead className="bg-muted/40 text-muted-foreground uppercase text-sm">
                     <tr>
                       <th className="p-3">Project / Target</th>
                       <th className="p-3">Sandbox Node</th>
@@ -289,16 +288,16 @@ export default function AdminConsolePage() {
                       <tr key={job.id} className="hover:bg-muted/20">
                         <td className="p-3">
                           <div className="font-bold text-foreground">{job.id}</div>
-                          <div className="text-[11px] text-muted-foreground truncate max-w-xs">{job.source}</div>
+                          <div className="text-sm text-muted-foreground truncate max-w-xs">{job.source}</div>
                         </td>
                         <td className="p-3 text-muted-foreground">
                           <div>{job.sandboxId}</div>
-                          <div className="text-[10px]">{job.memoryMb} MB • {job.runtimeSec}s</div>
+                          <div className="text-sm">{job.memoryMb} MB • {job.runtimeSec}s</div>
                         </td>
                         <td className="p-3">
                           <Badge
                             variant="outline"
-                            className={`text-[10px] ${
+                            className={`text-sm ${
                               job.status === "running"
                                 ? "border-primary text-primary"
                                 : job.status === "completed"
@@ -316,11 +315,11 @@ export default function AdminConsolePage() {
                               style={{ width: `${job.progress}%` }}
                             />
                           </div>
-                          <div className="text-[10px] text-muted-foreground mt-0.5">{job.progress}%</div>
+                          <div className="text-sm text-muted-foreground mt-0.5">{job.progress}%</div>
                         </td>
                         <td className="p-3">
                           <div className="text-foreground">${job.priceUsd.toFixed(2)}</div>
-                          <div className="text-[10px] text-muted-foreground">Compute: ${job.computeCostUsd.toFixed(2)}</div>
+                          <div className="text-sm text-muted-foreground">Compute: ${job.computeCostUsd.toFixed(2)}</div>
                         </td>
                         <td className="p-3 text-right">
                           {job.status === "running" ? (
@@ -328,13 +327,13 @@ export default function AdminConsolePage() {
                               size="sm"
                               variant="destructive"
                               onClick={() => handleKillSandbox(job.id)}
-                              className="h-7 text-[10px] font-mono px-2"
+                              className="h-7 text-sm font-mono px-2"
                             >
                               <Square className="h-3 w-3 me-1" />
                               <span>SIGKILL</span>
                             </Button>
                           ) : (
-                            <span className="text-[10px] text-muted-foreground">—</span>
+                            <span className="text-sm text-muted-foreground">—</span>
                           )}
                         </td>
                       </tr>
@@ -354,15 +353,15 @@ export default function AdminConsolePage() {
                 <ShieldAlert className="h-4 w-4 text-amber-500" />
                 <span>Zero-Trust Security Event Log</span>
               </CardTitle>
-              <CardDescription className="text-xs">
+              <CardDescription className="text-sm">
                 Real-time intrusion prevention telemetry, SSRF pre-DNS blocks, and prompt injection isolations.
               </CardDescription>
             </CardHeader>
 
             <CardContent className="p-0">
               <div className="overflow-x-auto" dir="ltr">
-                <table className="w-full text-xs text-left divide-y divide-border font-mono">
-                  <thead className="bg-muted/40 text-muted-foreground uppercase text-[10px]">
+                <table className="w-full text-sm text-left divide-y divide-border font-mono">
+                  <thead className="bg-muted/40 text-muted-foreground uppercase text-sm">
                     <tr>
                       <th className="p-3">Time</th>
                       <th className="p-3">Event Classification</th>
@@ -380,7 +379,7 @@ export default function AdminConsolePage() {
                         <td className="p-3">
                           <Badge
                             variant="outline"
-                            className={`text-[10px] ${
+                            className={`text-sm ${
                               evt.severity === "CRITICAL"
                                 ? "border-destructive text-destructive"
                                 : evt.severity === "HIGH"
@@ -392,7 +391,7 @@ export default function AdminConsolePage() {
                           </Badge>
                         </td>
                         <td className="p-3 text-right">
-                          <span className="text-[11px] font-bold text-primary">{evt.action}</span>
+                          <span className="text-sm font-bold text-primary">{evt.action}</span>
                         </td>
                       </tr>
                     ))}

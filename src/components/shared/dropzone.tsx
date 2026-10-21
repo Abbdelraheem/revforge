@@ -69,11 +69,11 @@ export function Dropzone({
 
         <div className="flex flex-col items-center justify-center space-y-2">
           {selectedFile ? (
-            <div className="flex items-center space-x-2 rtl:space-x-reverse text-primary">
+            <div className="flex items-center space-x-2  text-primary">
               <CheckCircle2 className="h-6 w-6" />
               <div className="text-start">
-                <span className="font-mono text-xs font-semibold block">{selectedFile.name}</span>
-                <span className="text-[10px] text-muted-foreground font-mono">
+                <span className="font-mono text-sm font-semibold block">{selectedFile.name}</span>
+                <span className="text-sm text-muted-foreground font-mono">
                   {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB • Verified Magic Bytes
                 </span>
               </div>
@@ -84,7 +84,7 @@ export function Dropzone({
               <p className="text-sm font-medium text-foreground">
                 Drop target artifact here or click to browse
               </p>
-              <p className="text-xs text-muted-foreground font-mono">
+              <p className="text-sm text-muted-foreground font-mono">
                 {acceptedExtensions.join("  ")} • Max 250MB
               </p>
             </>
@@ -93,7 +93,7 @@ export function Dropzone({
       </div>
 
       {error && (
-        <div className="mt-2 text-xs text-destructive flex items-center space-x-1.5 rtl:space-x-reverse">
+        <div className="mt-2 text-sm text-destructive flex items-center space-x-1.5 ">
           <AlertCircle className="h-4 w-4 flex-shrink-0" />
           <span>{error}</span>
         </div>

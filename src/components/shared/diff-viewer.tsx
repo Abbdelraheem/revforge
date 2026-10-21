@@ -22,10 +22,10 @@ export function DiffViewer({
   maxHeight = "360px",
 }: DiffViewerProps) {
   return (
-    <div className="rounded-lg border border-border bg-card overflow-hidden text-xs font-mono">
+    <div className="rounded-lg border border-border bg-card overflow-hidden text-sm font-mono">
       <div className="px-4 py-2 border-b border-border bg-muted/40 flex items-center justify-between text-muted-foreground">
         <span className="font-semibold text-foreground">{filename}</span>
-        <span className="text-[10px] text-muted-foreground/70">Clean-Room Diff</span>
+        <span className="text-sm text-muted-foreground/70">Clean-Room Diff</span>
       </div>
 
       <div
@@ -47,10 +47,10 @@ export function DiffViewer({
 
               return (
                 <tr key={idx} className={cn("transition-colors", rowStyle)}>
-                  <td className="w-8 pe-2 text-end select-none text-muted-foreground/40 text-[10px]">
+                  <td className="w-8 pe-2 text-end select-none text-muted-foreground/40 text-sm">
                     {line.oldLineNumber || " "}
                   </td>
-                  <td className="w-8 pe-3 text-end select-none text-muted-foreground/40 text-[10px]">
+                  <td className="w-8 pe-3 text-end select-none text-muted-foreground/40 text-sm">
                     {line.newLineNumber || " "}
                   </td>
                   <td className="w-4 select-none font-bold text-center">

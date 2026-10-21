@@ -35,7 +35,7 @@ export function Stepper({ steps, currentStep, onStepClick }: StepperProps) {
             >
               <div
                 className={cn(
-                  "h-8 w-8 rounded-full border flex items-center justify-center font-mono text-xs transition-colors",
+                  "h-8 w-8 rounded-full border flex items-center justify-center font-mono text-sm transition-colors",
                   isCompleted &&
                     "bg-primary text-primary-foreground border-primary",
                   isCurrent &&
@@ -50,7 +50,7 @@ export function Stepper({ steps, currentStep, onStepClick }: StepperProps) {
 
               <span
                 className={cn(
-                  "mt-2 text-xs font-medium text-center truncate max-w-[100px]",
+                  "mt-2 text-sm font-medium text-center truncate max-w-[100px]",
                   isCurrent ? "text-foreground font-semibold" : "text-muted-foreground"
                 )}
               >

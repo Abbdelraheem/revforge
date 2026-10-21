@@ -113,3 +113,22 @@ export async function submitProjectWizardAction(data: CreateProjectWizardInput) 
 
   return { success: true, projectId: result.projectId };
 }
+
+export async function submitTargetAction(formData: FormData) {
+  const targetInput = String(formData.get("targetInput") || "");
+  const name = String(formData.get("name") || targetInput.split("/").pop() || "Reconstructed Project");
+  const result = await submitProjectWizardAction({
+    name,
+    rawInput: targetInput,
+    kind: "url",
+    attestationType: "interoperability_only",
+    acceptPolicy: true,
+  });
+
+  if (result.error) {
+    throw new Error(result.error);
+  }
+
+  const { redirect } = await import("next/navigation");
+  redirect(`/projects/${result.projectId}`);
+}

@@ -1,23 +1,24 @@
 import React from "react";
 import Link from "next/link";
-import { RevForgeLogo } from "@/components/shared/revforge-logo";
+import { BrandLogo } from "@/components/shared/brand-logo";
+import { BRAND } from "@/config/brand";
 
 export function MarketingFooter() {
   return (
-    <footer className="border-t border-border bg-muted/20 text-xs font-sans">
+    <footer className="border-t border-border bg-muted/20 text-sm font-sans">
       <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-2 md:grid-cols-5 gap-8">
         {/* Brand Col */}
         <div className="col-span-2 space-y-3">
           <div className="flex items-center space-x-2.5">
             <div className="h-7 w-7 rounded border border-border bg-background flex items-center justify-center">
-              <RevForgeLogo className="h-4 w-4" />
+              <BrandLogo className="h-4 w-4" />
             </div>
-            <span className="font-bold text-foreground text-sm font-mono">RevForge</span>
+            <span className="font-bold text-foreground text-sm font-serif">{BRAND.name}</span>
           </div>
-          <p className="text-muted-foreground text-xs leading-relaxed max-w-sm">
+          <p className="text-muted-foreground text-sm leading-relaxed max-w-sm">
             Independent software architecture reconstruction, technical scoping, and clean-room source code generation platform.
           </p>
-          <div className="text-[11px] text-muted-foreground">
+          <div className="text-sm text-muted-foreground">
             Isolated Sandbox Workers • Complete IP Ownership
           </div>
         </div>
@@ -33,7 +34,7 @@ export function MarketingFooter() {
             </li>
             <li>
               <Link href="/pricing" className="hover:text-foreground transition">
-                Dynamic Pricing
+                Pricing
               </Link>
             </li>
             <li>
@@ -100,16 +101,23 @@ export function MarketingFooter() {
                 Acceptable Use Policy
               </Link>
             </li>
+            <li>
+              <Link href="/refund-policy" className="hover:text-foreground transition">
+                Refund Policy
+              </Link>
+            </li>
           </ul>
         </div>
       </div>
 
-      <div className="border-t border-border px-6 py-4 flex flex-col sm:flex-row items-center justify-between text-[11px] text-muted-foreground">
-        <div>© 2026 RevForge Inc. All rights reserved.</div>
+      <div className="border-t border-border px-6 py-4 flex flex-col sm:flex-row items-center justify-between text-sm text-muted-foreground">
+        <div>© 2026 {BRAND.companyLegalName}. All rights reserved.</div>
         <div className="flex items-center space-x-4 mt-2 sm:mt-0">
           <span>Billing Gateway: Paddle Verified</span>
           <span>•</span>
-          <span>Status: All Systems Operational</span>
+          <Link href="/status" className="hover:text-foreground transition">
+            Platform Status
+          </Link>
         </div>
       </div>
     </footer>

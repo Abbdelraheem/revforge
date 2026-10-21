@@ -61,7 +61,7 @@ export function TableHead({
   return (
     <th
       className={cn(
-        "h-10 px-4 text-start align-middle font-mono text-xs font-semibold text-muted-foreground [&:has([role=checkbox])]:pe-0",
+        "h-10 px-4 text-start align-middle font-semibold text-muted-foreground [&:has([role=checkbox])]:pe-0 text-sm",
         className
       )}
       {...props}
@@ -75,19 +75,7 @@ export function TableCell({
 }: React.TdHTMLAttributes<HTMLTableCellElement>) {
   return (
     <td
-      className={cn("p-4 align-middle text-xs [&:has([role=checkbox])]:pe-0", className)}
-      {...props}
-    />
-  );
-}
-
-export function Skeleton({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={cn("animate-pulse rounded-md bg-muted/70", className)}
+      className={cn("p-4 align-middle text-sm [&:has([role=checkbox])]:pe-0", className)}
       {...props}
     />
   );

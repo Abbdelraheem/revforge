@@ -6,9 +6,10 @@ import { ArrowRight, Lock, Mail, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { RevForgeLogo } from "@/components/shared/revforge-logo";
+import { BrandLogo } from "@/components/shared/brand-logo";
 import { GoogleIcon } from "@/components/shared/google-icon";
 import { loginAction } from "@/server/actions/auth";
+import { BRAND } from "@/config/brand";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -46,10 +47,10 @@ export default function LoginPage() {
         <div className="text-center space-y-2">
           <Link href="/" className="inline-flex items-center space-x-2.5 group">
             <div className="h-9 w-9 rounded border border-border bg-muted/40 flex items-center justify-center">
-              <RevForgeLogo className="h-5 w-5" />
+              <BrandLogo className="h-5 w-5" />
             </div>
             <span className="font-bold text-lg tracking-tight text-foreground font-serif">
-              RevForge
+              {BRAND.name}
             </span>
           </Link>
           <p className="text-sm text-muted-foreground">
@@ -89,7 +90,7 @@ export default function LoginPage() {
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t border-border" />
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
+              <div className="relative flex justify-center text-sm uppercase">
                 <span className="bg-card px-2 text-muted-foreground font-medium">Or continue with email</span>
               </div>
             </div>
@@ -113,7 +114,7 @@ export default function LoginPage() {
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-semibold text-foreground">Password</label>
-                  <Link href="/forgot-password" className="text-xs text-primary hover:underline">
+                  <Link href="/forgot-password" className="text-sm text-primary hover:underline">
                     Forgot password?
                   </Link>
                 </div>
@@ -152,7 +153,7 @@ export default function LoginPage() {
         </Card>
 
         {/* Security notice */}
-        <div className="text-center text-xs text-muted-foreground flex items-center justify-center space-x-1.5">
+        <div className="text-center text-sm text-muted-foreground flex items-center justify-center space-x-1.5">
           <ShieldCheck className="h-4 w-4 text-primary" />
           <span>Encrypted Session • Strict Access Controls</span>
         </div>

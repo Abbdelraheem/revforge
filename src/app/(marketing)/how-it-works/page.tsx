@@ -1,3 +1,4 @@
+import { BRAND } from "@/config/brand";
 ﻿import React from "react";
 import { MarketingHeader } from "@/components/shared/marketing-header";
 import { MarketingFooter } from "@/components/shared/marketing-footer";
@@ -8,7 +9,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export const metadata = {
-  title: "How It Works — RevForge Clean-Room Pipeline",
+  title: `How It Works — ${BRAND.name} Clean-Room Pipeline`,
   description: "End-to-end technical breakdown of the 8-stage reverse engineering and clean-room synthesis pipeline.",
 };
 
@@ -73,7 +74,7 @@ export default function HowItWorksPage() {
         <div className="space-y-4 max-w-2xl">
           <Badge variant="outline">Pipeline Architecture</Badge>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-            How RevForge Executes Clean-Room Reverse Engineering
+            How {BRAND.name} Executes Clean-Room Reverse Engineering
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Our 8-stage zero-trust pipeline maps observable software boundaries, eliminates prompt and command injections, and synthesizes 100% original, copyright-clean source code in isolated containers.
@@ -85,19 +86,19 @@ export default function HowItWorksPage() {
           {pipelineStages.map((stage) => (
             <Card key={stage.step} className="p-6 border-hairline">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div className="flex items-start space-x-4 rtl:space-x-reverse">
-                  <span className="font-mono text-xs font-bold px-2.5 py-1 rounded bg-muted text-primary border border-border">
+                <div className="flex items-start space-x-4 ">
+                  <span className="font-mono text-sm font-bold px-2.5 py-1 rounded bg-muted text-primary border border-border">
                     {stage.step}
                   </span>
                   <div className="space-y-1">
                     <h3 className="text-base font-bold text-foreground">{stage.title}</h3>
-                    <p className="text-xs text-muted-foreground leading-relaxed max-w-2xl">
+                    <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl">
                       {stage.description}
                     </p>
                   </div>
                 </div>
 
-                <div className="text-end font-mono text-[10px] text-muted-foreground/80 bg-muted/40 px-3 py-1.5 rounded border border-border/60 flex-shrink-0">
+                <div className="text-end font-mono text-sm text-muted-foreground/80 bg-muted/40 px-3 py-1.5 rounded border border-border/60 flex-shrink-0">
                   {stage.controls}
                 </div>
               </div>
@@ -109,18 +110,18 @@ export default function HowItWorksPage() {
         <section className="space-y-6 p-8 rounded-xl border border-border bg-card">
           <div className="space-y-2">
             <h2 className="text-xl font-bold">The Three States of the Evidence Ledger</h2>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               We never guess. The clean-room methodology mathematically categorizes extracted target evidence.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-sm">
             <div className="p-4 rounded-lg border border-success/30 bg-success/5 space-y-2">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-success">Seen</span>
                 <Badge variant="success">Verified</Badge>
               </div>
-              <p className="text-muted-foreground text-[11px] font-sans">
+              <p className="text-muted-foreground text-sm font-sans">
                 Components, DOM routes, or symbols directly observed and extracted from the target client files.
               </p>
             </div>
@@ -130,7 +131,7 @@ export default function HowItWorksPage() {
                 <span className="font-bold text-info">Inferred</span>
                 <Badge variant="info">Deduction</Badge>
               </div>
-              <p className="text-muted-foreground text-[11px] font-sans">
+              <p className="text-muted-foreground text-sm font-sans">
                 Strongly implied contracts, such as token headers confirming OAuth2 or schemas implied by API payloads.
               </p>
             </div>
@@ -140,7 +141,7 @@ export default function HowItWorksPage() {
                 <span className="font-bold text-warning">Unknown</span>
                 <Badge variant="warning">Reconstruction</Badge>
               </div>
-              <p className="text-muted-foreground text-[11px] font-sans">
+              <p className="text-muted-foreground text-sm font-sans">
                 Server-side proprietary implementations requiring clean-room functional synthesis from specification.
               </p>
             </div>
@@ -151,12 +152,12 @@ export default function HowItWorksPage() {
         <div className="p-8 rounded-xl border border-border bg-muted/20 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
             <h3 className="font-bold text-sm">Ready to analyze a target?</h3>
-            <p className="text-xs text-muted-foreground">Enter a live URL or upload a binary for instant pre-payment triage.</p>
+            <p className="text-sm text-muted-foreground">Enter a live URL or upload a binary for instant pre-payment triage.</p>
           </div>
           <Link href="/#triage-console">
             <Button size="sm" className="font-mono">
               <span>Start Analysis</span>
-              <ArrowRight className="ms-1.5 h-3.5 w-3.5 rtl:rotate-180" />
+              <ArrowRight className="ms-1.5 h-3.5 w-3.5 " />
             </Button>
           </Link>
         </div>

@@ -109,26 +109,26 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
         <div className="space-y-1">
           <div className="flex items-center space-x-2">
-            <Link href="/projects" className="text-xs text-muted-foreground hover:underline font-mono">
+            <Link href="/projects" className="text-sm text-muted-foreground hover:underline font-mono">
               Projects
             </Link>
-            <span className="text-muted-foreground text-xs">/</span>
-            <span className="text-xs font-mono text-muted-foreground">{project.id.slice(0, 8)}</span>
+            <span className="text-muted-foreground text-sm">/</span>
+            <span className="text-sm font-mono text-muted-foreground">{project.id.slice(0, 8)}</span>
           </div>
           <h1 className="text-2xl font-serif font-bold text-foreground">
             {project.name}
           </h1>
-          <p className="text-xs text-muted-foreground font-mono">
+          <p className="text-sm text-muted-foreground font-mono">
             Target: {target?.rawInput || target?.normalizedUrl || "Direct Ingestion"} ({target?.kind || "unknown"})
           </p>
         </div>
 
         <div className="flex items-center space-x-3">
-          <Badge variant="outline" className="text-xs font-mono uppercase">
+          <Badge variant="outline" className="text-sm font-mono uppercase">
             {project.status.replace(/_/g, " ")}
           </Badge>
           {project.status === "delivered" && (
-            <Button asChild size="sm" className="text-xs font-bold shadow-sm">
+            <Button asChild size="sm" className="text-sm font-bold shadow-sm">
               <Link href={`/api/download/${project.id}`}>
                 <Download className="me-1.5 h-3.5 w-3.5" />
                 <span>Download Package</span>
@@ -150,11 +150,11 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                   <Cpu className="h-4 w-4 text-primary" />
                   <span className="font-serif font-bold text-sm text-foreground">Clean-Room Build Pipeline</span>
                 </div>
-                <Badge variant="outline" className="text-xs font-mono">
+                <Badge variant="outline" className="text-sm font-mono">
                   {latestBuildJob.stage}
                 </Badge>
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-sm text-muted-foreground">
                 Status: {latestBuildJob.status} &bull; Parity Score: {latestBuildJob.parityScore ? `${(latestBuildJob.parityScore * 100).toFixed(1)}%` : "Computing..."}
               </p>
             </Card>
@@ -166,13 +166,13 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-base font-serif font-bold">Reconstruction Features</CardTitle>
-                  <CardDescription className="text-xs">
+                  <CardDescription className="text-sm">
                     Synthesized specifications based on the Evidence Ledger
                   </CardDescription>
                 </div>
                 {activeQuote && (
                   <div className="text-right">
-                    <div className="text-xs text-muted-foreground font-mono">Total Quote</div>
+                    <div className="text-sm text-muted-foreground font-mono">Total Quote</div>
                     <div className="text-xl font-bold font-mono text-primary">
                       ${(activeQuote.totalCents / 100).toFixed(2)}
                     </div>
@@ -182,22 +182,22 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             </CardHeader>
             <CardContent className="pt-4">
               {quoteLinesList.length === 0 ? (
-                <div className="p-8 text-center text-xs text-muted-foreground">
+                <div className="p-8 text-center text-sm text-muted-foreground">
                   No features generated yet. Architectural analysis is pending.
                 </div>
               ) : (
-                <div className="divide-y divide-border font-sans text-xs">
+                <div className="divide-y divide-border font-sans text-sm">
                   {quoteLinesList.map((line) => (
                     <div key={line.id} className="py-3 flex items-start justify-between">
                       <div className="space-y-1">
                         <div className="flex items-center space-x-2">
                           <span className="font-semibold text-foreground text-sm">{line.featureName}</span>
-                          <Badge variant="outline" className="text-[10px] font-mono">
+                          <Badge variant="outline" className="text-sm font-mono">
                             {line.tier}
                           </Badge>
                         </div>
                         <p className="text-muted-foreground">{line.featureRationale}</p>
-                        <span className="text-[11px] text-muted-foreground font-mono">
+                        <span className="text-sm text-muted-foreground font-mono">
                           {(line.hoursQ4 / 4).toFixed(2)} hrs estimated
                         </span>
                       </div>
@@ -218,9 +218,9 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             <Card className="border-border bg-card shadow-sm">
               <CardHeader className="pb-3 border-b border-border">
                 <CardTitle className="text-base font-serif font-bold">Order Summary</CardTitle>
-                <CardDescription className="text-xs font-mono">Quote v{activeQuote.version}</CardDescription>
+                <CardDescription className="text-sm font-mono">Quote v{activeQuote.version}</CardDescription>
               </CardHeader>
-              <CardContent className="pt-4 space-y-4 text-xs font-mono">
+              <CardContent className="pt-4 space-y-4 text-sm font-mono">
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Subtotal:</span>
@@ -242,13 +242,13 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
                   "use server";
                   await initiateCheckoutAction({ projectId: project.id });
                 }}>
-                  <Button type="submit" className="w-full text-xs font-bold shadow-sm h-10">
+                  <Button type="submit" className="w-full text-sm font-bold shadow-sm h-10">
                     <span>Proceed to Build Checkout</span>
                     <ArrowRight className="ms-1.5 h-3.5 w-3.5" />
                   </Button>
                 </form>
 
-                <div className="text-center text-[11px] text-muted-foreground flex items-center justify-center space-x-1 pt-1">
+                <div className="text-center text-sm text-muted-foreground flex items-center justify-center space-x-1 pt-1">
                   <ShieldCheck className="h-3.5 w-3.5 text-primary" />
                   <span>Verified Merchant &bull; Automated Verification</span>
                 </div>
@@ -256,7 +256,7 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
             </Card>
           )}
 
-          <Card className="border-border bg-card shadow-sm p-4 space-y-3 font-mono text-xs">
+          <Card className="border-border bg-card shadow-sm p-4 space-y-3 font-mono text-sm">
             <div className="font-bold text-foreground">Project Telemetry</div>
             <div className="space-y-1.5 text-muted-foreground">
               <div className="flex justify-between">

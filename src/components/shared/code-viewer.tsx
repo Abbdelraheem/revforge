@@ -28,20 +28,20 @@ export function CodeViewer({
   };
 
   return (
-    <div className="rounded-lg border border-border bg-muted/20 overflow-hidden font-mono text-xs">
+    <div className="rounded-lg border border-border bg-muted/20 overflow-hidden font-mono text-sm">
       {/* Code Header */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-muted/40">
-        <div className="flex items-center space-x-2 rtl:space-x-reverse text-muted-foreground">
+        <div className="flex items-center space-x-2  text-muted-foreground">
           <Terminal className="h-3.5 w-3.5 text-primary" />
           <span className="font-semibold text-foreground">{filename || `snippet.${language}`}</span>
-          <span className="text-[10px] uppercase text-muted-foreground/80">({language})</span>
+          <span className="text-sm uppercase text-muted-foreground/80">({language})</span>
         </div>
 
         <Button
           variant="ghost"
           size="sm"
           onClick={handleCopy}
-          className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+          className="h-7 px-2 text-sm text-muted-foreground hover:text-foreground"
         >
           {copied ? (
             <>
@@ -67,7 +67,7 @@ export function CodeViewer({
           <tbody>
             {lines.map((line, index) => (
               <tr key={index} className="hover:bg-muted/30">
-                <td className="w-10 pe-4 text-end select-none text-muted-foreground/50 text-[11px] font-mono">
+                <td className="w-10 pe-4 text-end select-none text-muted-foreground/50 text-sm font-mono">
                   {index + 1}
                 </td>
                 <td className="font-mono text-foreground/90 whitespace-pre leading-relaxed">

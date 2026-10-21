@@ -1,3 +1,4 @@
+import { BRAND } from "@/config/brand";
 import React from "react";
 import { MarketingHeader } from "@/components/shared/marketing-header";
 import { MarketingFooter } from "@/components/shared/marketing-footer";
@@ -7,14 +8,14 @@ import { ShieldCheck, Lock, Terminal, Cpu, CheckCircle2, Server, EyeOff, FileCod
 import { CodeViewer } from "@/components/shared/code-viewer";
 
 export const metadata = {
-  title: "Security Architecture — RevForge Zero-Trust Controls",
+  title: `Security Architecture — ${BRAND.name} Zero-Trust Controls`,
   description: "Defense-in-depth security specifications: gVisor sandboxing, SSRF guards, prompt injection delimiters, and zero-shell execution.",
 };
 
 const securityLayers = [
   {
     title: "1. Zero-Shell Command Execution",
-    description: "RevForge strictly forbids child_process.exec, execSync, or spawning with an intermediate shell. All CLI tools inside host and sandbox environments are invoked strictly via execFile with immutable array arguments and binary allowlists.",
+    description: `${BRAND.name} strictly forbids child_process.exec, execSync, or spawning with an intermediate shell. All CLI tools inside host and sandbox environments are invoked strictly via execFile with immutable array arguments and binary allowlists.`,
     code: `// runner.ts - Strictly shell: false
 const result = await execFileAsync(executable, args, {
   shell: false, // Mandatory: Zero shell injection
@@ -80,7 +81,7 @@ export default function SecurityPage() {
             Defense-in-Depth Security Architecture
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Reverse engineering unknown code and analyzing external web targets introduces severe injection vectors. RevForge is built from the kernel up to eliminate command injection, prompt hijacking, SSRF, and data leakage.
+            Reverse engineering unknown code and analyzing external web targets introduces severe injection vectors. {BRAND.name} is built from the kernel up to eliminate command injection, prompt hijacking, SSRF, and data leakage.
           </p>
         </div>
 
@@ -90,7 +91,7 @@ export default function SecurityPage() {
             <Card key={idx} className="p-6 border-hairline space-y-4">
               <div className="space-y-1">
                 <h3 className="text-base font-bold text-foreground">{layer.title}</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed">
+                <p className="text-sm text-muted-foreground leading-relaxed">
                   {layer.description}
                 </p>
               </div>
@@ -105,11 +106,11 @@ export default function SecurityPage() {
         </div>
 
         {/* Compliance & Standards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-xs">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 font-mono text-sm">
           <div className="p-5 rounded-lg border border-border bg-card space-y-2">
             <ShieldCheck className="h-5 w-5 text-primary" />
             <h4 className="font-bold text-foreground">Zero-Trust Network</h4>
-            <p className="text-[11px] text-muted-foreground font-sans">
+            <p className="text-sm text-muted-foreground font-sans">
               All binary decompilation and execution analysis takes place inside containers with --network=none. Binaries can never call home or exfiltrate credentials.
             </p>
           </div>
@@ -117,7 +118,7 @@ export default function SecurityPage() {
           <div className="p-5 rounded-lg border border-border bg-card space-y-2">
             <Lock className="h-5 w-5 text-primary" />
             <h4 className="font-bold text-foreground">Vault Storage Encryption</h4>
-            <p className="text-[11px] text-muted-foreground font-sans">
+            <p className="text-sm text-muted-foreground font-sans">
               Uploaded artifacts are isolated with server-generated UUIDv4 keys and encrypted at rest in object storage with strict 7-day retention lifecycles.
             </p>
           </div>
@@ -125,7 +126,7 @@ export default function SecurityPage() {
           <div className="p-5 rounded-lg border border-border bg-card space-y-2">
             <Cpu className="h-5 w-5 text-primary" />
             <h4 className="font-bold text-foreground">Hardware Quotas</h4>
-            <p className="text-[11px] text-muted-foreground font-sans">
+            <p className="text-sm text-muted-foreground font-sans">
               Sandboxes enforce hard cgroup limits (4GB RAM, 2 CPUs, 360s timeout) to prevent denial-of-service from decompression bombs or Ghidra infinite loops.
             </p>
           </div>

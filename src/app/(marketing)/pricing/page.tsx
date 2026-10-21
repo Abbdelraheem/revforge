@@ -40,7 +40,7 @@ export default function PricingPage() {
       <main className="flex-1 py-16 px-6 max-w-7xl mx-auto w-full space-y-16">
         {/* Header */}
         <div className="text-center space-y-4 max-w-3xl mx-auto">
-          <Badge variant="outline" className="border-primary/40 text-primary text-xs font-semibold">
+          <Badge variant="outline" className="border-primary/40 text-primary text-sm font-semibold">
             TRANSPARENT BENCHMARKED PRICING
           </Badge>
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground font-serif">
@@ -56,20 +56,20 @@ export default function PricingPage() {
           {/* Complimentary Analysis Box */}
           <Card className="border-border bg-card shadow-sm lg:col-span-1">
             <CardHeader className="pb-3 border-b border-border">
-              <Badge variant="outline" className="w-fit text-xs text-primary border-primary/40 font-semibold">
+              <Badge variant="outline" className="w-fit text-sm text-primary border-primary/40 font-semibold">
                 FIRST ANALYSIS FREE
               </Badge>
               <CardTitle className="text-xl font-bold font-serif">Architectural Analysis</CardTitle>
-              <CardDescription className="text-xs">
+              <CardDescription className="text-sm">
                 Inspect and generate a formal specification for your target
               </CardDescription>
             </CardHeader>
             <CardContent className="pt-5 space-y-4">
               <div className="flex items-baseline space-x-1">
                 <span className="text-4xl font-extrabold text-foreground font-mono">$0</span>
-                <span className="text-xs text-muted-foreground">first run ($5 credit thereafter)</span>
+                <span className="text-sm text-muted-foreground">first run ($5 credit thereafter)</span>
               </div>
-              <ul className="space-y-2 text-xs text-muted-foreground">
+              <ul className="space-y-2 text-sm text-muted-foreground">
                 <li className="flex items-center space-x-2">
                   <Check className="h-3.5 w-3.5 text-primary shrink-0" />
                   <span>Full AST disassembly & network trace extraction</span>
@@ -86,7 +86,7 @@ export default function PricingPage() {
             </CardContent>
             <CardFooter className="border-t border-border pt-4">
               <Link href="/projects/new" className="w-full">
-                <Button variant="outline" className="w-full text-xs font-semibold">
+                <Button variant="outline" className="w-full text-sm font-semibold">
                   Start Complimentary Analysis
                 </Button>
               </Link>
@@ -99,7 +99,7 @@ export default function PricingPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-xl font-bold font-serif">Interactive Scope Estimator</CardTitle>
-                  <CardDescription className="text-xs">
+                  <CardDescription className="text-sm">
                     Formula: hours × rate × 0.5 (integer cents, platform floor applied)
                   </CardDescription>
                 </div>
@@ -109,7 +109,7 @@ export default function PricingPage() {
             <CardContent className="pt-6 space-y-6">
               {/* Type selector */}
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-foreground">Project Complexity Tier</label>
+                <label className="text-sm font-semibold text-foreground">Project Complexity Tier</label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {[
                     { id: "portfolio", label: "Static / Landing", defaultHours: 12 },
@@ -130,8 +130,8 @@ export default function PricingPage() {
                           : "border-border bg-card text-muted-foreground hover:bg-muted/30"
                       }`}
                     >
-                      <div className="text-xs">{t.label}</div>
-                      <div className="text-[11px] text-muted-foreground mt-0.5">
+                      <div className="text-sm">{t.label}</div>
+                      <div className="text-sm text-muted-foreground mt-0.5">
                         ${DEFAULT_PRICING_CONFIG_V1.tiers[t.id as TierKey].hourlyRateCents / 100}/hr market
                       </div>
                     </button>
@@ -141,7 +141,7 @@ export default function PricingPage() {
 
               {/* Sliders */}
               <div className="space-y-2">
-                <div className="flex justify-between text-xs">
+                <div className="flex justify-between text-sm">
                   <span className="font-semibold text-foreground">Estimated Engineering Hours:</span>
                   <span className="font-mono font-bold text-primary">{estimatedHours} hrs</span>
                 </div>
@@ -154,7 +154,7 @@ export default function PricingPage() {
                   onChange={(e) => setEstimatedHours(Number(e.target.value))}
                   className="w-full accent-primary cursor-pointer"
                 />
-                <div className="flex justify-between text-[11px] text-muted-foreground">
+                <div className="flex justify-between text-sm text-muted-foreground">
                   <span>4 hrs (Minimal)</span>
                   <span>80 hrs (Standard)</span>
                   <span>160 hrs (Large Scope)</span>
@@ -164,34 +164,34 @@ export default function PricingPage() {
               {/* Price Breakdown */}
               <div className="p-4 rounded border border-border bg-muted/20 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
                 <div className="space-y-1">
-                  <div className="text-xs text-muted-foreground uppercase">Market Agency Estimate</div>
+                  <div className="text-sm text-muted-foreground uppercase">Market Agency Estimate</div>
                   <div className="text-xl font-bold line-through text-muted-foreground font-mono">
                     ${humanAgencyCost}
                   </div>
-                  <div className="text-xs text-muted-foreground">{estimatedHours} hrs @ ${rateDollars}/hr</div>
+                  <div className="text-sm text-muted-foreground">{estimatedHours} hrs @ ${rateDollars}/hr</div>
                 </div>
 
                 <div className="space-y-1 border-x border-border/60 px-2">
-                  <div className="text-xs text-primary font-bold uppercase tracking-wider">Clean-Room Price</div>
+                  <div className="text-sm text-primary font-bold uppercase tracking-wider">Clean-Room Price</div>
                   <div className="text-3xl font-extrabold text-foreground font-mono">
                     ${platformPrice}
                   </div>
-                  <div className="text-xs text-muted-foreground">50% market benchmark</div>
+                  <div className="text-sm text-muted-foreground">50% market benchmark</div>
                 </div>
 
                 <div className="space-y-1">
-                  <div className="text-xs text-muted-foreground uppercase">Estimated Client Savings</div>
+                  <div className="text-sm text-muted-foreground uppercase">Estimated Client Savings</div>
                   <div className="text-3xl font-extrabold text-foreground font-mono">~{savings}%</div>
-                  <div className="text-xs text-muted-foreground">Delivered via automated build</div>
+                  <div className="text-sm text-muted-foreground">Delivered via automated build</div>
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
-                <div className="text-xs text-muted-foreground">
+                <div className="text-sm text-muted-foreground">
                   Includes full Next.js 15, Drizzle ORM, and verified test suites.
                 </div>
                 <Link href="/projects/new">
-                  <Button className="text-xs font-bold shadow-sm w-full sm:w-auto">
+                  <Button className="text-sm font-bold shadow-sm w-full sm:w-auto">
                     <span>Analyze Your Target Now</span>
                     <ArrowRight className="ms-1.5 h-3.5 w-3.5" />
                   </Button>
@@ -207,7 +207,7 @@ export default function PricingPage() {
             <h2 className="text-2xl font-bold text-foreground font-serif">
               Project Scope Benchmarks
             </h2>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Representative examples of dynamic prices generated across different project sizes.
             </p>
           </div>
@@ -240,11 +240,11 @@ export default function PricingPage() {
               },
             ].map((b, idx) => (
               <div key={idx} className="p-5 rounded-lg border border-border bg-card space-y-2">
-                <div className="text-xs text-muted-foreground font-mono">Scope Benchmark</div>
+                <div className="text-sm text-muted-foreground font-mono">Scope Benchmark</div>
                 <h3 className="font-bold text-sm text-foreground">{b.title}</h3>
                 <div className="text-2xl font-extrabold text-primary font-mono">{b.range}</div>
-                <p className="text-xs text-muted-foreground leading-relaxed">{b.desc}</p>
-                <div className="text-[11px] text-muted-foreground pt-2 border-t border-border">
+                <p className="text-sm text-muted-foreground leading-relaxed">{b.desc}</p>
+                <div className="text-sm text-muted-foreground pt-2 border-t border-border">
                   Turnaround: <span className="font-semibold text-foreground">{b.turnaround}</span>
                 </div>
               </div>
@@ -253,18 +253,18 @@ export default function PricingPage() {
         </section>
 
         {/* Verification Banner */}
-        <div className="p-6 rounded-lg border border-border bg-muted/20 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+        <div className="p-6 rounded-lg border border-border bg-muted/20 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
           <div className="flex items-center space-x-3">
             <ShieldCheck className="h-8 w-8 text-primary shrink-0" />
             <div>
               <div className="font-bold text-foreground text-sm">Automated Test Verification & Parity Scoring</div>
-              <div className="text-muted-foreground text-xs mt-0.5">
+              <div className="text-muted-foreground text-sm mt-0.5">
                 Every generated repository is compiled and verified in an isolated sandbox before delivery. If delivery falls below quality thresholds, platform credits are automatically issued.
               </div>
             </div>
           </div>
           <Link href="/contact" className="shrink-0">
-            <Button variant="outline" size="sm" className="text-xs">
+            <Button variant="outline" size="sm" className="text-sm">
               Contact Support
             </Button>
           </Link>

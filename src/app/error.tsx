@@ -25,31 +25,31 @@ export default function ErrorBoundary({
         </div>
 
         <div className="space-y-2">
-          <Badge variant="outline" className="border-destructive/40 text-destructive text-[10px]">
+          <Badge variant="outline" className="border-destructive/40 text-destructive text-sm">
             ERR_500: APPLICATION_FAULT
           </Badge>
           <h1 className="text-xl font-bold text-foreground">
             System Execution Interrupted
           </h1>
-          <p className="text-xs text-muted-foreground font-sans leading-relaxed">
+          <p className="text-sm text-muted-foreground font-sans leading-relaxed">
             An unexpected error occurred during execution. The current state has been safely isolated to preserve data integrity.
           </p>
         </div>
 
         {error.digest && (
-          <div className="p-3 rounded border border-border bg-background text-left text-[11px] text-muted-foreground">
+          <div className="p-3 rounded border border-border bg-background text-left text-sm text-muted-foreground">
             <div>Fault Digest: <span className="text-foreground">{error.digest}</span></div>
           </div>
         )}
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-          <Button size="sm" onClick={() => reset()} className="w-full sm:w-auto text-xs">
+          <Button size="sm" onClick={() => reset()} className="w-full sm:w-auto text-sm">
             <RefreshCw className="me-1.5 h-3.5 w-3.5" />
             <span>Retry Execution</span>
           </Button>
           <Link href="/" className="w-full sm:w-auto">
-            <Button size="sm" variant="outline" className="w-full text-xs">
-              <ArrowLeft className="me-1.5 h-3.5 w-3.5 rtl:rotate-180" />
+            <Button size="sm" variant="outline" className="w-full text-sm">
+              <ArrowLeft className="me-1.5 h-3.5 w-3.5 " />
               <span>Back to Home</span>
             </Button>
           </Link>

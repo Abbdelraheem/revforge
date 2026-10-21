@@ -1,3 +1,4 @@
+import { BRAND } from "@/config/brand";
 ﻿import React from "react";
 import { MarketingHeader } from "@/components/shared/marketing-header";
 import { MarketingFooter } from "@/components/shared/marketing-footer";
@@ -8,7 +9,7 @@ import { ArrowRight, RefreshCw, Archive, Layers, ShieldCheck, FileCheck } from "
 import Link from "next/link";
 
 export const metadata = {
-  title: "Use Cases — RevForge Clean-Room Applications",
+  title: `Use Cases — ${BRAND.name} Clean-Room Applications`,
   description: "Enterprise scenarios: legacy software modernization, abandoned repository recovery, and agency technical scoping.",
 };
 
@@ -28,7 +29,7 @@ const useCases = [
   {
     icon: Layers,
     title: "Agency Technical Scoping & Cost Estimation",
-    description: "Software consultancies use RevForge to audit prospective client targets, automatically detecting tech stack perimeters and real developer hour benchmarks.",
+    description: `Software consultancies use ${BRAND.name} to audit prospective client targets, automatically detecting tech stack perimeters and real developer hour benchmarks.`,
     benefits: ["Instant Evidence Ledger generation", "Eliminate speculative quoting errors", "Empirically validated project timelines"],
   },
   {
@@ -51,7 +52,7 @@ export default function UseCasesPage() {
             Built for Engineers Modernizing Complex Software
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Whether migrating legacy monolithic portals or salvaging lost source code from production binaries, RevForge delivers production-grade clean-room repositories.
+            Whether migrating legacy monolithic portals or salvaging lost source code from production binaries, {BRAND.name} delivers production-grade clean-room repositories.
           </p>
         </div>
 
@@ -63,13 +64,13 @@ export default function UseCasesPage() {
                   <uc.icon className="h-5 w-5" />
                 </div>
                 <CardTitle className="text-base font-bold">{uc.title}</CardTitle>
-                <CardDescription className="text-xs leading-relaxed">
+                <CardDescription className="text-sm leading-relaxed">
                   {uc.description}
                 </CardDescription>
 
-                <ul className="space-y-1.5 pt-2 border-t border-border/40 text-xs text-muted-foreground font-mono">
+                <ul className="space-y-1.5 pt-2 border-t border-border/40 text-sm text-muted-foreground font-mono">
                   {uc.benefits.map((b, bIdx) => (
-                    <li key={bIdx} className="flex items-center space-x-2 rtl:space-x-reverse">
+                    <li key={bIdx} className="flex items-center space-x-2 ">
                       <span className="text-primary">•</span>
                       <span className="font-sans text-foreground/80">{b}</span>
                     </li>
@@ -79,9 +80,9 @@ export default function UseCasesPage() {
 
               <div className="pt-2">
                 <Link href="/#triage-console">
-                  <Button variant="outline" size="sm" className="font-mono text-xs w-full">
+                  <Button variant="outline" size="sm" className="font-mono text-sm w-full">
                     <span>Try With Your Target</span>
-                    <ArrowRight className="ms-1.5 h-3.5 w-3.5 rtl:rotate-180" />
+                    <ArrowRight className="ms-1.5 h-3.5 w-3.5 " />
                   </Button>
                 </Link>
               </div>

@@ -61,17 +61,17 @@ export default function DesignSystemPage() {
   return (
     <div className="min-h-screen bg-background text-foreground font-sans">
       {/* Top Bar */}
-      <header className="border-b border-border bg-card/60 backdrop-blur sticky top-0 z-40 px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center space-x-3 rtl:space-x-reverse">
+      <header className="border-b border-border bg-card sticky top-0 z-40 px-6 py-3 flex items-center justify-between">
+        <div className="flex items-center space-x-3 ">
           <Link
             href="/"
-            className="flex items-center text-xs font-mono text-muted-foreground hover:text-foreground"
+            className="flex items-center text-sm font-mono text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="me-1 h-3.5 w-3.5" />
             <span>Back to Product</span>
           </Link>
           <span className="text-border">|</span>
-          <span className="font-mono text-xs font-semibold">Living Design System & Token Catalog</span>
+          <span className="font-mono text-sm font-semibold">Living Design System & Token Catalog</span>
         </div>
       </header>
 
@@ -79,46 +79,46 @@ export default function DesignSystemPage() {
         <section className="space-y-4">
           <div>
             <h2 className="text-lg font-bold tracking-tight">1. Color Tokens (Restrained Technical Editorial)</h2>
-            <p className="text-xs text-muted-foreground">
-              Deep Forest Emerald accent with an 11-step slate scale. Zero neon purples or AI glows.
+            <p className="text-sm text-muted-foreground">
+              Deep Forest Emerald accent with an 11-step slate scale. Zero neon purples or artificial highlights.
             </p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
             <div className="p-3 rounded-lg border border-border bg-card space-y-1.5">
               <div className="h-10 w-full rounded bg-primary" />
-              <div className="font-mono text-xs font-semibold">Primary Accent</div>
-              <div className="font-mono text-[10px] text-muted-foreground">Deep Emerald</div>
+              <div className="font-mono text-sm font-semibold">Primary Accent</div>
+              <div className="font-mono text-sm text-muted-foreground">Deep Emerald</div>
             </div>
 
             <div className="p-3 rounded-lg border border-border bg-card space-y-1.5">
               <div className="h-10 w-full rounded bg-secondary" />
-              <div className="font-mono text-xs font-semibold">Secondary</div>
-              <div className="font-mono text-[10px] text-muted-foreground">Slate Surface</div>
+              <div className="font-mono text-sm font-semibold">Secondary</div>
+              <div className="font-mono text-sm text-muted-foreground">Slate Surface</div>
             </div>
 
             <div className="p-3 rounded-lg border border-border bg-card space-y-1.5">
               <div className="h-10 w-full rounded bg-success" />
-              <div className="font-mono text-xs font-semibold">Success</div>
-              <div className="font-mono text-[10px] text-muted-foreground">Verified Gate</div>
+              <div className="font-mono text-sm font-semibold">Success</div>
+              <div className="font-mono text-sm text-muted-foreground">Verified Gate</div>
             </div>
 
             <div className="p-3 rounded-lg border border-border bg-card space-y-1.5">
               <div className="h-10 w-full rounded bg-warning" />
-              <div className="font-mono text-xs font-semibold">Warning</div>
-              <div className="font-mono text-[10px] text-muted-foreground">Triage Flag</div>
+              <div className="font-mono text-sm font-semibold">Warning</div>
+              <div className="font-mono text-sm text-muted-foreground">Triage Flag</div>
             </div>
 
             <div className="p-3 rounded-lg border border-border bg-card space-y-1.5">
               <div className="h-10 w-full rounded bg-destructive" />
-              <div className="font-mono text-xs font-semibold">Destructive</div>
-              <div className="font-mono text-[10px] text-muted-foreground">SSRF Block</div>
+              <div className="font-mono text-sm font-semibold">Destructive</div>
+              <div className="font-mono text-sm text-muted-foreground">SSRF Block</div>
             </div>
 
             <div className="p-3 rounded-lg border border-border bg-card space-y-1.5">
               <div className="h-10 w-full rounded bg-info" />
-              <div className="font-mono text-xs font-semibold">Info</div>
-              <div className="font-mono text-[10px] text-muted-foreground">Inspection Data</div>
+              <div className="font-mono text-sm font-semibold">Info</div>
+              <div className="font-mono text-sm text-muted-foreground">Inspection Data</div>
             </div>
           </div>
         </section>
@@ -127,7 +127,7 @@ export default function DesignSystemPage() {
         <section className="space-y-4">
           <div>
             <h2 className="text-lg font-bold tracking-tight">2. Button Variants & States</h2>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Hairline 1px border precision, WCAG AA contrast, clean focus rings.
             </p>
           </div>
@@ -147,7 +147,7 @@ export default function DesignSystemPage() {
         <section className="space-y-4">
           <div>
             <h2 className="text-lg font-bold tracking-tight">3. Badges & Semantic Statuses</h2>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Technical indicator tags with monospace metadata.
             </p>
           </div>
@@ -167,7 +167,7 @@ export default function DesignSystemPage() {
         <section className="space-y-4">
           <div>
             <h2 className="text-lg font-bold tracking-tight">4. Stepper & Milestone Tracker</h2>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Interactive execution stepper with active and completed states.
             </p>
           </div>
@@ -191,7 +191,7 @@ export default function DesignSystemPage() {
         <section className="space-y-4">
           <div>
             <h2 className="text-lg font-bold tracking-tight">5. Code Viewer (Strict LTR Island)</h2>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Monospace code display with line numbers and copy action. Code content remains LTR inside RTL pages.
             </p>
           </div>
@@ -219,14 +219,14 @@ export async function runIsolatedContainer(image: string, args: string[]) {
         <section className="space-y-4">
           <div>
             <h2 className="text-lg font-bold tracking-tight">6. Repository File Tree & Diff Viewers</h2>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               Used in the clean-room post-payment delivery inspector.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <span className="text-xs font-mono text-muted-foreground mb-2 block">
+              <span className="text-sm font-mono text-muted-foreground mb-2 block">
                 File Tree Browser:
               </span>
               <FileTreeViewer
@@ -237,7 +237,7 @@ export async function runIsolatedContainer(image: string, args: string[]) {
             </div>
 
             <div>
-              <span className="text-xs font-mono text-muted-foreground mb-2 block">
+              <span className="text-sm font-mono text-muted-foreground mb-2 block">
                 Unified Diff Inspector:
               </span>
               <DiffViewer filename="auth-service.ts" diffLines={sampleDiff} />
@@ -252,12 +252,12 @@ export async function runIsolatedContainer(image: string, args: string[]) {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Dropzone onFileSelect={(f) => alert(`Selected file: ${f.name}`)} />
+            <Dropzone onFileSelect={(f) => { void f; }} />
             <EmptyState
               title="No Reconstructed Projects"
               description="You have not initiated any clean-room reverse-engineering builds yet."
               actionLabel="Start New Analysis"
-              onAction={() => alert("Navigate to new analysis")}
+              onAction={() => {}}
             />
           </div>
         </section>

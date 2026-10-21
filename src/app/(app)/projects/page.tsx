@@ -43,7 +43,7 @@ export default async function ProjectsListPage() {
           </p>
         </div>
         <div>
-          <Button asChild className="text-xs font-semibold h-10 shadow-sm">
+          <Button asChild className="text-sm font-semibold h-10 shadow-sm">
             <Link href="/projects/new">
               <Plus className="me-2 h-4 w-4" />
               <span>New Analysis</span>
@@ -61,7 +61,7 @@ export default async function ProjectsListPage() {
             </div>
             <div className="space-y-1">
               <p className="text-sm font-semibold text-foreground">No projects found</p>
-              <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+              <p className="text-sm text-muted-foreground max-w-sm mx-auto">
                 Submit your first target URL, Android APK, or binary to start the clean-room analysis pipeline.
               </p>
             </div>
@@ -86,22 +86,22 @@ export default async function ProjectsListPage() {
                   >
                     <span>{p.name}</span>
                   </Link>
-                  <p className="text-xs text-muted-foreground line-clamp-1">
+                  <p className="text-sm text-muted-foreground line-clamp-1">
                     {p.description || "Clean-room architectural analysis target"}
                   </p>
-                  <div className="text-[11px] text-muted-foreground font-mono">
+                  <div className="text-sm text-muted-foreground font-mono">
                     ID: {p.id}
                   </div>
                 </div>
 
                 <div className="flex items-center space-x-4">
-                  <Badge variant="outline" className="text-xs font-mono capitalize">
+                  <Badge variant="outline" className="text-sm font-mono capitalize">
                     {p.status.replace(/_/g, " ")}
                   </Badge>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-sm text-muted-foreground">
                     {new Date(p.createdAt).toLocaleDateString()}
                   </span>
-                  <Button asChild variant="outline" size="sm" className="text-xs font-semibold">
+                  <Button asChild variant="outline" size="sm" className="text-sm font-semibold">
                     <Link href={`/projects/${p.id}`}>
                       <span>Open</span>
                       <ArrowRight className="ms-1 h-3 w-3" />

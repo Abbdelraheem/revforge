@@ -1,3 +1,4 @@
+import { BRAND } from "@/config/brand";
 import React from "react";
 import { MarketingHeader } from "@/components/shared/marketing-header";
 import { MarketingFooter } from "@/components/shared/marketing-footer";
@@ -5,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 
 export const metadata = {
-  title: "Engineering Changelog — RevForge",
+  title: `Engineering Changelog — ${BRAND.name}`,
   description: "Chronological release notes, architecture improvements, security hardening passes, and sandbox runtime updates.",
 };
 
@@ -95,7 +96,7 @@ export default function ChangelogPage() {
       <main className="flex-1 py-16 px-6 max-w-5xl mx-auto w-full">
         {/* Header */}
         <div className="space-y-4 mb-12 border-b border-border pb-8">
-          <Badge variant="outline" className="border-primary/40 text-primary font-mono text-xs">
+          <Badge variant="outline" className="border-primary/40 text-primary font-mono text-sm">
             VERSION HISTORY & RELEASES
           </Badge>
           <h1 className="text-3xl md:text-5xl font-serif font-bold tracking-tight">
@@ -115,10 +116,10 @@ export default function ChangelogPage() {
 
               <div className="flex flex-wrap items-center gap-2 font-mono">
                 <span className="text-lg font-bold text-foreground">{rel.version}</span>
-                <span className="text-xs text-muted-foreground">• {rel.date}</span>
+                <span className="text-sm text-muted-foreground">• {rel.date}</span>
                 <Badge
                   variant={idx === 0 ? "default" : "outline"}
-                  className="font-mono text-xs"
+                  className="font-mono text-sm"
                 >
                   {rel.tag}
                 </Badge>
@@ -132,13 +133,13 @@ export default function ChangelogPage() {
                 <CardContent className="p-5 space-y-4">
                   {rel.changes.map((group, gIdx) => (
                     <div key={gIdx} className="space-y-2">
-                      <div className="font-mono text-xs font-semibold text-primary">
+                      <div className="font-mono text-sm font-semibold text-primary">
                         {group.category}
                       </div>
-                      <ul className="space-y-1.5 text-xs text-muted-foreground">
+                      <ul className="space-y-1.5 text-sm text-muted-foreground">
                         {group.items.map((item, iIdx) => (
                           <li key={iIdx} className="flex items-start space-x-2">
-                            <span className="text-primary font-mono text-xs mt-0.5">•</span>
+                            <span className="text-primary font-mono text-sm mt-0.5">•</span>
                             <span>{item}</span>
                           </li>
                         ))}

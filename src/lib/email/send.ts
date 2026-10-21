@@ -15,8 +15,7 @@ export interface SendEmailOptions {
 export async function sendEmail(options: SendEmailOptions): Promise<{ success: boolean; id?: string; error?: string }> {
   if (!resend) {
     if (process.env.NODE_ENV !== "production") {
-      console.log(`[Dev Mailbox] To: ${Array.isArray(options.to) ? options.to.join(", ") : options.to}`);
-      console.log(`[Dev Mailbox] Subject: ${options.subject}`);
+      process.stdout.write(`[Dev Mailbox] To: ${Array.isArray(options.to) ? options.to.join(", ") : options.to}\n`);
       return { success: true, id: `dev-mock-${Date.now()}` };
     }
     return { success: false, error: "RESEND_API_KEY not configured" };

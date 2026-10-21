@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans, IBM_Plex_Serif, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
+import { BRAND } from "@/config/brand";
 
 const ibmPlexSans = IBM_Plex_Sans({
   subsets: ["latin"],
@@ -24,7 +25,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RevForge — Software Architecture Reconstruction & Clean-Room Code Generation",
+  title: `${BRAND.name} — Architecture Reconstruction & Clean-Room Systems`,
   description:
     "Autonomous Clean-Room Reverse Engineering, Technical Scoping, Dynamic Cost Estimation, and Production Code Generation.",
 };
