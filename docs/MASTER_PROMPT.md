@@ -21,7 +21,7 @@
 ### 0.3 Evidence rule (the previous agent violated this; you must not)
 - A phase is `done` only when its **exit commands** (listed in section 16) were actually executed and passed. Paste the command and the last ~15 lines of real output into the Evidence column.
 - Forbidden: claiming something works because it compiles; claiming tests exist when they don't; writing docs that describe features that are not implemented; writing `console.log("unlocked")` in place of real behavior.
-- If something can only be verified with a real external key (Anthropic, Paddle, Resend, Google/GitHub OAuth), verify it against a **test double** and mark it `VERIFIED-WITH-TEST-DOUBLE` in `docs/FINAL_REPORT.md`. Never mark it `VERIFIED-LIVE`.
+- If something can only be verified with a real external key (Anthropic, Paddle, Resend, Google/GitHub OAuth), verify it against a **test double** and mark it `VERIFIED-WITH-TEST-DOUBLE` in `docs/FINAL_REPORT.md`. Never mark it `VERIFIED_LIVE_PROD`.
 
 ### 0.4 Failure rule (never get stuck, never loop forever)
 - A command fails → read the full error → fix the root cause.

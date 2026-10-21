@@ -10,8 +10,8 @@
 | Task 3 — Sandbox, Egress Proxy, Extractors | done | `node scripts/audit.mjs --task 3`<br><pre>T3: 39/39&#10;commit=3003924 date=2026-10-20T22:45:14.730Z&#10;ALL SELECTED CHECKS PASSED</pre> | 2026-10-20 |
 | Task 4 — Build Engine | done | `node scripts/audit.mjs --task 4`<br><pre>T4: 44/44&#10;commit=3e76a8d date=2026-10-20T23:06:19.878Z&#10;ALL SELECTED CHECKS PASSED</pre> | 2026-10-20 |
 | Task 5 — UI / Design Tokens | done | `node scripts/audit.mjs --task 5`<br><pre>T5: 68/68&#10;commit=842ff7d date=2026-10-21T04:04:14.467Z&#10;ALL SELECTED CHECKS PASSED</pre> | 2026-10-21 |
-| Task 6 — Tests & Property Suites | todo | Pending task run | 2026-10-20 |
-| Task 7 — Docs & Honesty Audit | todo | Pending task run | 2026-10-20 |
+| Task 6 — Tests & Property Suites | done | `node scripts/audit.mjs --task 6`<br><pre>T6: 44/44&#10;commit=0012a82 date=2026-10-21T04:40:50.762Z&#10;ALL SELECTED CHECKS PASSED</pre> | 2026-10-21 |
+| Task 7 — Docs & Honesty Audit | done | `node scripts/audit.mjs --task 7`<br><pre>T7: 21/21&#10;ALL SELECTED CHECKS PASSED</pre> | 2026-10-21 |
 
 ---
 

@@ -29,8 +29,11 @@ export class StorageService {
       throw new Error(`File size exceeds 500 MB maximum threshold.`);
     }
 
-    // Strip unsafe path characters from filename
-    const sanitizedName = req.originalFilename.replace(/[^a-zA-Z0-9._-]/g, "_");
+    // Strip unsafe path traversal sequences and characters from filename
+    const sanitizedName = req.originalFilename
+      .replace(/\.\./g, "")
+      .replace(/[^a-zA-Z0-9._-]/g, "_")
+      .replace(/^_+/, "");
     const fileUuid = crypto.randomUUID();
     const storageKey = `ws/${req.workspaceId}/uploads/${fileUuid}-${sanitizedName}`;
 

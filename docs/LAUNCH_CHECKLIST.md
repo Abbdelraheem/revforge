@@ -25,13 +25,29 @@ Follow these steps before opening the platform to public traffic:
      LLM_PROVIDER=anthropic
      ```
 
-4. **Production Infrastructure (Database & Storage)**:
+4. **Transactional Email (Resend)**:
+   - Configure your Resend API credentials for delivery notifications:
+     ```env
+     RESEND_API_KEY=re_live_...
+     EMAIL_FROM=notifications@yourdomain.com
+     ```
+
+5. **Legal & Clean-Room IP Compliance**:
+   - Have a specialized technology lawyer review your Terms of Service, Acceptable Use Policy, and Clean-Room IP guidelines to ensure compliance with reverse-engineering protections and non-infringement standards.
+
+6. **Production Infrastructure (Database & Storage)**:
    - Provision a PostgreSQL 16 database and Redis instance.
    - Run `npx drizzle-kit migrate` to apply migrations and RLS policies.
    - Run `npx tsx src/db/seed.ts` to create the Pricing Config v1 and the superadmin account.
    - Configure your S3-compatible object storage (e.g., Cloudflare R2 or AWS S3).
 
-5. **Sandbox & Workers**:
+7. **Sandbox & Workers**:
    - Ensure the worker machine runs Docker with gVisor (`runsc`) enabled.
    - Set `SANDBOX_RUNTIME=runsc`.
    - Start the worker daemon using `npm run worker` or via Docker Compose.
+
+8. **End-to-End Live Verification**:
+   - Run the full suite with live provider configurations:
+     ```bash
+     npm run e2e:live
+     ```

@@ -21,17 +21,20 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run Audit Checks
-        run: node scripts/audit.mjs --all
+      - name: TypeScript Typecheck (tsc)
+        run: npx tsc --noEmit
 
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Lint
+      - name: ESLint Check (lint)
         run: npm run lint
 
-      - name: Unit & Integration Tests
-        run: npm test
+      - name: Unit & Integration Suites (vitest)
+        run: npx vitest run
 
-      - name: Next.js Build
+      - name: End-to-End Test Suite (playwright)
+        run: npx playwright test
+
+      - name: Acceptance Referee Audit (audit.mjs)
+        run: node scripts/audit.mjs --all
+
+      - name: Next.js Production Build
         run: npm run build

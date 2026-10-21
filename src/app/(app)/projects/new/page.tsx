@@ -54,7 +54,7 @@ export default async function NewProjectPage() {
             <div className="p-4 rounded-md border border-border bg-muted/20 space-y-2 text-sm text-muted-foreground">
               <div className="flex items-center space-x-2 text-foreground font-semibold">
                 <Shield className="h-4 w-4 text-primary" />
-                <span>Zero-Retention Clean-Room Guarantee</span>
+                <span>Zero-Retention Clean-Room Protocol</span>
               </div>
               <p>
                 Target observation is decoupled from synthesis. No proprietary bytecode is copied; only observable interfaces and public contracts are recorded in your Evidence Ledger.

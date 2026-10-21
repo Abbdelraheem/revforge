@@ -59,6 +59,51 @@ export class FakePaymentProvider implements PaymentProvider {
 }
 
 /**
+ * Standalone verification function for Paddle Webhook HMAC signatures
+ * Returns boolean false on signature failure or replay attacks outside 300s
+ */
+export function verifyPaddleSignature(
+  rawBody: string,
+  signatureHeader: string | null,
+  secretKey: string
+): boolean {
+  if (!signatureHeader || !secretKey) {
+    return false;
+  }
+  try {
+    const parts = signatureHeader.split(";").reduce((acc, part) => {
+      const [key, val] = part.split("=");
+      if (key && val) acc[key.trim()] = val.trim();
+      return acc;
+    }, {} as Record<string, string>);
+
+    const ts = parts["ts"];
+    const h1 = parts["h1"];
+    if (!ts || !h1) return false;
+
+    const tsNum = parseInt(ts, 10);
+    const nowSec = Math.floor(Date.now() / 1000);
+    if (Math.abs(nowSec - tsNum) > 300) {
+      return false;
+    }
+
+    const expectedHmac = crypto
+      .createHmac("sha256", secretKey)
+      .update(`${ts}:${rawBody}`)
+      .digest("hex");
+
+    const sigBuf = Buffer.from(h1, "hex");
+    const expBuf = Buffer.from(expectedHmac, "hex");
+    if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Production Paddle Billing Provider
  */
 export class PaddleProvider implements PaymentProvider {

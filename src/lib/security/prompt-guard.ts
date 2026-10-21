@@ -60,6 +60,21 @@ export function sanitizeDelimitedContent(content: string): string {
 export const sanitizeDelimited = sanitizeDelimitedContent;
 
 /**
+ * Strips adversarial prompt injection attempts and dangerous commands
+ * from untrusted user/target inputs.
+ */
+export function sanitizePromptInput(input: string): string {
+  if (!input) return "";
+  let sanitized = sanitizeDelimitedContent(input);
+  // Neutralize common prompt injection keywords & shell payload attempts
+  sanitized = sanitized.replace(/SYSTEM\s*OVERRIDE/gi, "[BLOCKED_INJECTION]");
+  sanitized = sanitized.replace(/SYSTEM\s*:/gi, "USER_INPUT:");
+  sanitized = sanitized.replace(/rm\s+-rf/gi, "[BLOCKED_COMMAND]");
+  sanitized = sanitized.replace(/execute_bash/gi, "[BLOCKED_TOOL]");
+  return sanitized;
+}
+
+/**
  * Wraps untrusted target artifacts (DOM, binary strings, headers, decompiled code)
  * in strict XML delimiters with defense-in-depth system guardrails.
  */

@@ -1,0 +1,322 @@
+PASS  [T0] dependency: vitest
+PASS  [T0] dependency: @playwright/test
+PASS  [T0] dependency: playwright
+PASS  [T0] dependency: bullmq
+PASS  [T0] dependency: ioredis
+PASS  [T0] dependency: @aws-sdk/client-s3
+PASS  [T0] dependency: @aws-sdk/s3-request-presigner
+PASS  [T0] dependency: undici
+PASS  [T0] dependency: fast-check
+PASS  [T0] dependency: pino
+PASS  [T0] dependency: file-type
+PASS  [T0] dependency: resend
+PASS  [T0] dependency: @axe-core/playwright
+PASS  [T0] npm script test uses vitest
+PASS  [T0] removed: test-verification.ts
+PASS  [T0] removed: tests/security.test.ts
+PASS  [T0] exists: vitest.config.ts
+PASS  [T0] exists: playwright.config.ts
+PASS  [T0] exists: .github/workflows/ci.yml
+PASS  [T0] exists: .env.example
+PASS  [T0] exists: docker-compose.yml
+PASS  [T0] compose has postgres
+PASS  [T0] compose has redis
+PASS  [T0] compose has minio
+PASS  [T0] env.ts: no default for secrets (DATA_KEY/NEXTAUTH_SECRET/FAKE_WEBHOOK_SECRET)
+PASS  [T0] env.ts: ALLOW_RUNC not defaulting to true
+PASS  [T0] env.ts: production refuses PAYMENT_PROVIDER=fake and LLM_PROVIDER=fixture
+PASS  [T0] env.ts: skips strict validation only during `next build` phase
+PASS  [T0] layout loads IBM_Plex_Sans via next/font
+PASS  [T0] layout loads IBM_Plex_Serif via next/font
+PASS  [T0] layout loads IBM_Plex_Mono via next/font
+PASS  [T0] layout: lang=en, no dir=rtl
+PASS  [T1] removed: src/app/api/triage/route.ts
+PASS  [T1] removed: src/app/api/checkout/route.ts
+PASS  [T1] removed: src/app/api/stream
+PASS  [T1] removed: src/app/api/webhook
+PASS  [T1] removed: src/lib/security/ssrf-guard.ts
+PASS  [T1] removed: src/lib/security/sandbox-runner.ts
+PASS  [T1] removed: src/lib/pricing/pricing-engine.ts
+PASS  [T1] removed: src/lib/paddle
+PASS  [T1] removed: src/lib/storage/storage-service.ts
+PASS  [T1] removed: workers/reconstruction-worker.ts
+PASS  [T1] forbidden: localStorage
+PASS  [T1] forbidden: fake persona
+PASS  [T1] forbidden: setTimeout in auth pages
+PASS  [T1] forbidden: client-side unlock state
+PASS  [T1] forbidden: imports of deleted modules
+PASS  [T1] forbidden: margin/COGS talk
+PASS  [T1] forbidden: false guarantees
+PASS  [T1] forbidden: false guarantees (legal pages)
+PASS  [T1] forbidden: misused statute claims
+PASS  [T1] forbidden: fake live status
+PASS  [T1] forbidden: stripe/mock leftovers
+PASS  [T1] forbidden: auth pages must call server actions (no fake)
+PASS  [T1] middleware: nonce CSP
+PASS  [T1] middleware: guards /dashboard and /admin
+PASS  [T1] dashboard is a server component reading the DB
+PASS  [T1] exists: src/app/(auth)/verify-email/page.tsx
+PASS  [T1] exists: src/app/(auth)/forgot-password/page.tsx
+PASS  [T1] exists: src/app/(auth)/reset-password/page.tsx
+PASS  [T1] attestation has no pre-selected option
+PASS  [T2] exists: src/lib/queue/queues.ts
+PASS  [T2] exists: src/lib/queue/outbox.ts
+PASS  [T2] exists: workers/index.ts
+PASS  [T2] exists: workers/analysis-worker.ts
+PASS  [T2] exists: src/lib/analysis/pipeline.ts
+PASS  [T2] exists: src/server/actions/quotes.ts
+PASS  [T2] exists: src/server/actions/checkout.ts
+PASS  [T2] exists: src/server/actions/uploads.ts
+PASS  [T2] exists: src/app/(app)/projects/page.tsx
+PASS  [T2] exists: src/app/(app)/projects/[id]/page.tsx
+PASS  [T2] exists: src/app/dev/fake-checkout/page.tsx
+PASS  [T2] exists: src/lib/email/send.ts
+PASS  [T2] exists: src/lib/billing/credits.ts
+PASS  [T2] exists: src/lib/analysis/free-trial.ts
+PASS  [T2] wired: "callStructured" is used by src/lib/analysis/pipeline.ts
+PASS  [T2] wired: "persistAnalysisReport" is used by src/lib/analysis/pipeline.ts
+PASS  [T2] wired: "priceQuote" is used by src/server/actions/quotes.ts
+PASS  [T2] wired: "createCheckout" is used by src/server/actions/checkout.ts
+PASS  [T2] wired: "dispatchOutbox" is used by src/app/api/webhooks/paddle/route.ts or workers/index.ts
+PASS  [T2] wired: "transitionProject" is used by src/server/actions/checkout.ts or src/app/api/webhooks/paddle/route.ts
+PASS  [T2] wired: "analysisPipeline" is used by workers/analysis-worker.ts
+PASS  [T2] required: BullMQ Worker in workers/analysis-worker.ts
+PASS  [T2] required: BullMQ Queue in src/lib/queue/queues.ts
+PASS  [T2] required: heartbeat writes in workers/index.ts
+PASS  [T2] required: real Anthropic call in src/lib/llm/structured.ts
+PASS  [T2] required: free trial atomic update in src/lib/analysis/free-trial.ts
+PASS  [T2] webhook: verify first and fails closed
+PASS  [T2] webhook: idempotency via unique event id
+PASS  [T2] webhook: amount/currency/txn match before unlock
+PASS  [T2] checkout: amount comes from DB quote, never from input
+PASS  [T2] fake checkout is dev-only and posts a SIGNED webhook
+PASS  [T2] forbidden: client-supplied price field
+PASS  [T2] forbidden: fixture LLM reachable in production path without guard
+PASS  [T3] exists: src/lib/sandbox/runner.ts
+PASS  [T3] exists: src/lib/sandbox/profiles.ts
+PASS  [T3] exists: src/lib/sandbox/args.ts
+PASS  [T3] exists: src/lib/analysis/extractors/web.ts
+PASS  [T3] exists: src/lib/analysis/extractors/har.ts
+PASS  [T3] exists: src/lib/analysis/extractors/apk.ts
+PASS  [T3] exists: src/lib/analysis/extractors/asar.ts
+PASS  [T3] exists: src/lib/analysis/extractors/binary.ts
+PASS  [T3] exists: src/lib/analysis/extractors/types.ts
+PASS  [T3] exists: docker/sandbox-analyze.Dockerfile
+PASS  [T3] exists: docker/sandbox-crawl.Dockerfile
+PASS  [T3] exists: docker/sandbox-verify.Dockerfile
+PASS  [T3] exists: docker/egress-proxy/index.ts
+PASS  [T3] exists: docker-compose.worker.yml
+PASS  [T3] exists: fixtures/demo-site/index.html
+PASS  [T3] exists: fixtures/har/sample.har
+PASS  [T3] profile flag --cap-drop=ALL
+PASS  [T3] profile flag no-new-privileges
+PASS  [T3] profile flag --read-only
+PASS  [T3] profile flag --pids-limit
+PASS  [T3] profile flag --network=none
+PASS  [T3] profile flag --user
+PASS  [T3] profile flag --memory
+PASS  [T3] profile flag --tmpfs
+PASS  [T3] profile defined: analyze
+PASS  [T3] profile defined: crawl
+PASS  [T3] profile defined: verify
+PASS  [T3] runner uses execFile with shell:false
+PASS  [T3] runner has NO generic docker passthrough
+PASS  [T3] runner exposes specific functions
+PASS  [T3] runner guarantees teardown (finally + label)
+PASS  [T3] args validated by Zod
+PASS  [T3] gVisor required in production
+PASS  [T3] forbidden: shell exec anywhere
+PASS  [T3] egress proxy validates + pins IPs and has host allowlist
+PASS  [T3] web extractor uses playwright and safe origins
+PASS  [T3] extractors validated with Zod
+PASS  [T3] wired: "runExtractor" is used by src/lib/analysis/pipeline.ts
+PASS  [T3] pipeline degrades gracefully when an extractor fails
+PASS  [T4] exists: src/lib/build/orchestrator.ts
+PASS  [T4] exists: src/lib/build/planner.ts
+PASS  [T4] exists: src/lib/build/observer.ts
+PASS  [T4] exists: src/lib/build/builder-agent.ts
+PASS  [T4] exists: src/lib/build/verifier.ts
+PASS  [T4] exists: src/lib/build/parity.ts
+PASS  [T4] exists: src/lib/build/leakage.ts
+PASS  [T4] exists: src/lib/build/safety-scan.ts
+PASS  [T4] exists: src/lib/build/packager.ts
+PASS  [T4] exists: src/lib/build/limits.ts
+PASS  [T4] exists: src/lib/build/stacks.ts
+PASS  [T4] exists: src/lib/build/checkpoint.ts
+PASS  [T4] exists: src/lib/build/spec-validator.ts
+PASS  [T4] exists: workers/build-worker.ts
+PASS  [T4] exists: workers/reaper.ts
+PASS  [T4] exists: workers/reconcile.ts
+PASS  [T4] orchestrator uses builder-agent
+PASS  [T4] orchestrator uses verifier
+PASS  [T4] orchestrator uses leakage
+PASS  [T4] orchestrator uses safety-scan
+PASS  [T4] orchestrator uses packager
+PASS  [T4] orchestrator uses limits
+PASS  [T4] orchestrator uses checkpoint
+PASS  [T4] orchestrator uses planner
+PASS  [T4] orchestrator escalates models (FAST/STANDARD/PREMIUM)
+PASS  [T4] orchestrator handles stagnation + iteration/time/cost limits
+PASS  [T4] orchestrator ends in terminal states (delivered / delivered_partial / build_failed)
+PASS  [T4] parity weights 0.35/0.15/0.35/0.15
+PASS  [T4] parity uses real image diff (pixelmatch/ssim)
+PASS  [T4] leakage: minhash/shingles with 0.25 threshold
+PASS  [T4] builder agent: real Anthropic tool-use loop
+PASS  [T4] builder agent has NO access to evidence-raw
+PASS  [T4] builder tools chrooted to job workspace
+PASS  [T4] safety scan: install scripts, secrets, audit
+PASS  [T4] packager writes PARITY_REPORT.md + EVIDENCE_LEDGER.md + sha256 + uploads to deliveries bucket
+PASS  [T4] spec validator rejects raw-source leakage
+PASS  [T4] wired: "runBuild" is used by workers/build-worker.ts
+PASS  [T4] required: BullMQ Worker for builds in workers/build-worker.ts
+PASS  [T4] reaper recovers stuck jobs with retry then fail
+PASS  [T4] reconcile re-dispatches outbox
+PASS  [T4] credits issued on partial/failed delivery
+PASS  [T4] forbidden: fake sleeping progress
+PASS  [T4] download serves delivery from storage via signed URL (no template ZIP)
+PASS  [T4] removed: src/lib/storage/zip-builder.ts
+PASS  [T5] forbidden: tiny text (text-xs / text-[9-12px])
+PASS  [T5] forbidden: mono headings
+PASS  [T5] forbidden: dark-mode classes
+PASS  [T5] forbidden: gradients / glow / blur / glass
+PASS  [T5] forbidden: emoji in UI
+PASS  [T5] forbidden: pulsing fake status
+PASS  [T5] forbidden: buzzwords
+PASS  [T5] forbidden: Arabic/RTL leftovers
+PASS  [T5] forbidden: hardcoded brand name (use BRAND.name)
+PASS  [T5] forbidden: hardcoded brand name in legal pages (use BRAND.name)
+PASS  [T5] forbidden: TODO/lorem/coming soon/alert()
+PASS  [T5] forbidden: console.log in app code
+PASS  [T5] tokens: paper/ink/vermilion defined
+PASS  [T5] exists: scripts/check-contrast.ts
+PASS  [T5] exists: src/components/shared/wordmark.tsx
+PASS  [T5] ui component: button
+PASS  [T5] ui component: input
+PASS  [T5] ui component: textarea
+PASS  [T5] ui component: select
+PASS  [T5] ui component: checkbox
+PASS  [T5] ui component: radio-group
+PASS  [T5] ui component: switch
+PASS  [T5] ui component: tabs
+PASS  [T5] ui component: dialog
+PASS  [T5] ui component: dropdown-menu
+PASS  [T5] ui component: tooltip
+PASS  [T5] ui component: toast
+PASS  [T5] ui component: badge
+PASS  [T5] ui component: card
+PASS  [T5] ui component: table
+PASS  [T5] ui component: data-table
+PASS  [T5] ui component: progress
+PASS  [T5] ui component: skeleton
+PASS  [T5] shared component: stepper
+PASS  [T5] shared component: dropzone
+PASS  [T5] shared component: code-viewer
+PASS  [T5] shared component: file-tree
+PASS  [T5] shared component: image-compare
+PASS  [T5] shared component: evidence-ledger-table
+PASS  [T5] shared component: log-stream
+PASS  [T5] shared component: empty-state
+PASS  [T5] shared component: command-palette
+PASS  [T5] shared component: breadcrumbs
+PASS  [T5] exists: src/app/(marketing)/status/page.tsx
+PASS  [T5] exists: src/app/(marketing)/refund-policy/page.tsx
+PASS  [T5] exists: src/app/(marketing)/contact/page.tsx
+PASS  [T5] exists: src/app/(app)/billing/page.tsx
+PASS  [T5] exists: src/app/(app)/settings/page.tsx
+PASS  [T5] exists: src/app/(app)/notifications/page.tsx
+PASS  [T5] exists: src/app/(app)/team/page.tsx
+PASS  [T5] exists: src/app/(app)/projects/new/page.tsx
+PASS  [T5] exists: src/app/(admin)/admin/users/page.tsx
+PASS  [T5] exists: src/app/(admin)/admin/jobs/page.tsx
+PASS  [T5] exists: src/app/(admin)/admin/orders/page.tsx
+PASS  [T5] exists: src/app/(admin)/admin/pricing/page.tsx
+PASS  [T5] exists: src/app/(admin)/admin/audit/page.tsx
+PASS  [T5] exists: src/app/(admin)/admin/abuse/page.tsx
+PASS  [T5] exists: src/app/api/health/route.ts
+PASS  [T5] exists: src/app/api/demo-triage/route.ts
+PASS  [T5] loading.tsx on >= 8 routes
+PASS  [T5] error.tsx in (app) and (admin)
+PASS  [T5] home is a server component
+PASS  [T5] home uses the real pricing engine for its calculator
+PASS  [T5] home has no copy-pasted 3-up icon grids (max 1 `grid-cols-3`)
+PASS  [T5] status page reads real health
+PASS  [T5] command palette navigates (router.push) and searches projects
+PASS  [T5] contact + DMCA forms persist to DB
+PASS  [T5] pricing page shows formula hours x rate x 0.5 using real config
+PASS  [T6] exists: tests/integration/rls.test.ts
+PASS  [T6] exists: tests/integration/webhook.test.ts
+PASS  [T6] exists: tests/integration/download-gate.test.ts
+PASS  [T6] exists: tests/integration/upload.test.ts
+PASS  [T6] exists: tests/integration/quote-versioning.test.ts
+PASS  [T6] exists: tests/integration/free-trial-race.test.ts
+PASS  [T6] exists: tests/unit/ssrf-payloads.test.ts
+PASS  [T6] exists: tests/unit/prompt-injection.test.ts
+PASS  [T6] exists: tests/unit/leakage.test.ts
+PASS  [T6] exists: tests/unit/parity.test.ts
+PASS  [T6] exists: tests/unit/sandbox-args.test.ts
+PASS  [T6] exists: tests/unit/state-machine.test.ts
+PASS  [T6] exists: tests/unit/pricing.property.test.ts
+PASS  [T6] exists: e2e/golden-path.spec.ts
+PASS  [T6] exists: e2e/unpaid-gates.spec.ts
+PASS  [T6] exists: e2e/tenant-isolation.spec.ts
+PASS  [T6] exists: e2e/break-it.spec.ts
+PASS  [T6] exists: e2e/a11y.spec.ts
+PASS  [T6] exists: e2e/crawl-all-links.spec.ts
+PASS  [T6] exists: fixtures/injection/index.html
+PASS  [T6] exists: fixtures/injection/sample.har
+PASS  [T6] forbidden: tautological assertions
+PASS  [T6] forbidden: skipped/only tests
+PASS  [T6] SSRF test has >= 50 payloads
+PASS  [T6] SSRF test covers mapped-IPv6, decimal/octal/hex, rebinding, redirect
+PASS  [T6] webhook test covers: invalid signature
+PASS  [T6] webhook test covers: replay
+PASS  [T6] webhook test covers: mismatch
+PASS  [T6] webhook test covers: duplicate
+PASS  [T6] webhook test covers: missing secret
+PASS  [T6] RLS test uses two workspaces and asserts zero rows across tenants
+PASS  [T6] download gate: unpaid, other tenant, anonymous, expired URL
+PASS  [T6] golden path covers signup -> analysis -> quote -> checkout -> build -> download -> npm build of the ZIP
+PASS  [T6] break-it covers: unsigned webhook
+PASS  [T6] break-it covers: IDOR
+PASS  [T6] break-it covers: path traversal
+PASS  [T6] break-it covers: XSS
+PASS  [T6] break-it covers: prompt injection
+PASS  [T6] break-it covers: rate limit
+PASS  [T6] break-it covers: CSRF
+PASS  [T6] break-it covers: admin
+PASS  [T6] a11y spec uses axe
+PASS  [T6] injection test asserts recorded tool calls are unchanged
+PASS  [T6] CI runs lint, typecheck, unit, integration, e2e, audit
+PASS  [T7] exists: README.md
+PASS  [T7] exists: docs/ARCHITECTURE.md
+PASS  [T7] exists: docs/SECURITY.md
+PASS  [T7] exists: docs/DEPLOYMENT.md
+PASS  [T7] exists: docs/WORKER_ON_DEMAND.md
+PASS  [T7] exists: docs/RUNBOOK.md
+PASS  [T7] exists: docs/API.md
+PASS  [T7] exists: docs/LAUNCH_CHECKLIST.md
+PASS  [T7] exists: docs/DECISIONS.md
+PASS  [T7] exists: CHANGELOG.md
+PASS  [T7] README has quick start with real commands
+PASS  [T7] no 'open'/'todo' rows left in docs/PROGRESS.md
+PASS  [T7] forbidden: claims in docs of things that do not exist (generic words)
+PASS  [T7] launch checklist mentions Paddle
+PASS  [T7] launch checklist mentions Anthropic
+PASS  [T7] launch checklist mentions Resend
+PASS  [T7] launch checklist mentions domain
+PASS  [T7] launch checklist mentions lawyer
+PASS  [T7] launch checklist mentions gVisor
+PASS  [T7] launch checklist mentions e2e:live
+PASS  [T7] docs/AUDIT_RESULT.txt exists and says ALL PASS for tasks 0-7
+PASS  [TG] tsc --noEmit
+PASS  [TG] eslint
+PASS  [TG] vitest: all pass
+PASS  [TG] at least 150 vitest tests pass
+PASS  [TG] next build with NO env vars
+PASS  [TG] contrast script
+PASS  [TG] npm audit (no high/critical in prod deps)
+PASS  [TG] playwright lists >= 12 tests
+
+T0: 32/32  T1: 29/29  T2: 33/33  T3: 39/39  T4: 44/44  T5: 68/68  T6: 44/44  T7: 21/21  TG: 8/8
+commit=0012a82 date=2026-10-21T04:55:29.891Z
+ALL SELECTED CHECKS PASSED

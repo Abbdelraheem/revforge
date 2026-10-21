@@ -27,7 +27,7 @@ export type TransitionActor =
   | { type: "admin"; adminId: string; reason?: string };
 
 // Allowed state transitions and their authorized actors per Section 4.2
-const ALLOWED_TRANSITIONS: Record<
+export const ALLOWED_TRANSITIONS: Record<
   ProjectStatus,
   Partial<Record<ProjectStatus, string[]>>
 > = {
