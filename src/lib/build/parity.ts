@@ -1,9 +1,20 @@
-export interface ParityBreakdown {
-  visual: number; // weight 0.35
-  structural: number; // weight 0.15
-  behavioral: number; // weight 0.35
+import pixelmatch from "pixelmatch";
+import { PNG } from "pngjs";
+
+export interface ParityInput {
+  visual: number | null; // weight 0.35
+  structural: number | null; // weight 0.15
+  behavioral: number | null; // weight 0.35
   buildHealth: number; // weight 0.15
+}
+
+export interface ParityBreakdown {
+  visual: number | null;
+  structural: number | null;
+  behavioral: number | null;
+  buildHealth: number;
   overall: number;
+  coverage: number;
 }
 
 export const PARITY_WEIGHTS = {
@@ -14,31 +25,43 @@ export const PARITY_WEIGHTS = {
 };
 
 /**
- * Computes composite parity score with canonical weights:
- * 0.35 Visual (pixelmatch / ssim visual diff)
- * 0.15 Structural (AST route / component hierarchy match)
- * 0.35 Behavioral (integration tests / API payload contract)
- * 0.15 Build Health (clean compile, zero type errors, lint passed)
+ * Computes composite parity score with canonical weights (0.35/0.15/0.35/0.15).
+ * Null dimensions are excluded and remaining active weights are renormalized.
+ * Returns { visual, structural, behavioral, buildHealth, overall, coverage }.
  */
-export function computeParityScore(scores: {
-  visual: number;
-  structural: number;
-  behavioral: number;
-  buildHealth: number;
-}): ParityBreakdown {
-  const v = Math.min(1, Math.max(0, scores.visual));
-  const s = Math.min(1, Math.max(0, scores.structural));
-  const b = Math.min(1, Math.max(0, scores.behavioral));
+export function computeParityScore(scores: ParityInput): ParityBreakdown {
+  const clamp = (val: number | null) =>
+    val === null ? null : Math.min(1, Math.max(0, val));
+
+  const v = clamp(scores.visual);
+  const s = clamp(scores.structural);
+  const b = clamp(scores.behavioral);
   const h = Math.min(1, Math.max(0, scores.buildHealth));
 
-  const overall = Number(
-    (
-      0.35 * v +
-      0.15 * s +
-      0.35 * b +
-      0.15 * h
-    ).toFixed(4)
-  );
+  let totalWeightedScore = 0;
+  let coverage = 0;
+
+  if (v !== null) {
+    totalWeightedScore += PARITY_WEIGHTS.visual * v;
+    coverage += PARITY_WEIGHTS.visual;
+  }
+  if (s !== null) {
+    totalWeightedScore += PARITY_WEIGHTS.structural * s;
+    coverage += PARITY_WEIGHTS.structural;
+  }
+  if (b !== null) {
+    totalWeightedScore += PARITY_WEIGHTS.behavioral * b;
+    coverage += PARITY_WEIGHTS.behavioral;
+  }
+  // buildHealth is always measurable
+  totalWeightedScore += PARITY_WEIGHTS.buildHealth * h;
+  coverage += PARITY_WEIGHTS.buildHealth;
+
+  coverage = Number(coverage.toFixed(4));
+  const overall =
+    coverage === 0
+      ? 0
+      : Number((totalWeightedScore / coverage).toFixed(4));
 
   return {
     visual: v,
@@ -46,12 +69,83 @@ export function computeParityScore(scores: {
     behavioral: b,
     buildHealth: h,
     overall,
+    coverage,
   };
 }
 
 /**
- * Image diff helper using pixel comparison or structural similarity (ssim / pixelmatch).
- * Compares two RGBA image buffers of dimensions width x height.
+ * Checks whether parity evaluation satisfies the delivery threshold.
+ * passed = buildHealth > 0 && coverage >= 0.5 && overall >= threshold.
+ * Build + structure alone (coverage 0.3) will NOT pass.
+ */
+export function isParityPassed(score: ParityBreakdown, threshold: number): boolean {
+  return score.buildHealth > 0 && score.coverage >= 0.5 && score.overall >= threshold;
+}
+
+/**
+ * Decodes PNG buffers and runs pixelmatch visual difference.
+ */
+export function comparePngBuffers(
+  refBuffer: Buffer,
+  renderedBuffer: Buffer
+): { mismatchRatio: number; visualScore: number } {
+  try {
+    const img1 = PNG.sync.read(refBuffer);
+    const img2 = PNG.sync.read(renderedBuffer);
+
+    // If dimensions differ, penalize and adjust to common size
+    const width = Math.max(img1.width, img2.width);
+    const height = Math.max(img1.height, img2.height);
+
+    const buf1 = Buffer.alloc(width * height * 4, 0);
+    const buf2 = Buffer.alloc(width * height * 4, 0);
+
+    // Copy img1 into buf1
+    for (let y = 0; y < img1.height; y++) {
+      for (let x = 0; x < img1.width; x++) {
+        const srcIdx = (img1.width * y + x) << 2;
+        const dstIdx = (width * y + x) << 2;
+        buf1[dstIdx] = img1.data[srcIdx]!;
+        buf1[dstIdx + 1] = img1.data[srcIdx + 1]!;
+        buf1[dstIdx + 2] = img1.data[srcIdx + 2]!;
+        buf1[dstIdx + 3] = img1.data[srcIdx + 3]!;
+      }
+    }
+
+    // Copy img2 into buf2
+    for (let y = 0; y < img2.height; y++) {
+      for (let x = 0; x < img2.width; x++) {
+        const srcIdx = (img2.width * y + x) << 2;
+        const dstIdx = (width * y + x) << 2;
+        buf2[dstIdx] = img2.data[srcIdx]!;
+        buf2[dstIdx + 1] = img2.data[srcIdx + 1]!;
+        buf2[dstIdx + 2] = img2.data[srcIdx + 2]!;
+        buf2[dstIdx + 3] = img2.data[srcIdx + 3]!;
+      }
+    }
+
+    const diff = new PNG({ width, height });
+    const numDiffPixels = pixelmatch(
+      buf1,
+      buf2,
+      diff.data,
+      width,
+      height,
+      { threshold: 0.1 }
+    );
+
+    const totalPixels = width * height;
+    const mismatchRatio = totalPixels > 0 ? numDiffPixels / totalPixels : 0;
+    const visualScore = Number(Math.max(0, 1 - mismatchRatio).toFixed(4));
+
+    return { mismatchRatio, visualScore };
+  } catch (err) {
+    return { mismatchRatio: 1.0, visualScore: 0.0 };
+  }
+}
+
+/**
+ * Fallback image diff helper for raw RGBA buffers
  */
 export function compareImages(
   img1: Buffer,
@@ -59,34 +153,16 @@ export function compareImages(
   width: number,
   height: number
 ): { mismatchRatio: number; visualScore: number } {
-  if (img1.length === 0 || img2.length === 0 || img1.length !== img2.length) {
+  try {
+    const diff = Buffer.alloc(width * height * 4);
+    const numDiff = pixelmatch(img1, img2, diff, width, height, { threshold: 0.1 });
+    const totalPixels = width * height;
+    const mismatchRatio = totalPixels > 0 ? numDiff / totalPixels : 0;
+    return {
+      mismatchRatio,
+      visualScore: Number(Math.max(0, 1 - mismatchRatio).toFixed(4)),
+    };
+  } catch {
     return { mismatchRatio: 1.0, visualScore: 0.0 };
   }
-
-  let diffPixels = 0;
-  const totalPixels = width * height;
-
-  // Pixel comparison (pixelmatch style byte-by-byte comparison)
-  for (let i = 0; i < img1.length; i += 4) {
-    const r1 = img1[i] ?? 0;
-    const r2 = img2[i] ?? 0;
-    const g1 = img1[i + 1] ?? 0;
-    const g2 = img2[i + 1] ?? 0;
-    const b1 = img1[i + 2] ?? 0;
-    const b2 = img2[i + 2] ?? 0;
-    const a1 = img1[i + 3] ?? 0;
-    const a2 = img2[i + 3] ?? 0;
-    const dr = Math.abs(r1 - r2);
-    const dg = Math.abs(g1 - g2);
-    const db = Math.abs(b1 - b2);
-    const da = Math.abs(a1 - a2);
-    if (dr > 15 || dg > 15 || db > 15 || da > 15) {
-      diffPixels++;
-    }
-  }
-
-  const mismatchRatio = totalPixels > 0 ? diffPixels / totalPixels : 1.0;
-  const visualScore = Number(Math.max(0, 1.0 - mismatchRatio).toFixed(4));
-
-  return { mismatchRatio, visualScore };
 }

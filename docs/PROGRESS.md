@@ -12,6 +12,7 @@
 | Task 5 — UI / Design Tokens | done | `node scripts/audit.mjs --task 5`<br><pre>T5: 68/68&#10;commit=842ff7d date=2026-10-21T04:04:14.467Z&#10;ALL SELECTED CHECKS PASSED</pre> | 2026-10-21 |
 | Task 6 — Tests & Property Suites | done | `node scripts/audit.mjs --task 6`<br><pre>T6: 44/44&#10;commit=0012a82 date=2026-10-21T04:40:50.762Z&#10;ALL SELECTED CHECKS PASSED</pre> | 2026-10-21 |
 | Task 7 — Docs & Honesty Audit | done | `node scripts/audit.mjs --task 7`<br><pre>T7: 21/21&#10;ALL SELECTED CHECKS PASSED</pre> | 2026-10-21 |
+| V3 — Real Engine, Enforced RLS & Gates | done | `node scripts/audit.mjs --all --gates`<br><pre>T0: 32/32  T1: 29/29  T2: 33/33  T3: 39/39  T4: 44/44  T5: 68/68  T6: 44/44  T7: 21/21  TG: 8/8&#10;commit=28401b8 date=2026-10-22T10:27:49.721Z&#10;ALL SELECTED CHECKS PASSED</pre> | 2026-10-22 |
 
 ---
 

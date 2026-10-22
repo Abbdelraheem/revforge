@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { FolderGit2, Plus, ArrowRight, Clock, ShieldCheck } from "lucide-react";
-import { db } from "@/db";
+import { withTenant } from "@/db/tenant";
 import { projects } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
@@ -17,18 +17,22 @@ export default async function ProjectsListPage() {
     redirect("/login");
   }
 
-  const workspaceProjects = await db
-    .select({
-      id: projects.id,
-      name: projects.name,
-      description: projects.description,
-      status: projects.status,
-      createdAt: projects.createdAt,
-      updatedAt: projects.updatedAt,
-    })
-    .from(projects)
-    .where(eq(projects.workspaceId, session.workspace.id))
-    .orderBy(desc(projects.createdAt));
+  const workspaceProjects = await withTenant(
+    { userId: session.user.id, workspaceId: session.workspace.id },
+    (tx) =>
+      tx
+        .select({
+          id: projects.id,
+          name: projects.name,
+          description: projects.description,
+          status: projects.status,
+          createdAt: projects.createdAt,
+          updatedAt: projects.updatedAt,
+        })
+        .from(projects)
+        .where(eq(projects.workspaceId, session.workspace.id))
+        .orderBy(desc(projects.createdAt))
+  );
 
   return (
     <div className="space-y-8 font-sans text-foreground">

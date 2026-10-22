@@ -2,7 +2,7 @@
 
 RevForge AI is a high-assurance platform that analyzes legacy applications, mobile binaries, web endpoints, and network traces, producing clean-room rebuild specifications and synthesizing fresh, modern TypeScript/Next.js codebases.
 
-Every synthesis run is clean-room verified: references undergo strict shingle MinHash leakage detection (enforcing zero copyright infringement), parity verification against visual and functional baselines, and execution inside hardened gVisor sandboxes.
+Every synthesis run undergoes strict shingle MinHash leakage detection (enforcing non-infringement standards), parity verification against visual and functional baselines, and execution inside hardened gVisor sandboxes.
 
 ---
 

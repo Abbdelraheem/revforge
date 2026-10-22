@@ -1,7 +1,7 @@
 import React from "react";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { db } from "@/db";
+import { systemDb } from "@/db";
 import { auditLog } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -15,7 +15,7 @@ export default async function AdminAuditPage() {
     redirect("/login");
   }
 
-  const logs = await db
+  const logs = await systemDb
     .select()
     .from(auditLog)
     .orderBy(desc(auditLog.createdAt))

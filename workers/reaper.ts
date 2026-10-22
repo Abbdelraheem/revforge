@@ -1,4 +1,4 @@
-import { db } from "@/db";
+import { systemDb } from "@/db";
 import { buildJobs, projects } from "@/db/schema";
 import { and, lt, eq, inArray } from "drizzle-orm";
 import { buildQueue } from "@/lib/queue/queues";
@@ -22,7 +22,7 @@ export const DEFAULT_REAPER_CONFIG: ReaperConfig = {
 export async function reapStuckJobs(config = DEFAULT_REAPER_CONFIG): Promise<number> {
   const cutoff = new Date(Date.now() - config.heartbeatTimeoutMs);
 
-  const stuckJobs = await db
+  const stuckJobs = await systemDb
     .select()
     .from(buildJobs)
     .where(
@@ -38,7 +38,7 @@ export async function reapStuckJobs(config = DEFAULT_REAPER_CONFIG): Promise<num
     recoveredCount++;
     if (job.attempt < config.maxAttempts) {
       // Retry job
-      await db
+      await systemDb
         .update(buildJobs)
         .set({
           status: "queued",
@@ -55,7 +55,7 @@ export async function reapStuckJobs(config = DEFAULT_REAPER_CONFIG): Promise<num
       });
     } else {
       // Exhausted attempts: fail build
-      await db
+      await systemDb
         .update(buildJobs)
         .set({
           status: "build_failed",
@@ -64,7 +64,7 @@ export async function reapStuckJobs(config = DEFAULT_REAPER_CONFIG): Promise<num
         })
         .where(eq(buildJobs.id, job.id));
 
-      await db
+      await systemDb
         .update(projects)
         .set({
           status: "build_failed",

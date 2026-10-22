@@ -1,7 +1,7 @@
 import React from "react";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { db } from "@/db";
+import { systemDb } from "@/db";
 import { abuseReports } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -15,7 +15,7 @@ export default async function AdminAbusePage() {
     redirect("/login");
   }
 
-  const reports = await db
+  const reports = await systemDb
     .select()
     .from(abuseReports)
     .orderBy(desc(abuseReports.createdAt))

@@ -1,7 +1,7 @@
 import React from "react";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { db } from "@/db";
+import { withTenant } from "@/db/tenant";
 import { orders, creditsLedger } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { getWorkspaceCreditBalance } from "@/lib/billing/credits";
@@ -17,19 +17,26 @@ export default async function BillingPage() {
 
   const balanceCents = await getWorkspaceCreditBalance(session.workspace.id);
 
-  const workspaceOrders = await db
-    .select()
-    .from(orders)
-    .where(eq(orders.workspaceId, session.workspace.id))
-    .orderBy(desc(orders.createdAt))
-    .limit(20);
+  const { workspaceOrders, transactions } = await withTenant(
+    { userId: session.user.id, workspaceId: session.workspace.id },
+    async (tx) => {
+      const ords = await tx
+        .select()
+        .from(orders)
+        .where(eq(orders.workspaceId, session.workspace.id))
+        .orderBy(desc(orders.createdAt))
+        .limit(20);
 
-  const transactions = await db
-    .select()
-    .from(creditsLedger)
-    .where(eq(creditsLedger.workspaceId, session.workspace.id))
-    .orderBy(desc(creditsLedger.createdAt))
-    .limit(20);
+      const txns = await tx
+        .select()
+        .from(creditsLedger)
+        .where(eq(creditsLedger.workspaceId, session.workspace.id))
+        .orderBy(desc(creditsLedger.createdAt))
+        .limit(20);
+
+      return { workspaceOrders: ords, transactions: txns };
+    }
+  );
 
   return (
     <div className="p-8 max-w-6xl mx-auto space-y-8 font-sans">

@@ -1,7 +1,7 @@
 import React from "react";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { db } from "@/db";
+import { systemDb } from "@/db";
 import { buildJobs } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -15,7 +15,7 @@ export default async function AdminJobsPage() {
     redirect("/login");
   }
 
-  const jobs = await db
+  const jobs = await systemDb
     .select()
     .from(buildJobs)
     .orderBy(desc(buildJobs.createdAt))

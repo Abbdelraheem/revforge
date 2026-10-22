@@ -1,6 +1,6 @@
 "use server";
 
-import { db } from "@/db";
+import { systemDb } from "@/db";
 import { abuseReports } from "@/db/schema";
 import { z } from "zod";
 
@@ -25,7 +25,7 @@ export async function submitAbuseReport(formData: FormData) {
     return { success: false, error: parsed.error.issues[0]?.message || "Invalid input." };
   }
 
-  await db.insert(abuseReports).values({
+  await systemDb.insert(abuseReports).values({
     targetUrl: parsed.data.targetUrl,
     reporterEmail: parsed.data.reporterEmail,
     reason: parsed.data.reason,

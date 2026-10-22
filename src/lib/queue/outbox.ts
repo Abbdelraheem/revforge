@@ -1,10 +1,10 @@
-import { db } from "@/db";
+import { systemDb } from "@/db";
 import { outbox } from "@/db/schema";
 import { isNull, eq } from "drizzle-orm";
 import { analysisQueue, buildQueue, emailQueue } from "./queues";
 
 export async function dispatchOutbox(limit = 50): Promise<number> {
-  const pending = await db
+  const pending = await systemDb
     .select()
     .from(outbox)
     .where(isNull(outbox.dispatchedAt))
@@ -38,7 +38,7 @@ export async function dispatchOutbox(limit = 50): Promise<number> {
         );
       }
 
-      await db
+      await systemDb
         .update(outbox)
         .set({ dispatchedAt: new Date() })
         .where(eq(outbox.id, item.id));

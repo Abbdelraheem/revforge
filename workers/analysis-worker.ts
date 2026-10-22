@@ -1,7 +1,7 @@
 import { Worker, Job } from "bullmq";
 import { getRedisConnection, ANALYSIS_QUEUE_NAME, AnalysisJobPayload } from "@/lib/queue/queues";
 import { analysisPipeline } from "@/lib/analysis/pipeline";
-import { db } from "@/db";
+import { systemDb } from "@/db";
 import { projects, jobEvents } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
@@ -13,7 +13,7 @@ export function createAnalysisWorker(): Worker<AnalysisJobPayload> {
       process.stdout.write(`[AnalysisWorker] Processing analysis for project ${projectId} (Job ID: ${job.id})\n`);
 
       // Update project status to analyzing
-      await db
+      await systemDb
         .update(projects)
         .set({ status: "analyzing", updatedAt: new Date() })
         .where(eq(projects.id, projectId));
@@ -24,7 +24,7 @@ export function createAnalysisWorker(): Worker<AnalysisJobPayload> {
         return { success: true, classification: report.classification };
       } catch (err: any) {
         console.error(`[AnalysisWorker] Failed analysis for project ${projectId}:`, err);
-        await db
+        await systemDb
           .update(projects)
           .set({ status: "analysis_failed", updatedAt: new Date() })
           .where(eq(projects.id, projectId));

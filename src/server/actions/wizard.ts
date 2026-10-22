@@ -1,7 +1,7 @@
 "use server";
 
 import { requireSession } from "@/lib/auth";
-import { db } from "@/db";
+import { withTenant } from "@/db/tenant";
 import { attestations, targets, projects, auditLog } from "@/db/schema";
 import { checkTargetDenyList } from "@/lib/security/deny-list";
 import { transitionProject } from "@/db/state-machine";
@@ -47,8 +47,10 @@ export async function submitProjectWizardAction(data: CreateProjectWizardInput) 
   const targetHash = data.targetSha256 || crypto.createHash("sha256").update(data.rawInput).digest("hex");
 
   // Atomic database creation
-  const result = await db.transaction(async (tx) => {
-    // 1. Create Project row
+  const result = await withTenant(
+    { userId: session.user.id, workspaceId: session.workspace.id },
+    async (tx) => {
+      // 1. Create Project row
     const [project] = await tx
       .insert(projects)
       .values({

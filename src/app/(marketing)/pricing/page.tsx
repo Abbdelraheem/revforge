@@ -72,7 +72,7 @@ export default function PricingPage() {
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li className="flex items-center space-x-2">
                   <Check className="h-3.5 w-3.5 text-primary shrink-0" />
-                  <span>Full AST disassembly & network trace extraction</span>
+                  <span>Observable interface & network trace extraction</span>
                 </li>
                 <li className="flex items-center space-x-2">
                   <Check className="h-3.5 w-3.5 text-primary shrink-0" />

@@ -26,7 +26,11 @@ export class FakePaymentProvider implements PaymentProvider {
     }
 
     const signature = headers.get("x-fake-signature");
-    const secret = process.env.FAKE_WEBHOOK_SECRET || "dev_fake_webhook_secret_key";
+    const secret = process.env.FAKE_WEBHOOK_SECRET;
+
+    if (!secret) {
+      throw new Error("missing_fake_webhook_secret");
+    }
 
     if (!signature) {
       throw new Error("missing_signature");
@@ -224,7 +228,10 @@ export class PaddleProvider implements PaymentProvider {
   }
 }
 
-export function signFakeWebhook(payload: any, secret = process.env.FAKE_WEBHOOK_SECRET || "dev_fake_webhook_secret_key"): { body: string; signature: string } {
+export function signFakeWebhook(payload: any, secret = process.env.FAKE_WEBHOOK_SECRET): { body: string; signature: string } {
+  if (!secret) {
+    throw new Error("FAKE_WEBHOOK_SECRET is not configured");
+  }
   const body = typeof payload === "string" ? payload : JSON.stringify(payload);
   const signature = crypto.createHmac("sha256", secret).update(body).digest("hex");
   return { body, signature };

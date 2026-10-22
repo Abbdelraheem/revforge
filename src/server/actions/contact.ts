@@ -1,6 +1,6 @@
 "use server";
 
-import { db } from "@/db";
+import { systemDb } from "@/db";
 import { abuseReports } from "@/db/schema";
 import { z } from "zod";
 
@@ -24,7 +24,7 @@ export async function submitContactForm(formData: FormData) {
   }
 
   // Persist contact message in abuseReports table as contact inquiry
-  await db.insert(abuseReports).values({
+  await systemDb.insert(abuseReports).values({
     targetUrl: `contact://inquiry?subject=${encodeURIComponent(parsed.data.subject)}`,
     reporterEmail: parsed.data.email,
     reason: `Contact Inquiry: ${parsed.data.subject}`,

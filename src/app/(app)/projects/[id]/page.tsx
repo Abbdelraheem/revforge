@@ -15,7 +15,7 @@ import {
   Cpu,
   Terminal,
 } from "lucide-react";
-import { db } from "@/db";
+import { withTenant } from "@/db/tenant";
 import {
   projects,
   targets,
@@ -47,61 +47,78 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
   const workspaceId = session.workspace.id;
 
-  const [project] = await db
-    .select()
-    .from(projects)
-    .where(
-      and(
-        eq(projects.id, id),
-        eq(projects.workspaceId, workspaceId)
-      )
-    );
+  const data = await withTenant(
+    { userId: session.user.id, workspaceId },
+    async (tx) => {
+      const [proj] = await tx
+        .select()
+        .from(projects)
+        .where(
+          and(
+            eq(projects.id, id),
+            eq(projects.workspaceId, workspaceId)
+          )
+        );
 
-  if (!project) {
+      if (!proj) return null;
+
+      const [tgt] = await tx
+        .select()
+        .from(targets)
+        .where(eq(targets.projectId, proj.id));
+
+      const [quote] = await tx
+        .select()
+        .from(quotes)
+        .where(
+          and(
+            eq(quotes.projectId, proj.id),
+            eq(quotes.status, "active")
+          )
+        )
+        .orderBy(desc(quotes.version))
+        .limit(1);
+
+      const lines = quote
+        ? await tx
+            .select({
+              id: quoteLines.id,
+              featureId: quoteLines.featureId,
+              tier: quoteLines.tier,
+              hoursQ4: quoteLines.hoursQ4,
+              platformCents: quoteLines.platformCents,
+              selected: quoteLines.selected,
+              featureName: features.name,
+              featureRationale: features.rationale,
+              optional: features.optional,
+            })
+            .from(quoteLines)
+            .innerJoin(features, eq(features.id, quoteLines.featureId))
+            .where(eq(quoteLines.quoteId, quote.id))
+        : [];
+
+      const [job] = await tx
+        .select()
+        .from(buildJobs)
+        .where(eq(buildJobs.projectId, proj.id))
+        .orderBy(desc(buildJobs.createdAt))
+        .limit(1);
+
+      return {
+        project: proj,
+        target: tgt,
+        activeQuote: quote,
+        quoteLinesList: lines,
+        latestBuildJob: job,
+      };
+    }
+  );
+
+  if (!data || !data.project) {
     notFound();
   }
 
-  const [target] = await db
-    .select()
-    .from(targets)
-    .where(eq(targets.projectId, project.id));
-
-  const [activeQuote] = await db
-    .select()
-    .from(quotes)
-    .where(
-      and(
-        eq(quotes.projectId, project.id),
-        eq(quotes.status, "active")
-      )
-    )
-    .orderBy(desc(quotes.version))
-    .limit(1);
-
-  const quoteLinesList = activeQuote
-    ? await db
-        .select({
-          id: quoteLines.id,
-          featureId: quoteLines.featureId,
-          tier: quoteLines.tier,
-          hoursQ4: quoteLines.hoursQ4,
-          platformCents: quoteLines.platformCents,
-          selected: quoteLines.selected,
-          featureName: features.name,
-          featureRationale: features.rationale,
-          optional: features.optional,
-        })
-        .from(quoteLines)
-        .innerJoin(features, eq(features.id, quoteLines.featureId))
-        .where(eq(quoteLines.quoteId, activeQuote.id))
-    : [];
-
-  const [latestBuildJob] = await db
-    .select()
-    .from(buildJobs)
-    .where(eq(buildJobs.projectId, project.id))
-    .orderBy(desc(buildJobs.createdAt))
-    .limit(1);
+  const { project, target, activeQuote, quoteLinesList, latestBuildJob } = data;
 
   return (
     <div className="space-y-8 font-sans text-foreground">

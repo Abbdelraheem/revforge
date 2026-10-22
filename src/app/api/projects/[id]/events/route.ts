@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
 import { getSession } from "@/lib/auth";
-import { db } from "@/db";
-import { projects, jobEvents, buildJobs } from "@/db/schema";
-import { eq, and, gt, desc } from "drizzle-orm";
+import { withTenant } from "@/db/tenant";
+import { projects, jobEvents } from "@/db/schema";
+import { eq, and, gt } from "drizzle-orm";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -31,15 +31,19 @@ export async function GET(
   }
 
   // Tenant and ownership verification
-  const [project] = await db
-    .select()
-    .from(projects)
-    .where(
-      and(
-        eq(projects.id, projectId),
-        eq(projects.workspaceId, session.workspace.id)
-      )
-    );
+  const [project] = await withTenant(
+    { userId: session.user.id, workspaceId: session.workspace.id },
+    (tx) =>
+      tx
+        .select()
+        .from(projects)
+        .where(
+          and(
+            eq(projects.id, projectId),
+            eq(projects.workspaceId, session.workspace.id)
+          )
+        )
+  );
 
   if (!project) {
     return new Response(JSON.stringify({ error: "Project not found" }), {
@@ -77,16 +81,20 @@ export async function GET(
 
       while (!closed) {
         // Query database events strictly ordered by id
-        const rows = await db
-          .select()
-          .from(jobEvents)
-          .where(
-            and(
-              eq(jobEvents.workspaceId, session.workspace.id),
-              gt(jobEvents.id, last)
-            )
-          )
-          .limit(100);
+        const rows = await withTenant(
+          { userId: session.user.id, workspaceId: session.workspace.id },
+          (tx) =>
+            tx
+              .select()
+              .from(jobEvents)
+              .where(
+                and(
+                  eq(jobEvents.workspaceId, session.workspace.id),
+                  gt(jobEvents.id, last)
+                )
+              )
+              .limit(100)
+        );
 
         for (const e of rows) {
           last = e.id;

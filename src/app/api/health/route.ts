@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { db } from "@/db";
+import { systemDb } from "@/db";
 import { workerHeartbeats } from "@/db/schema";
 import { gt, desc } from "drizzle-orm";
 import { getRedisConnection } from "@/lib/queue/queues";
@@ -15,7 +15,7 @@ export async function GET() {
   // 1. Check DB
   try {
     const recentCutoff = new Date(Date.now() - 60_000); // seen in last 60s
-    const workers = await db
+    const workers = await systemDb
       .select()
       .from(workerHeartbeats)
       .where(gt(workerHeartbeats.lastSeen, recentCutoff))

@@ -1,5 +1,5 @@
 import React from "react";
-import { db } from "@/db";
+import { systemDb } from "@/db";
 import { workerHeartbeats } from "@/db/schema";
 import { desc, gt } from "drizzle-orm";
 import { MarketingHeader } from "@/components/shared/marketing-header";
@@ -15,7 +15,7 @@ export default async function StatusPage() {
   let heartbeats: Array<{ id: string; lastSeen: Date; capacity: number; version: string }> = [];
 
   try {
-    heartbeats = await db
+    heartbeats = await systemDb
       .select({
         id: workerHeartbeats.id,
         lastSeen: workerHeartbeats.lastSeen,

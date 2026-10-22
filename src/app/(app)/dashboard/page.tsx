@@ -15,8 +15,8 @@ import {
   FileCode,
   ShieldCheck,
 } from "lucide-react";
-import { db } from "@/db";
-import { projects, buildJobs, users, workspaces, workspaceMembers } from "@/db/schema";
+import { withTenant } from "@/db/tenant";
+import { projects, buildJobs } from "@/db/schema";
 import { eq, desc, and, or } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { BRAND } from "@/config/brand";
@@ -34,41 +34,46 @@ export default async function DashboardPage() {
   const workspaceId = session.workspace.id;
   const user = session.user;
 
-  // Query workspace projects
-  const workspaceProjects = await db
-    .select({
-      id: projects.id,
-      name: projects.name,
-      description: projects.description,
-      status: projects.status,
-      createdAt: projects.createdAt,
-      updatedAt: projects.updatedAt,
-    })
-    .from(projects)
-    .where(eq(projects.workspaceId, workspaceId))
-    .orderBy(desc(projects.createdAt))
-    .limit(10);
+  const { workspaceProjects, activeJobs } = await withTenant(
+    { userId: user.id, workspaceId },
+    async (tx) => {
+      const projs = await tx
+        .select({
+          id: projects.id,
+          name: projects.name,
+          description: projects.description,
+          status: projects.status,
+          createdAt: projects.createdAt,
+          updatedAt: projects.updatedAt,
+        })
+        .from(projects)
+        .where(eq(projects.workspaceId, workspaceId))
+        .orderBy(desc(projects.createdAt))
+        .limit(10);
 
-  // Query active jobs for this workspace
-  const activeJobs = await db
-    .select({
-      id: buildJobs.id,
-      status: buildJobs.status,
-      stage: buildJobs.stage,
-      createdAt: buildJobs.createdAt,
-    })
-    .from(buildJobs)
-    .where(
-      and(
-        eq(buildJobs.workspaceId, workspaceId),
-        or(
-          eq(buildJobs.status, "queued"),
-          eq(buildJobs.status, "building"),
-          eq(buildJobs.status, "verifying")
+      const jobs = await tx
+        .select({
+          id: buildJobs.id,
+          status: buildJobs.status,
+          stage: buildJobs.stage,
+          createdAt: buildJobs.createdAt,
+        })
+        .from(buildJobs)
+        .where(
+          and(
+            eq(buildJobs.workspaceId, workspaceId),
+            or(
+              eq(buildJobs.status, "queued"),
+              eq(buildJobs.status, "building"),
+              eq(buildJobs.status, "verifying")
+            )
+          )
         )
-      )
-    )
-    .limit(5);
+        .limit(5);
+
+      return { workspaceProjects: projs, activeJobs: jobs };
+    }
+  );
 
   const totalProjects = workspaceProjects.length;
   const activeBuildCount = activeJobs.length;

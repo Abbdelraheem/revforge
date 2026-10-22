@@ -1,4 +1,4 @@
-import { db } from "@/db";
+import { systemDb } from "@/db";
 import { workerHeartbeats } from "@/db/schema";
 import { createAnalysisWorker } from "./analysis-worker";
 import { dispatchOutbox } from "@/lib/queue/outbox";
@@ -10,7 +10,7 @@ const OUTBOX_INTERVAL_MS = 5_000;
 
 async function recordHeartbeat(): Promise<void> {
   try {
-    await db
+    await systemDb
       .insert(workerHeartbeats)
       .values({
         id: WORKER_ID,
