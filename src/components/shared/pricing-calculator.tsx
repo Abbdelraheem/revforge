@@ -106,7 +106,7 @@ export function PricingCalculator() {
           <div className="p-4 rounded-lg border border-border bg-background space-y-1">
             <div className="text-sm text-muted-foreground uppercase">Estimated Client Savings</div>
             <div className="text-3xl font-extrabold text-primary">~{savings}%</div>
-            <div className="text-sm text-muted-foreground">Automated Pipeline</div>
+            <div className="text-sm text-muted-foreground">Estimated vs. assumed agency rates (indicative estimate)</div>
           </div>
         </div>
 

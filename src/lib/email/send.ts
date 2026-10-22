@@ -1,9 +1,10 @@
 import { Resend } from "resend";
 import { BRAND } from "@/config/brand";
+import { env } from "@/env";
 
-const resendApiKey = process.env.RESEND_API_KEY;
+const resendApiKey = env.RESEND_API_KEY;
 const resend = resendApiKey ? new Resend(resendApiKey) : null;
-const FROM_EMAIL = process.env.EMAIL_FROM || `${BRAND.name} <notifications@revforge.ai>`;
+const FROM_EMAIL = env.EMAIL_FROM;
 
 export interface SendEmailOptions {
   to: string | string[];
@@ -14,7 +15,7 @@ export interface SendEmailOptions {
 
 export async function sendEmail(options: SendEmailOptions): Promise<{ success: boolean; id?: string; error?: string }> {
   if (!resend) {
-    if (process.env.NODE_ENV !== "production") {
+    if (env.NODE_ENV !== "production") {
       process.stdout.write(`[Dev Mailbox] To: ${Array.isArray(options.to) ? options.to.join(", ") : options.to}\n`);
       return { success: true, id: `dev-mock-${Date.now()}` };
     }

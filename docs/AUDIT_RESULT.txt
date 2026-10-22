@@ -308,15 +308,7 @@ PASS  [T7] launch checklist mentions lawyer
 PASS  [T7] launch checklist mentions gVisor
 PASS  [T7] launch checklist mentions e2e:live
 PASS  [T7] docs/AUDIT_RESULT.txt exists and says ALL PASS for tasks 0-7
-PASS  [TG] tsc --noEmit
-PASS  [TG] eslint
-PASS  [TG] vitest: all pass
-PASS  [TG] at least 150 vitest tests pass
-PASS  [TG] next build with NO env vars
-PASS  [TG] contrast script
-PASS  [TG] npm audit (no high/critical in prod deps)
-PASS  [TG] playwright lists >= 12 tests
 
-T0: 32/32  T1: 29/29  T2: 33/33  T3: 39/39  T4: 44/44  T5: 68/68  T6: 44/44  T7: 21/21  TG: 8/8
-commit=fe080ed date=2026-10-22T11:38:07.816Z
+T0: 32/32  T1: 29/29  T2: 33/33  T3: 39/39  T4: 44/44  T5: 68/68  T6: 44/44  T7: 21/21
+commit=54d7139 date=2026-10-22T13:29:23.453Z
 ALL SELECTED CHECKS PASSED

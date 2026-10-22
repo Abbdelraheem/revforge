@@ -71,7 +71,7 @@ export default function CleanRoomIpPolicyPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="text-sm space-y-1.5 text-muted-foreground">
-                  <p>• Runs inside an air-gapped gVisor sandbox container.</p>
+                  <p>• Runs inside an isolated sandbox container with network isolation.</p>
                   <p>• Analyzes binary headers, symbols, manifest files, and client-side web DOM structures.</p>
                   <p>• Emits <em>only</em> high-level functional interface contracts, route structures, and data schemas.</p>
                   <p>• <strong>Strict Rule:</strong> No proprietary decompiler code or binary strings are allowed to pass through the boundary.</p>

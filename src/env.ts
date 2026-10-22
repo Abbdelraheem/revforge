@@ -7,6 +7,20 @@ const envSchema = z
     NODE_ENV: z.enum(["development", "production", "test"]).default("development"),
     APP_URL: z.string().url().default("http://localhost:3000"),
     DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
+    SYSTEM_DATABASE_URL: z.string().min(1).optional(),
+    COST_CAP_RATIO: z.coerce.number().default(0.6),
+
+    // Email & Notifications
+    RESEND_API_KEY: z.string().optional(),
+    EMAIL_FROM: z.string().default("RevForge <notifications@revforge.ai>"),
+    SUPERADMIN_EMAIL: z.string().email().default("admin@revforge.ai"),
+
+    // Studio Configuration
+    STUDIO_TOKEN_CENTS: z.coerce.number().default(1),
+    STUDIO_INCLUDED_RATIO: z.coerce.number().default(0.15),
+    STUDIO_MARKUP: z.coerce.number().default(3.0),
+    STUDIO_MIN_CHARGE_CENTS: z.coerce.number().default(50),
+    STUDIO_DAILY_EDIT_LIMIT: z.coerce.number().default(20),
 
     // LLM Configuration
     ANTHROPIC_API_KEY: z.string().optional(),
@@ -38,6 +52,7 @@ const envSchema = z
     // Security & Crypto: NO DEFAULTS for secrets
     DATA_KEY: z.string().min(32).optional(),
     NEXTAUTH_SECRET: z.string().min(32).optional(),
+    AUTH_SECRET: z.string().min(16).optional(),
     NEXTAUTH_URL: z.string().default("http://localhost:3000"),
 
     // Sandbox runtime

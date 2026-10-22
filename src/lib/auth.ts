@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { db } from "@/db";
 import { users, workspaces, workspaceMembers } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
+import { env } from "@/env";
 
 const SESSION_COOKIE_NAME = "revforge_session_token";
 const SESSION_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
@@ -58,7 +59,7 @@ export function verifyPassword(password: string, storedHash: string): boolean {
  * Signs a session payload into a tamper-proof signed cookie string
  */
 export function signSessionPayload(data: { userId: string; workspaceId: string }): string {
-  const secret = process.env.AUTH_SECRET || "revforge_dev_secret_must_be_set_in_production";
+  const secret = env.AUTH_SECRET || env.NEXTAUTH_SECRET || "revforge_dev_secret_must_be_set_in_production";
   const payloadStr = JSON.stringify({ ...data, expires: Date.now() + SESSION_MAX_AGE * 1000 });
   const hmac = crypto.createHmac("sha256", secret).update(payloadStr).digest("hex");
   return `${Buffer.from(payloadStr).toString("base64url")}.${hmac}`;
@@ -72,7 +73,7 @@ export function verifySessionToken(token: string): { userId: string; workspaceId
     const [encodedPayload, providedHmac] = token.split(".");
     if (!encodedPayload || !providedHmac) return null;
 
-    const secret = process.env.AUTH_SECRET || "revforge_dev_secret_must_be_set_in_production";
+    const secret = env.AUTH_SECRET || env.NEXTAUTH_SECRET || "revforge_dev_secret_must_be_set_in_production";
     const payloadStr = Buffer.from(encodedPayload, "base64url").toString("utf8");
     const expectedHmac = crypto.createHmac("sha256", secret).update(payloadStr).digest("hex");
 

@@ -26,7 +26,7 @@ export class FakePaymentProvider implements PaymentProvider {
     }
 
     const signature = headers.get("x-fake-signature");
-    const secret = process.env.FAKE_WEBHOOK_SECRET;
+    const secret = env.FAKE_WEBHOOK_SECRET;
 
     if (!secret) {
       throw new Error("missing_fake_webhook_secret");
@@ -228,7 +228,7 @@ export class PaddleProvider implements PaymentProvider {
   }
 }
 
-export function signFakeWebhook(payload: any, secret = process.env.FAKE_WEBHOOK_SECRET): { body: string; signature: string } {
+export function signFakeWebhook(payload: any, secret = env.FAKE_WEBHOOK_SECRET): { body: string; signature: string } {
   if (!secret) {
     throw new Error("FAKE_WEBHOOK_SECRET is not configured");
   }

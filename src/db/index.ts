@@ -1,11 +1,12 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
+import { env } from "@/env";
 
 const appConnectionString =
-  process.env.DATABASE_URL || "postgres://postgres:postgres@127.0.0.1:5432/revforge";
+  env.DATABASE_URL || "postgres://postgres:postgres@127.0.0.1:5432/revforge";
 const systemConnectionString =
-  process.env.SYSTEM_DATABASE_URL || appConnectionString;
+  env.SYSTEM_DATABASE_URL || appConnectionString;
 
 // App client uses DATABASE_URL (app role, NOBYPASSRLS)
 export const client = postgres(appConnectionString, { prepare: false });

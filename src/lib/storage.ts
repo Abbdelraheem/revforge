@@ -2,11 +2,11 @@ import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { env } from "@/env";
 
-const endpoint = process.env.STORAGE_ENDPOINT || env.STORAGE_ENDPOINT || "http://127.0.0.1:9000";
-const region = process.env.STORAGE_REGION || env.STORAGE_REGION || "us-east-1";
-const accessKeyId = process.env.STORAGE_ACCESS_KEY || env.STORAGE_ACCESS_KEY || "minioadmin";
-const secretAccessKey = process.env.STORAGE_SECRET_KEY || env.STORAGE_SECRET_KEY || "minioadmin";
-const bucket = process.env.STORAGE_BUCKET_DELIVERIES || env.STORAGE_BUCKET_DELIVERIES || "deliveries";
+const endpoint = env.STORAGE_ENDPOINT;
+const region = env.STORAGE_REGION;
+const accessKeyId = env.STORAGE_ACCESS_KEY;
+const secretAccessKey = env.STORAGE_SECRET_KEY;
+const bucket = env.STORAGE_BUCKET_DELIVERIES;
 
 export const s3Client = new S3Client({
   endpoint,

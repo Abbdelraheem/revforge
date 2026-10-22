@@ -44,13 +44,13 @@ const releases = [
     version: "v2.3.0",
     date: "August 2026",
     tag: "Security Milestone",
-    headline: "gVisor MicroVM Sandboxing & Air-Gapped Network Isolation",
+    headline: "Container Sandboxing & Network Isolation",
     changes: [
       {
         category: "Sandbox Isolation",
         items: [
-          "Transitioned backend disassembly containers to gVisor (runsc) virtualization with read-only root filesystems and non-root UID execution.",
-          "Enforced --network=none flag for all binary unpacking passes (.apk, ELF, PE, Mach-O, ASAR) to prevent unauthorized outbound network requests.",
+          "Transitioned backend disassembly containers to hardened sandbox execution with read-only root filesystems and non-root UID execution.",
+          "Enforced network isolation for binary unpacking passes (.apk, ELF, PE, Mach-O, ASAR) to prevent unauthorized outbound network requests.",
         ],
       },
     ],
@@ -80,8 +80,8 @@ const releases = [
         category: "Core Engine",
         items: [
           "Inaugural release of the Evidence Ledger classification pipeline (Seen, Inferred, Unknown).",
-          "Automated headless Ghidra decompiler bridge, JADX APK unpacker, and Playwright DOM extraction workers.",
-          "End-to-end verification testing harness generating production-ready Next.js repositories.",
+          "Automated containerized extractors for APKs, archives, and Playwright DOM extraction workers.",
+          "End-to-end verification testing harness generating verified Next.js repositories.",
         ],
       },
     ],

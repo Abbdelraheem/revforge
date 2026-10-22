@@ -58,7 +58,7 @@ export default function LandingPage() {
           <div className="pt-8 flex flex-wrap items-center justify-center gap-6 text-sm font-mono text-muted-foreground">
             <div className="flex items-center space-x-2">
               <span className="h-2 w-2 rounded-full bg-primary" />
-              <span>Runtime: gVisor MicroVM</span>
+              <span>Runtime: Sandboxed Container Runner</span>
             </div>
             <span>&bull;</span>
             <div className="flex items-center space-x-2">
@@ -77,9 +77,9 @@ export default function LandingPage() {
         <section id="triage-console" className="py-16 px-6 bg-muted/20 border-y border-border">
           <div className="max-w-4xl mx-auto space-y-6">
             <div className="text-center space-y-2">
-              <Badge variant="outline" className="border-primary/40 text-primary text-sm font-semibold">
-                INTERACTIVE DEMO
-              </Badge>
+              <div className="text-sm uppercase tracking-widest text-primary font-bold">
+                Interactive Inspection
+              </div>
               <h2 className="text-2xl sm:text-3xl font-bold text-foreground font-serif">
                 Test Static Inspection & Scope Quoting
               </h2>
@@ -95,9 +95,9 @@ export default function LandingPage() {
         {/* 8-Stage Clean-Room Methodology */}
         <section className="py-8 px-6 max-w-7xl mx-auto space-y-12">
           <div className="text-center space-y-3 max-w-2xl mx-auto">
-            <Badge variant="outline" className="border-primary/40 text-primary text-sm font-semibold">
-              RIGOROUS ISOLATION PROTOCOL
-            </Badge>
+            <div className="text-sm uppercase tracking-widest text-primary font-bold">
+              Rigorous Isolation Protocol
+            </div>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground font-serif">
               8-Stage Clean-Room Pipeline
             </h2>
@@ -113,7 +113,7 @@ export default function LandingPage() {
               { step: "03", name: "Evidence Ledger", desc: "Partitioning into Seen (empirical), Inferred (data flow), and Unknown (server-side)." },
               { step: "04", name: "Dynamic Quote", desc: "Algorithmic computation with hours × rate × 0.5 formula and category price floors." },
               { step: "05", name: "Webhook Verification", desc: "Verified HMAC-SHA256 signature check before enqueuing sandbox job." },
-              { step: "06", name: "MicroVM Sandbox", desc: "Headless Ghidra & JADX execution in air-gapped non-root gVisor container." },
+              { step: "06", name: "Sandboxed Extractor", desc: "Isolated container extractor execution with strict compute quotas and non-root user." },
               { step: "07", name: "Clean Synthesis", desc: "Independent creation of Next.js 15, Drizzle ORM, and TypeScript codebase from specs." },
               { step: "08", name: "Verified Release", desc: "Automated verification test suite and signed delivery package." },
             ].map((st) => (
@@ -133,9 +133,9 @@ export default function LandingPage() {
         <section className="py-16 px-6 bg-muted/20 border-y border-border">
           <div className="max-w-4xl mx-auto space-y-8">
             <div className="text-center space-y-2">
-              <Badge variant="outline" className="border-primary/40 text-primary text-sm font-semibold">
-                TRANSPARENT SCOPE QUOTING
-              </Badge>
+              <div className="text-sm uppercase tracking-widest text-primary font-bold">
+                Transparent Scope Quoting
+              </div>
               <h2 className="text-2xl sm:text-3xl font-bold text-foreground font-serif">
                 50% Market Benchmark Pricing Formula
               </h2>

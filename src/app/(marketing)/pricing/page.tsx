@@ -182,7 +182,7 @@ export default function PricingPage() {
                 <div className="space-y-1">
                   <div className="text-sm text-muted-foreground uppercase">Estimated Client Savings</div>
                   <div className="text-3xl font-extrabold text-foreground font-mono">~{savings}%</div>
-                  <div className="text-sm text-muted-foreground">Delivered via automated build</div>
+                  <div className="text-sm text-muted-foreground">Estimated vs. assumed agency market rates (indicative only)</div>
                 </div>
               </div>
 
@@ -216,39 +216,38 @@ export default function PricingPage() {
             {[
               {
                 title: "Portfolio / Landing Page",
-                range: "$29 – $49",
-                turnaround: "~3 minutes",
+                tier: "portfolio" as const,
                 desc: "Static and SSG sites, marketing pages, design systems, and responsive layouts.",
               },
               {
                 title: "Interactive Web App",
-                range: "$99 – $149",
-                turnaround: "~6 minutes",
+                tier: "web_app" as const,
                 desc: "CRUD workflows, authenticated dashboards, relational database schemas, and REST endpoints.",
               },
               {
                 title: "Mobile App (Android APK)",
-                range: "$199 – $249",
-                turnaround: "~10 minutes",
+                tier: "mobile_app" as const,
                 desc: "Decompiled DEX bytecode synthesized into clean React Native and TypeScript interfaces.",
               },
               {
                 title: "Full SaaS Ecosystem",
-                range: "$299 – $499",
-                turnaround: "~15 minutes",
+                tier: "enterprise_saas" as const,
                 desc: "Multi-tenant routing, worker job queues, relational migrations, and automated test harnesses.",
               },
-            ].map((b, idx) => (
-              <div key={idx} className="p-5 rounded-lg border border-border bg-card space-y-2">
-                <div className="text-sm text-muted-foreground font-mono">Scope Benchmark</div>
-                <h3 className="font-bold text-sm text-foreground">{b.title}</h3>
-                <div className="text-2xl font-extrabold text-primary font-mono">{b.range}</div>
-                <p className="text-sm text-muted-foreground leading-relaxed">{b.desc}</p>
-                <div className="text-sm text-muted-foreground pt-2 border-t border-border">
-                  Turnaround: <span className="font-semibold text-foreground">{b.turnaround}</span>
+            ].map((b, idx) => {
+              const cfg = DEFAULT_PRICING_CONFIG_V1.tiers[b.tier];
+              const minOrderDollars = (cfg.minOrderCents / 100).toFixed(0);
+              const effectiveHourlyRateDollars = ((cfg.hourlyRateCents * (DEFAULT_PRICING_CONFIG_V1.factorBp / 10000)) / 100).toFixed(0);
+              return (
+                <div key={idx} className="p-5 rounded-lg border border-border bg-card space-y-2">
+                  <div className="text-sm text-muted-foreground font-mono">Scope Benchmark</div>
+                  <h3 className="font-bold text-sm text-foreground">{b.title}</h3>
+                  <div className="text-2xl font-extrabold text-primary font-mono">From ${minOrderDollars}</div>
+                  <div className="text-sm text-muted-foreground font-mono">Formula rate: ${effectiveHourlyRateDollars}/hr</div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{b.desc}</p>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
 

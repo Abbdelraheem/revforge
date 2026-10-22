@@ -12,6 +12,7 @@ import {
 import { transitionProject } from "@/db/state-machine";
 import { dispatchOutbox } from "@/lib/queue/outbox";
 import { eq, sql } from "drizzle-orm";
+import { env } from "@/env";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const costCapRatio = Number(process.env.COST_CAP_RATIO ?? 0.6);
+  const costCapRatio = env.COST_CAP_RATIO;
 
   try {
     const result = await systemDb.transaction(async (tx) => {

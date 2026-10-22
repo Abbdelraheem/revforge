@@ -124,7 +124,7 @@ export async function runBuild(jobId: string): Promise<BuildResult> {
     PREMIUM: BUILD_MODELS.PREMIUM,
   };
 
-  const costCapRatio = Number(process.env.COST_CAP_RATIO ?? 0.6);
+  const costCapRatio = env.COST_CAP_RATIO;
   const costCapCents = job.costCapCents || Math.round((order?.amountCents || 10000) * costCapRatio);
 
   const expectedRoutes =

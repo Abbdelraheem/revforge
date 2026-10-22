@@ -2,6 +2,7 @@ import { db } from "./index";
 import { pricingConfig, users, workspaces, workspaceMembers } from "./schema";
 import { eq } from "drizzle-orm";
 import crypto from "node:crypto";
+import { env } from "@/env";
 
 const log = (msg: string) => process.stdout.write(msg + "\n");
 
@@ -57,7 +58,7 @@ export async function seed() {
   }
 
   // 2. Seed Default Admin Workspace & Superadmin user
-  const adminEmail = process.env.SUPERADMIN_EMAIL || "admin@example.com";
+  const adminEmail = env.SUPERADMIN_EMAIL;
   const existingAdmin = await db
     .select()
     .from(users)

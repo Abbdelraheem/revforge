@@ -56,7 +56,7 @@ export default function DmcaPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="font-mono text-sm space-y-1 text-muted-foreground">
-              <div>{BRAND.name} Inc. — Legal Operations Group</div>
+              <div>{BRAND.companyLegalName} — Legal Operations Group</div>
               <div>Attn: Copyright Agent</div>
               <div>Email: <span className="text-foreground font-semibold">dmca@revforge.ai</span></div>
               <div>Location: Dover, Delaware, USA</div>

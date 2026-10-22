@@ -1,4 +1,4 @@
-# RevForge System Status & Verification Report (V4)
+# RevForge System Status & Verification Report (V5)
 
 Last Updated: October 2026
 Audit Referee: `scripts/audit.mjs`
@@ -7,9 +7,9 @@ Audit Referee: `scripts/audit.mjs`
 
 ## 1. Executive Summary
 
-RevForge has undergone a full architectural refactor and hardening pass across V3 and V4. All simulated build progress, fake tenant accessors, constant parity scores, fabricated ZIP keys, and silent fixture fallbacks have been removed and replaced with real, contract-bound implementations. 
+RevForge provides an automated clean-room software reconstruction pipeline and post-delivery visual studio editor. All simulated build progress, fake tenant accessors, constant parity scores, fabricated ZIP keys, and silent fixture fallbacks have been removed and replaced with real, contract-bound implementations. 
 
-Under V4, all delivery gates require real visual and behavioral measurement (minimum 80% parity coverage), runner fallbacks and mock keys are completely eradicated, model configurations are centralized, filesystem guards block deep directory escapes, and the build loop survives verifier runtime exceptions without rejecting.
+Under V4 and V5, all delivery gates require real visual and behavioral measurement (minimum 80% parity coverage), runner fallbacks and mock keys are completely eradicated, model configurations and token rates are strictly configured from Anthropic published tables with startup assertions, filesystem guards block deep directory escapes (refusing `.git` and `node_modules` at any depth), and the build loop survives verifier runtime exceptions without rejecting.
 
 ---
 
@@ -41,7 +41,7 @@ Under V4, all delivery gates require real visual and behavioral measurement (min
 ### Filesystem Containment & Sandboxed Tools
 - **Deepest Ancestor Canonicalization (`src/lib/build/fs-guard.ts`)**: Resolves deepest existing ancestor before `realpathSync`, blocking NUL bytes, absolute paths, and parent directory traversal.
 - **Deep Segment Refusal**: For write operations, blocks `.git` and `node_modules` at ANY depth (`sub/.git/HEAD`, `deep/node_modules/**`).
-- **Tool Sandbox (`src/lib/build/tools.ts`)**: Enforces allowlist of safe commands (`npm`, `npx`, `node`, `git`) and forbids arbitrary execution, shell escapes, and interactive flags. Forces `--ignore-scripts` on npm installations.
+- **Tool Sandbox (`src/lib/build/tools.ts`)**: Enforces allowlist of safe commands (`npm`, `npx`, `node`) and strictly rejects binaries such as `git`, `docker`, `curl`, `wget`, `sh`, `bash`, and arbitrary command execution. Forces `--ignore-scripts` on npm installations.
 - **Live Agent Configuration**: `builder-agent.ts` throws clear configuration error when `ANTHROPIC_API_KEY` is missing in live mode (mock keys removed).
 
 ### Real Runtime Capture & Parity Verifier
@@ -57,17 +57,21 @@ Under V4, all delivery gates require real visual and behavioral measurement (min
 
 ### Centralized Model & Token Pricing
 - **Central Model Config (`src/config/models.ts`)**: FAST, STANDARD, and PREMIUM tiers sourced cleanly from environment settings without hardcoded string literals in orchestrator.
-- **Configured Token Rates (`src/config/pricing.ts`)**: Real input/output token pricing per million tokens across tiers.
+- **Configured Token Rates (`src/config/pricing.ts`)**: Real input/output token pricing per million tokens across tiers sourced from published Anthropic rates. Startup check guarantees all configured models have rates.
 
 ---
 
-## 3. What Is Limited (Development Fallbacks)
+## 3. What Is Not Done / Not Verified in Production
 
-1. **Docker Extractor Execution**:
-   - In production, extractors require Docker with gVisor (`runsc`).
-   - In non-production local development without Docker running, runner falls back to standalone TypeScript extractors in `sandbox/extractors/`.
-2. **Fixture Mode**:
-   - Only permitted when `LLM_PROVIDER=fixture` AND `NODE_ENV !== "production"`.
+1. **Host-Level gVisor Isolation**:
+   - In production cloud deployment, container runners require Docker daemon configured with gVisor (`runsc`) runtime. In local developer environments without `runsc`, the container isolation falls back to standard container execution or local TypeScript extractors.
+2. **Third-Party Provider Credentials**:
+   - Live Paddle payment processing and real webhook cryptographic validation require valid live vendor secrets; local automated tests run against test fixtures and mock signatures.
+   - Live LLM synthesis requires funded Anthropic API credentials; test pipelines use deterministic test doubles.
+3. **Headless Browser Environment**:
+   - Visual regression capture and behavioral verification require headless Chromium (`npx playwright install chromium`) to be installed in the execution environment.
+4. **Email Delivery**:
+   - Live transactional email delivery requires an active Resend account and verified sender domain (`RESEND_API_KEY`, `EMAIL_FROM`).
 
 ---
 

@@ -1,56 +1,30 @@
 import { NextResponse } from "next/server";
-import { systemDb } from "@/db";
-import { workerHeartbeats } from "@/db/schema";
-import { gt, desc } from "drizzle-orm";
-import { getRedisConnection } from "@/lib/queue/queues";
+import { checkSystemHealth } from "@/lib/health/probe";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const startTime = Date.now();
-  let dbHealthy = false;
-  let redisHealthy = false;
-  let activeWorkers = 0;
-
-  // 1. Check DB
   try {
-    const recentCutoff = new Date(Date.now() - 60_000); // seen in last 60s
-    const workers = await systemDb
-      .select()
-      .from(workerHeartbeats)
-      .where(gt(workerHeartbeats.lastSeen, recentCutoff))
-      .orderBy(desc(workerHeartbeats.lastSeen));
-
-    dbHealthy = true;
-    activeWorkers = workers.length;
-  } catch {
-    dbHealthy = false;
-  }
-
-  // 2. Check Redis
-  try {
-    const redis = getRedisConnection();
-    const pong = await redis.ping();
-    redisHealthy = pong === "PONG";
-  } catch {
-    redisHealthy = false;
-  }
-
-  const allHealthy = dbHealthy && redisHealthy;
-  const latencyMs = Date.now() - startTime;
-
-  return NextResponse.json(
-    {
-      status: allHealthy ? "healthy" : "degraded",
-      timestamp: new Date().toISOString(),
-      latencyMs,
-      services: {
-        database: dbHealthy ? "operational" : "failing",
-        redis: redisHealthy ? "operational" : "failing",
-        workers: activeWorkers > 0 ? "operational" : "idle",
-        activeWorkersCount: activeWorkers,
+    const report = await checkSystemHealth();
+    const statusCode = report.status === "healthy" ? 200 : 503;
+    return NextResponse.json(report, { status: statusCode });
+  } catch (err: any) {
+    return NextResponse.json(
+      {
+        status: "down",
+        services: {
+          postgres: false,
+          postgresSystem: false,
+          redis: false,
+          s3: false,
+          docker: false,
+          worker: false,
+        },
+        timestamp: new Date().toISOString(),
+        error: err.message || "Failed to probe health dependencies",
       },
-    },
-    { status: allHealthy ? 200 : 503 }
-  );
+      { status: 503 }
+    );
+  }
 }

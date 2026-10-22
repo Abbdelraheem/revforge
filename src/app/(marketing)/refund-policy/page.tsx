@@ -60,7 +60,14 @@ export default function RefundPolicyPage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-lg font-serif font-bold text-foreground">5. Billing Disputes & Inquiries</h2>
+            <h2 className="text-lg font-serif font-bold text-foreground">5. Studio Tokens & Edits</h2>
+            <p>
+              Studio tokens are consumed in real-time for autonomous code edits, prompt enhancements, and preview sandbox instances. Once an edit is accepted and credits are settled, Studio tokens are non-refundable. If an edit fails or is rejected by automated safety/parity guards, the held tokens are immediately and fully restored to your balance. All refunds across {BRAND.name} are issued exclusively as platform credits.
+            </p>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="text-lg font-serif font-bold text-foreground">6. Billing Disputes & Inquiries</h2>
             <p>
               If you believe an order was processed in error or experience technical discrepancies, contact our engineering billing desk at <a href={`mailto:${BRAND.supportEmail}`} className="text-primary hover:underline">{BRAND.supportEmail}</a>.
             </p>

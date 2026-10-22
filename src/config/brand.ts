@@ -6,7 +6,7 @@ export const BRAND = {
   privacyEmail: "privacy@revforge.ai",
   abuseEmail: "abuse@revforge.ai",
   domain: process.env.NEXT_PUBLIC_APP_DOMAIN || "revforge.ai",
-  companyLegalName: "RevForge Inc.",
+  companyLegalName: "RevForge",
   location: "Dover, Delaware, USA",
 } as const;
 

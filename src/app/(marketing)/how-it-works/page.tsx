@@ -47,8 +47,8 @@ const pipelineStages = [
   {
     step: "06",
     title: "Isolated Sandbox Rebuild",
-    description: "A secure gVisor container (runsc) is spawned with --network=none, read-only rootfs, and non-root execution. Headless Ghidra / JADX reconstructs the clean-room contracts.",
-    controls: "gVisor Kernel Sandbox • Network Isolation • Strict CPU/RAM Quotas",
+    description: "A secure isolated container is spawned with strict quotas, read-only rootfs, and non-root execution to extract clean-room contracts.",
+    controls: "Hardened Sandbox • Network Isolation • Strict CPU/RAM Quotas",
   },
   {
     step: "07",

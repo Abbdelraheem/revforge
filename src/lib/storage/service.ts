@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { env } from "@/env";
 
 export interface PresignedUploadRequest {
   workspaceId: string;
@@ -37,8 +38,8 @@ export class StorageService {
     const fileUuid = crypto.randomUUID();
     const storageKey = `ws/${req.workspaceId}/uploads/${fileUuid}-${sanitizedName}`;
 
-    const endpoint = process.env.S3_ENDPOINT || "http://127.0.0.1:9000";
-    const bucket = process.env.S3_BUCKET_UPLOADS || "uploads";
+    const endpoint = env.STORAGE_ENDPOINT;
+    const bucket = env.STORAGE_BUCKET_UPLOADS;
 
     // Direct S3/MinIO upload endpoint
     const uploadUrl = `${endpoint}/${bucket}/${storageKey}`;
@@ -57,12 +58,12 @@ export class StorageService {
     storageKey: string,
     expiresInSec: number = 300
   ): Promise<string> {
-    const endpoint = process.env.S3_ENDPOINT || "http://127.0.0.1:9000";
-    const bucket = process.env.S3_BUCKET_DELIVERIES || "deliveries";
+    const endpoint = env.STORAGE_ENDPOINT;
+    const bucket = env.STORAGE_BUCKET_DELIVERIES;
     const expiresAt = Date.now() + Math.min(expiresInSec, 300) * 1000;
 
     // Cryptographic signature token for delivery download verification
-    const secret = process.env.DATA_KEY || "revforge_storage_signing_secret";
+    const secret = env.DATA_KEY || "revforge_storage_signing_secret";
     const token = crypto
       .createHmac("sha256", secret)
       .update(`${storageKey}:${expiresAt}`)

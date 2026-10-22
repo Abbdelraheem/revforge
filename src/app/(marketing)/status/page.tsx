@@ -1,7 +1,5 @@
 import React from "react";
-import { systemDb } from "@/db";
-import { workerHeartbeats } from "@/db/schema";
-import { desc, gt } from "drizzle-orm";
+import { checkSystemHealth, HealthReport } from "@/lib/health/probe";
 import { MarketingHeader } from "@/components/shared/marketing-header";
 import { MarketingFooter } from "@/components/shared/marketing-footer";
 import { Badge } from "@/components/ui/badge";
@@ -11,25 +9,36 @@ import { BRAND } from "@/config/brand";
 export const dynamic = "force-dynamic";
 
 export default async function StatusPage() {
-  const cutoff = new Date(Date.now() - 5 * 60 * 1000);
-  let heartbeats: Array<{ id: string; lastSeen: Date; capacity: number; version: string }> = [];
+  let health: HealthReport = {
+    status: "down",
+    services: {
+      postgres: false,
+      postgresSystem: false,
+      redis: false,
+      s3: false,
+      docker: false,
+      worker: false,
+    },
+    timestamp: new Date().toISOString(),
+  };
 
   try {
-    heartbeats = await systemDb
-      .select({
-        id: workerHeartbeats.id,
-        lastSeen: workerHeartbeats.lastSeen,
-        capacity: workerHeartbeats.capacity,
-        version: workerHeartbeats.version,
-      })
-      .from(workerHeartbeats)
-      .where(gt(workerHeartbeats.lastSeen, cutoff))
-      .orderBy(desc(workerHeartbeats.lastSeen));
+    health = await checkSystemHealth();
   } catch {
-    // db fallback
+    // Graceful fallback if probe throws
   }
 
-  const isOperational = heartbeats.length > 0;
+  const isOperational = health.status === "healthy";
+  const isDegraded = health.status === "degraded";
+
+  const serviceList = [
+    { name: "PostgreSQL (App Role)", key: "postgres", ok: health.services.postgres },
+    { name: "PostgreSQL (System Role)", key: "postgresSystem", ok: health.services.postgresSystem },
+    { name: "Redis 7 (BullMQ & Outbox)", key: "redis", ok: health.services.redis },
+    { name: "S3 Object Storage", key: "s3", ok: health.services.s3 },
+    { name: "Container Isolation Runtime", key: "docker", ok: health.services.docker },
+    { name: "Active Worker Pool", key: "worker", ok: health.services.worker },
+  ];
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground font-sans">
@@ -44,125 +53,60 @@ export default async function StatusPage() {
             System & Infrastructure Status
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Live operational status of {BRAND.name} sandboxed compilation workers, Redis queues, and payment webhooks.
+            Live operational telemetry across {BRAND.name} Postgres databases, Redis queues, S3 storage, and sandboxed compilation workers.
           </p>
         </div>
 
         {/* Global Banner */}
-        <div className={`p-4 rounded-lg border flex items-center justify-between ${
-          isOperational ? "border-emerald-600/30 bg-emerald-500/10 text-emerald-800" : "border-amber-600/30 bg-amber-500/10 text-amber-800"
-        }`}>
+        <div
+          className={`p-4 rounded-lg border flex items-center justify-between ${
+            isOperational
+              ? "border-emerald-600/30 bg-emerald-500/10 text-emerald-800"
+              : isDegraded
+              ? "border-amber-600/30 bg-amber-500/10 text-amber-800"
+              : "border-red-600/30 bg-red-500/10 text-red-800"
+          }`}
+        >
           <div className="flex items-center space-x-3">
-            <span className={`h-3 w-3 rounded-full ${isOperational ? "bg-emerald-600" : "bg-amber-600"}`} />
+            <span
+              className={`h-3 w-3 rounded-full ${
+                isOperational ? "bg-emerald-600" : isDegraded ? "bg-amber-600" : "bg-red-600"
+              }`}
+            />
             <span className="font-semibold text-sm">
-              {isOperational ? "All Systems Operational" : "Sandbox Worker Pool Idle / Scaling Up"}
+              {isOperational
+                ? "All Core Systems Operational"
+                : isDegraded
+                ? "System Degraded — Background Worker or Sandbox Idle"
+                : "System Outage — Core Infrastructure Unreachable"}
             </span>
           </div>
           <span className="font-mono text-sm text-muted-foreground">
-            {new Date().toISOString()}
+            {health.timestamp}
           </span>
         </div>
 
         {/* Services Status Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card className="border-border bg-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-serif">Clean-Room Sandbox Workers</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Active Instances:</span>
-                <span className="font-mono font-bold">{heartbeats.length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Isolation Runtime:</span>
-                <span className="font-mono">gVisor MicroVM</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Status:</span>
-                <Badge variant={isOperational ? "default" : "secondary"}>
-                  {isOperational ? "Operational" : "Idle"}
-                </Badge>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-border bg-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-serif">Transactional Outbox & BullMQ</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Queue Backend:</span>
-                <span className="font-mono">Redis 7 (AOF)</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Outbox Reconciler:</span>
-                <span className="font-mono">Active (5s heartbeat)</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Status:</span>
-                <Badge variant="default">Operational</Badge>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-border bg-card">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base font-serif">Paddle Payment Gateway</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Webhook Verification:</span>
-                <span className="font-mono">HMAC-SHA256 (±300s)</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Currency:</span>
-                <span className="font-mono">USD Only</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Status:</span>
-                <Badge variant="default">Operational</Badge>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Worker Pool Heartbeats Table */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-bold font-serif text-foreground">
-            Worker Heartbeats Ledger
-          </h2>
-          {heartbeats.length === 0 ? (
-            <div className="p-8 rounded-lg border border-border bg-card text-center text-sm text-muted-foreground">
-              No worker heartbeats registered in the last 5 minutes.
-            </div>
-          ) : (
-            <div className="rounded-md border border-border overflow-hidden">
-              <table className="w-full text-sm font-sans">
-                <thead className="bg-muted/40 border-b border-border">
-                  <tr>
-                    <th className="p-3 text-start font-semibold">Worker Node ID</th>
-                    <th className="p-3 text-start font-semibold">Version</th>
-                    <th className="p-3 text-start font-semibold">Capacity</th>
-                    <th className="p-3 text-start font-semibold">Last Heartbeat Seen</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {heartbeats.map((hb) => (
-                    <tr key={hb.id} className="border-b border-border last:border-0 hover:bg-muted/20">
-                      <td className="p-3 font-mono text-sm">{hb.id}</td>
-                      <td className="p-3 font-mono">{hb.version}</td>
-                      <td className="p-3 font-mono">{hb.capacity} concurrent</td>
-                      <td className="p-3 font-mono text-muted-foreground">
-                        {new Date(hb.lastSeen).toLocaleTimeString()}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {serviceList.map((svc) => (
+            <Card key={svc.key} className="border-border bg-card">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-serif">{svc.name}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-sm">
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Status:</span>
+                  <Badge variant={svc.ok ? "default" : "destructive"}>
+                    {svc.ok ? "Operational" : "Unavailable"}
+                  </Badge>
+                </div>
+                <div className="flex justify-between items-center text-sm text-muted-foreground">
+                  <span>Heartbeat:</span>
+                  <span className="font-mono">{svc.ok ? "Passing" : "No Signal"}</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
         </div>
       </main>
 

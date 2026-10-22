@@ -4,6 +4,7 @@ import { requireSession } from "@/lib/auth";
 import { withTenant } from "@/db/tenant";
 import { attestations, targets, projects, auditLog } from "@/db/schema";
 import { checkTargetDenyList } from "@/lib/security/deny-list";
+import { assertSafeUrl } from "@/lib/security/ssrf";
 import { transitionProject } from "@/db/state-machine";
 import crypto from "node:crypto";
 import { headers } from "next/headers";
@@ -15,6 +16,8 @@ export interface CreateProjectWizardInput {
   rawInput: string;
   attestationType: "owner" | "written_permission" | "interoperability_only";
   acceptPolicy: boolean;
+  termsAccepted?: boolean;
+  rightToAnalyze?: boolean;
   targetSha256?: string;
   storageKey?: string;
 }
@@ -31,11 +34,20 @@ export async function submitProjectWizardAction(data: CreateProjectWizardInput) 
     return { error: "You must accept the Acceptable Use and Clean-Room policies." };
   }
 
-  // Deny-list check for URL targets
+  if (data.termsAccepted === false || data.rightToAnalyze === false) {
+    return { error: "You must explicitly confirm legal terms acceptance and right to analyze." };
+  }
+
+  // Deny-list and SSRF checks for URL targets
   if (data.kind === "url" || data.kind === "github_repo") {
     const denyCheck = checkTargetDenyList(data.rawInput);
     if (!denyCheck.allowed) {
       return { error: denyCheck.reason || "Target URL is prohibited on the platform." };
+    }
+    try {
+      await assertSafeUrl(data.rawInput);
+    } catch (err: any) {
+      return { error: `Security check rejected URL: ${err.message}` };
     }
   }
 

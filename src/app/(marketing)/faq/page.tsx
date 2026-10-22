@@ -55,7 +55,7 @@ const faqs = [
     questions: [
       {
         q: `How does ${BRAND.name} isolate untrusted binary uploads (.apk, .exe, .dll)?`,
-        a: "All uploaded binaries are inspected for magic bytes, stored securely, and processed exclusively inside ephemeral containers with gVisor (runsc) virtualization. The sandbox runs with a read-only root filesystem, non-root user UID, strict memory quotas, and air-gapped networking (--network=none).",
+        a: "All uploaded binaries are inspected for magic bytes, stored securely, and processed exclusively inside ephemeral sandboxed containers. The sandbox runs with a read-only root filesystem, non-root user UID, strict memory quotas, and network isolation.",
       },
       {
         q: `How does ${BRAND.name} prevent Server-Side Request Forgery (SSRF)?`,
@@ -73,11 +73,11 @@ const faqs = [
     questions: [
       {
         q: "What do I receive once the clean-room rebuild completes?",
-        a: "You receive a production-ready, clean-room repository packaged as a verified ZIP download. The package includes complete Next.js 15 / TypeScript source code, Tailwind CSS styling, Drizzle ORM schema, migrations, automated verification tests, environment configuration (.env.example), and an architectural parity report.",
+        a: "You receive a clean-room repository packaged as a verified ZIP download. The package includes complete Next.js 15 / TypeScript source code, Tailwind CSS styling, Drizzle ORM schema, migrations, automated verification tests, environment configuration (.env.example), and an architectural parity report.",
       },
       {
         q: "How long does a full reverse-engineering and synthesis job take?",
-        a: "Simple portfolio and landing pages complete in ~2 to 3 minutes. Complex interactive web applications and SaaS platforms complete in ~5 to 15 minutes depending on API route count, database complexity, and test coverage requirements.",
+        a: "Job duration depends on target complexity, the number of routes and obligations to build and verify, and LLM synthesis latency. Build iterations run autonomously until all obligations pass or configured cost and time limits are reached.",
       },
     ],
   },
