@@ -35,10 +35,13 @@ import { initiateCheckoutAction } from "@/server/actions/checkout";
 
 interface ProjectDetailPageProps {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ studio_error?: string }>;
 }
 
-export default async function ProjectDetailPage({ params }: ProjectDetailPageProps) {
+export default async function ProjectDetailPage({ params, searchParams }: ProjectDetailPageProps) {
   const { id } = await params;
+  const queryParams = searchParams ? await searchParams : {};
+  const studioError = queryParams.studio_error;
   const session = await getSession();
 
   if (!session) {
@@ -122,6 +125,14 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
 
   return (
     <div className="space-y-8 font-sans text-foreground">
+      {/* Studio Error Alert Banner if redirected from Studio */}
+      {studioError && (
+        <div className="p-4 rounded-md border border-amber-600/30 bg-amber-500/10 text-amber-800 text-sm flex items-center space-x-2">
+          <AlertCircle className="h-4 w-4 shrink-0 text-amber-600" />
+          <span>Studio Access Notice: {studioError}</span>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-border pb-6">
         <div className="space-y-1">
@@ -144,13 +155,21 @@ export default async function ProjectDetailPage({ params }: ProjectDetailPagePro
           <Badge variant="outline" className="text-sm font-mono uppercase">
             {project.status.replace(/_/g, " ")}
           </Badge>
-          {project.status === "delivered" && (
-            <Button asChild size="sm" className="text-sm font-bold shadow-sm">
-              <Link href={`/api/download/${project.id}`}>
-                <Download className="me-1.5 h-3.5 w-3.5" />
-                <span>Download Package</span>
-              </Link>
-            </Button>
+          {(project.status === "delivered" || project.status === "delivered_partial") && (
+            <>
+              <Button asChild size="sm" variant="default" className="text-sm font-bold shadow-sm">
+                <Link href={`/projects/${project.id}/studio`}>
+                  <FileCode className="me-1.5 h-3.5 w-3.5" />
+                  <span>Open in Studio</span>
+                </Link>
+              </Button>
+              <Button asChild size="sm" variant="outline" className="text-sm font-bold shadow-sm">
+                <Link href={`/api/download/${project.id}`}>
+                  <Download className="me-1.5 h-3.5 w-3.5" />
+                  <span>Download Package</span>
+                </Link>
+              </Button>
+            </>
           )}
         </div>
       </div>

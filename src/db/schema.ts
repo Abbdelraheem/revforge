@@ -238,7 +238,7 @@ export const orders = pgTable("orders", {
   projectId: uuid("project_id").references(() => projects.id, { onDelete: "cascade" }).notNull(),
   quoteId: uuid("quote_id").references(() => quotes.id, { onDelete: "cascade" }),
   kind: text("kind", {
-    enum: ["build", "analysis_fee"],
+    enum: ["build", "analysis_fee", "studio_pack"],
   }).notNull(),
   status: text("status", {
     enum: [
@@ -295,6 +295,7 @@ export const creditsLedger = pgTable("credits_ledger", {
   workspaceId: uuid("workspace_id").references(() => workspaces.id, { onDelete: "cascade" }).notNull(),
   deltaCents: integer("delta_cents").notNull(),
   reason: text("reason").notNull(),
+  kind: text("kind"),
   orderId: uuid("order_id").references(() => orders.id, { onDelete: "set null" }),
   buildJobId: uuid("build_job_id"),
   createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
@@ -475,6 +476,76 @@ export const workerHeartbeats = pgTable("worker_heartbeats", {
   lastSeen: timestamp("last_seen", { withTimezone: true }).defaultNow().notNull(),
 });
 
+// 31. Studio Edits
+export const studioEdits = pgTable("studio_edits", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  projectId: uuid("project_id").references(() => projects.id, { onDelete: "cascade" }).notNull(),
+  workspaceId: uuid("workspace_id").references(() => workspaces.id, { onDelete: "cascade" }).notNull(),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }).notNull(),
+  parentVersionId: uuid("parent_version_id"),
+  resultingVersionId: uuid("resulting_version_id"),
+  promptRaw: text("prompt_raw").notNull(),
+  promptEnhanced: text("prompt_enhanced"),
+  status: text("status", {
+    enum: [
+      "pending",
+      "enhancing",
+      "held",
+      "applying",
+      "verifying",
+      "committed",
+      "failed",
+      "refunded",
+    ],
+  }).default("pending").notNull(),
+  tokensHeldCents: integer("tokens_held_cents").default(0).notNull(),
+  tokensSettledCents: integer("tokens_settled_cents").default(0).notNull(),
+  diffStat: jsonb("diff_stat").$type<{
+    filesChanged: number;
+    insertions: number;
+    deletions: number;
+  }>(),
+  failureReason: text("failure_reason"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  finishedAt: timestamp("finished_at", { withTimezone: true }),
+});
+
+// 32. Studio Versions
+export const studioVersions = pgTable("studio_versions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  projectId: uuid("project_id").references(() => projects.id, { onDelete: "cascade" }).notNull(),
+  workspaceId: uuid("workspace_id").references(() => workspaces.id, { onDelete: "cascade" }).notNull(),
+  parentVersionId: uuid("parent_version_id"),
+  versionNumber: integer("version_number").notNull(),
+  label: text("label").notNull(),
+  zipStorageKey: text("zip_storage_key").notNull(),
+  previewUrl: text("preview_url"),
+  parityScore: real("parity_score"),
+  filesManifest: jsonb("files_manifest").$type<Array<{
+    path: string;
+    size: number;
+    sha256: string;
+  }>>().default([]).notNull(),
+  createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+// 33. Studio Preview Sessions
+export const studioPreviewSessions = pgTable("studio_preview_sessions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  projectId: uuid("project_id").references(() => projects.id, { onDelete: "cascade" }).notNull(),
+  workspaceId: uuid("workspace_id").references(() => workspaces.id, { onDelete: "cascade" }).notNull(),
+  versionId: uuid("version_id").references(() => studioVersions.id, { onDelete: "cascade" }).notNull(),
+  containerId: text("container_id"),
+  port: integer("port"),
+  status: text("status", {
+    enum: ["starting", "running", "stopped", "failed"],
+  }).default("starting").notNull(),
+  authToken: text("auth_token").notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
 // Relations
 export const workspaceRelations = relations(workspaces, ({ one, many }) => ({
   owner: one(users, { fields: [workspaces.ownerId], references: [users.id] }),
@@ -491,4 +562,7 @@ export const projectsRelations = relations(projects, ({ one, many }) => ({
   quotes: many(quotes),
   orders: many(orders),
   buildJobs: many(buildJobs),
+  studioEdits: many(studioEdits),
+  studioVersions: many(studioVersions),
+  studioPreviewSessions: many(studioPreviewSessions),
 }));

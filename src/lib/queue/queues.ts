@@ -18,6 +18,7 @@ export function getRedisConnection(): IORedis {
 export const ANALYSIS_QUEUE_NAME = "revforge-analysis";
 export const BUILD_QUEUE_NAME = "revforge-build";
 export const EMAIL_QUEUE_NAME = "revforge-email";
+export const STUDIO_QUEUE_NAME = "revforge-studio";
 
 export interface AnalysisJobPayload {
   projectId: string;
@@ -32,6 +33,16 @@ export interface EmailJobPayload {
   to: string;
   subject: string;
   html: string;
+}
+
+export interface StudioJobPayload {
+  editId: string;
+  projectId: string;
+  workspaceId: string;
+  userId: string;
+  parentVersionId?: string;
+  rawPrompt: string;
+  maxCents: number;
 }
 
 export const analysisQueue: Queue<AnalysisJobPayload> = new Queue(ANALYSIS_QUEUE_NAME, {
@@ -69,5 +80,14 @@ export const emailQueue: Queue<EmailJobPayload> = new Queue(EMAIL_QUEUE_NAME, {
       delay: 1000,
     },
     removeOnComplete: 50,
+  },
+});
+
+export const studioQueue: Queue<StudioJobPayload> = new Queue(STUDIO_QUEUE_NAME, {
+  connection: getRedisConnection(),
+  defaultJobOptions: {
+    attempts: 1,
+    removeOnComplete: 100,
+    removeOnFail: 500,
   },
 });
