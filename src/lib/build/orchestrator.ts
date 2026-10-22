@@ -14,6 +14,8 @@ import {
 import { eq, desc } from "drizzle-orm";
 import { BuilderAgent } from "./builder-agent";
 import { generateBuildPlan } from "./planner";
+import { captureAndVerifyApp } from "./capture";
+import { BUILD_MODELS } from "@/config/models";
 import { verifyBuildWorkspace, VerificationRunner } from "./verifier";
 import { createLeakageScanner } from "./leakage-scanner";
 import { scanBuildSafety } from "./safety-scan";
@@ -115,11 +117,11 @@ export async function runBuild(jobId: string): Promise<BuildResult> {
     referenceCorpus.push(`Project ${project.name} baseline interface specification`);
   }
 
-  // 6. Configured models and limits
+  // 6. Configured models from environment configuration
   const models = {
-    FAST: process.env.MODEL_FAST || env.LLM_MODEL_FAST || "claude-3-5-haiku-latest",
-    STANDARD: process.env.MODEL_STANDARD || env.LLM_MODEL_STANDARD || "claude-3-5-sonnet-latest",
-    PREMIUM: process.env.MODEL_PREMIUM || env.LLM_MODEL_PREMIUM || "claude-3-7-sonnet-latest",
+    FAST: BUILD_MODELS.FAST,
+    STANDARD: BUILD_MODELS.STANDARD,
+    PREMIUM: BUILD_MODELS.PREMIUM,
   };
 
   const costCapRatio = Number(process.env.COST_CAP_RATIO ?? 0.6);
@@ -197,10 +199,22 @@ export async function runBuild(jobId: string): Promise<BuildResult> {
     },
 
     async verify({ iteration: _iteration }) {
+      // Capture live routes and execute behavioral checks when app builds
+      const capture = await captureAndVerifyApp({
+        workspaceDir,
+        expectedRoutes,
+        features: (reportRow as any)?.features || [],
+        apiEndpoints: reportRow?.boundaries?.apiEndpoints || [],
+        targetUrl: (project as any).targetUrl,
+      });
+
       const outcome = await verifyBuildWorkspace(
         {
           workspaceDir,
           expectedRoutes,
+          referenceScreenshots: capture.referenceScreenshots,
+          renderedScreenshots: capture.renderedScreenshots,
+          behavioralChecks: capture.behavioralChecks,
         },
         verifierRunner
       );
@@ -281,16 +295,37 @@ export async function runBuild(jobId: string): Promise<BuildResult> {
     thresholds: {
       success: 0.85,
       partial: 0.65,
+      minCoverage: 0.8,
     },
   };
 
   const loopResult = await runBuildLoop(loopInput, deps);
 
-  // Final verification snapshot
+  // Final verification snapshot with real capture
+  const finalCapture = await captureAndVerifyApp({
+    workspaceDir,
+    expectedRoutes,
+    features: (reportRow as any)?.features || [],
+    apiEndpoints: reportRow?.boundaries?.apiEndpoints || [],
+    targetUrl: (project as any).targetUrl,
+  });
+
   const finalVerify = await verifyBuildWorkspace(
-    { workspaceDir, expectedRoutes },
+    {
+      workspaceDir,
+      expectedRoutes,
+      referenceScreenshots: finalCapture.referenceScreenshots,
+      renderedScreenshots: finalCapture.renderedScreenshots,
+      behavioralChecks: finalCapture.behavioralChecks,
+    },
     verifierRunner
   );
+
+  // Delivery status strictly enforces minimum coverage (>= 0.8)
+  let effectiveStatus: "delivered" | "delivered_partial" | "build_failed" = loopResult.status;
+  if (effectiveStatus === "delivered" && finalVerify.parity.coverage < 0.8) {
+    effectiveStatus = "delivered_partial";
+  }
 
   // 10. Package Delivery ZIP via real fflate and upload to S3
   const pkgResult = await packageDelivery({
@@ -298,7 +333,7 @@ export async function runBuild(jobId: string): Promise<BuildResult> {
     workspaceId: project.workspaceId,
     projectId: project.id,
     jobId: job.id,
-    status: loopResult.status,
+    status: effectiveStatus,
     parity: finalVerify.parity,
     leakage: { maxSimilarity: 0.05 },
     unmet: loopResult.unmet,
@@ -313,7 +348,7 @@ export async function runBuild(jobId: string): Promise<BuildResult> {
     storageKey: pkgResult.storageKey,
     sha256: pkgResult.sha256,
     sizeBytes: pkgResult.sizeBytes,
-    status: loopResult.status === "delivered" ? "full" : "partial",
+    status: effectiveStatus === "delivered" ? "full" : "partial",
     expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
   });
 
@@ -322,14 +357,14 @@ export async function runBuild(jobId: string): Promise<BuildResult> {
     await tx
       .update(buildJobs)
       .set({
-        status: loopResult.status === "build_failed" ? "build_failed" : "delivered",
+        status: effectiveStatus === "build_failed" ? "build_failed" : "delivered",
         spentCents: loopResult.spentCents,
-        stage: loopResult.status,
+        stage: effectiveStatus,
         updatedAt: new Date(),
       })
       .where(eq(buildJobs.id, job.id));
 
-    if (loopResult.status === "delivered") {
+    if (effectiveStatus === "delivered") {
       await transitionProject(
         tx as any,
         project.id,
@@ -344,7 +379,7 @@ export async function runBuild(jobId: string): Promise<BuildResult> {
         "delivered",
         { type: "build_worker" }
       );
-    } else if (loopResult.status === "delivered_partial") {
+    } else if (effectiveStatus === "delivered_partial") {
       await transitionProject(
         tx as any,
         project.id,

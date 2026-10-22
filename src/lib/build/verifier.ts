@@ -37,11 +37,15 @@ export interface VerificationOutcome {
  */
 export async function verifyBuildWorkspace(
   options: VerificationOptions,
-  runner?: VerificationRunner
+  runner: VerificationRunner
 ): Promise<VerificationOutcome> {
   const diagnostics: string[] = [];
   const obligations: Record<string, "verified" | "failed" | "pending"> = {};
   const wsDir = options.workspaceDir;
+
+  if (!runner) {
+    throw new Error("VerificationRunner is strictly required for workspace verification.");
+  }
 
   // 1. Build Health Check
   let buildHealth = 0;
@@ -51,20 +55,6 @@ export async function verifyBuildWorkspace(
     buildHealth = 0;
     diagnostics.push("Empty workspace or missing package.json in workspace root.");
     obligations["build_clean_compile"] = "failed";
-  } else if (!runner) {
-    // Basic file presence evaluation when runner is not supplied
-    try {
-      const hasLayout =
-        fs.existsSync(path.join(wsDir, "src/app/layout.tsx")) ||
-        fs.existsSync(path.join(wsDir, "app/layout.tsx")) ||
-        fs.existsSync(path.join(wsDir, "src/pages/_app.tsx")) ||
-        fs.existsSync(path.join(wsDir, "pages/_app.tsx"));
-      buildHealth = hasLayout ? 0.9 : 0.5;
-      obligations["build_clean_compile"] = hasLayout ? "verified" : "failed";
-    } catch {
-      buildHealth = 0.2;
-      obligations["build_clean_compile"] = "failed";
-    }
   } else {
     // Actually execute npm ci/install then npm run build
     try {

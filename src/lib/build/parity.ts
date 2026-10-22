@@ -75,11 +75,14 @@ export function computeParityScore(scores: ParityInput): ParityBreakdown {
 
 /**
  * Checks whether parity evaluation satisfies the delivery threshold.
- * passed = buildHealth > 0 && coverage >= 0.5 && overall >= threshold.
- * Build + structure alone (coverage 0.3) will NOT pass.
+ * Full delivery requires buildHealth > 0, coverage >= minCoverage (default 0.8), and overall >= threshold.
  */
-export function isParityPassed(score: ParityBreakdown, threshold: number): boolean {
-  return score.buildHealth > 0 && score.coverage >= 0.5 && score.overall >= threshold;
+export function isParityPassed(
+  score: ParityBreakdown,
+  threshold: number,
+  minCoverage: number = 0.8
+): boolean {
+  return score.buildHealth > 0 && score.coverage >= minCoverage && score.overall >= threshold;
 }
 
 /**

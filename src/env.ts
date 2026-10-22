@@ -10,9 +10,9 @@ const envSchema = z
 
     // LLM Configuration
     ANTHROPIC_API_KEY: z.string().optional(),
-    LLM_MODEL_FAST: z.string().default("claude-haiku-5-5"),
-    LLM_MODEL_STANDARD: z.string().default("claude-sonnet-5-5"),
-    LLM_MODEL_PREMIUM: z.string().default("claude-opus-5-5"),
+    LLM_MODEL_FAST: z.string().default("claude-3-5-haiku-latest"),
+    LLM_MODEL_STANDARD: z.string().default("claude-3-5-sonnet-latest"),
+    LLM_MODEL_PREMIUM: z.string().default("claude-3-7-sonnet-latest"),
     LLM_PROVIDER: z.enum(["anthropic", "fixture"]).default("fixture"),
 
     // Payment Provider Configuration

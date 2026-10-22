@@ -36,8 +36,14 @@ export class BuilderAgent {
     this.workspaceDir = path.resolve(options.workspaceDir);
     this.model = options.modelName;
     this.customRunCommand = options.runCommand;
+    const apiKey = env.ANTHROPIC_API_KEY;
+    if (!apiKey) {
+      if (env.LLM_PROVIDER !== "fixture" || process.env.NODE_ENV === "production") {
+        throw new Error("Missing ANTHROPIC_API_KEY configuration for live BuilderAgent execution.");
+      }
+    }
     this.client = new Anthropic({
-      apiKey: env.ANTHROPIC_API_KEY || "mock-key",
+      apiKey: apiKey || "sk-ant-api03-fixture-placeholder",
     });
   }
 

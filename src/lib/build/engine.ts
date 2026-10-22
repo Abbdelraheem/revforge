@@ -70,6 +70,7 @@ export interface LoopInput {
   thresholds: {
     success: number;
     partial: number;
+    minCoverage?: number;
   };
   waived?: string[];
 }
@@ -114,16 +115,21 @@ export async function runBuildLoop(
   const startTime = deps.now();
   let spentCents = 0;
   let bestScore = 0;
+  let bestCoverage = 0;
   let bestIteration = 0;
   let bestCheckpointId: string | null = null;
   let currentRole: "FAST" | "STANDARD" | "PREMIUM" = "STANDARD";
   let stagnationCounter = 0;
-  let consecutiveExceptions = 0;
+  let consecutiveBuilderErrors = 0;
+  let consecutiveSafetyErrors = 0;
+  let consecutiveLeakageErrors = 0;
+  let consecutiveVerifyErrors = 0;
   let unmet: string[] = [...input.obligations];
   let feedback: string | undefined = undefined;
   const roleHistory: string[] = [];
   let stopReason: LoopResult["stopReason"] | null = null;
   let totalIterationsExecuted = 0;
+  const minCoverage = input.thresholds.minCoverage ?? 0.8;
 
   const handleStagnation = () => {
     stagnationCounter++;
@@ -172,11 +178,11 @@ export async function runBuildLoop(
         unmet,
         feedback,
       });
-      consecutiveExceptions = 0;
+      consecutiveBuilderErrors = 0;
       feedback = undefined;
     } catch (err: any) {
-      consecutiveExceptions++;
-      if (consecutiveExceptions >= 3) {
+      consecutiveBuilderErrors++;
+      if (consecutiveBuilderErrors >= 3) {
         stopReason = "fatal_error";
         break;
       }
@@ -194,7 +200,25 @@ export async function runBuildLoop(
     spentCents += iterCost;
 
     // 2. scanSafety
-    const safety = await deps.scanSafety();
+    let safety;
+    try {
+      safety = await deps.scanSafety();
+      consecutiveSafetyErrors = 0;
+    } catch (err: any) {
+      consecutiveSafetyErrors++;
+      if (consecutiveSafetyErrors >= 3) {
+        stopReason = "fatal_error";
+        break;
+      }
+      feedback = `Safety scan error at iteration ${iteration}: ${err?.message || String(err)}`;
+      const shouldStop = handleStagnation();
+      if (shouldStop) {
+        stopReason = "stagnation";
+        break;
+      }
+      continue;
+    }
+
     if (!safety.passed) {
       if (bestCheckpointId) {
         await deps.checkpoint.restore(bestCheckpointId);
@@ -209,7 +233,25 @@ export async function runBuildLoop(
     }
 
     // 3. scanLeakage
-    const leakage = await deps.scanLeakage();
+    let leakage;
+    try {
+      leakage = await deps.scanLeakage();
+      consecutiveLeakageErrors = 0;
+    } catch (err: any) {
+      consecutiveLeakageErrors++;
+      if (consecutiveLeakageErrors >= 3) {
+        stopReason = "fatal_error";
+        break;
+      }
+      feedback = `Leakage scan error at iteration ${iteration}: ${err?.message || String(err)}`;
+      const shouldStop = handleStagnation();
+      if (shouldStop) {
+        stopReason = "stagnation";
+        break;
+      }
+      continue;
+    }
+
     if (leakage.hasLeakage) {
       if (bestCheckpointId) {
         await deps.checkpoint.restore(bestCheckpointId);
@@ -224,7 +266,25 @@ export async function runBuildLoop(
     }
 
     // 4. verify
-    const verifyResult = await deps.verify({ iteration });
+    let verifyResult;
+    try {
+      verifyResult = await deps.verify({ iteration });
+      consecutiveVerifyErrors = 0;
+    } catch (err: any) {
+      consecutiveVerifyErrors++;
+      if (consecutiveVerifyErrors >= 3) {
+        stopReason = "fatal_error";
+        break;
+      }
+      feedback = `Verifier error at iteration ${iteration}: ${err?.message || String(err)}`;
+      const shouldStop = handleStagnation();
+      if (shouldStop) {
+        stopReason = "stagnation";
+        break;
+      }
+      continue;
+    }
+
     const overallScore = verifyResult.parity.overall;
 
     // Update unmet obligations
@@ -240,6 +300,7 @@ export async function runBuildLoop(
     // Checkpoint saved only on strict improvement of overall score
     if (overallScore > bestScore) {
       bestScore = overallScore;
+      bestCoverage = verifyResult.parity.coverage;
       bestIteration = iteration;
       bestCheckpointId = await deps.checkpoint.save(iteration, overallScore);
     }
@@ -255,8 +316,12 @@ export async function runBuildLoop(
       stagnationCounter = 0;
     }
 
-    // Check for success
-    if (unmet.length === 0 && bestScore >= input.thresholds.success) {
+    // Check for success (requires satisfying obligations, reaching parity score, and meeting minCoverage)
+    if (
+      unmet.length === 0 &&
+      bestScore >= input.thresholds.success &&
+      bestCoverage >= minCoverage
+    ) {
       stopReason = "success";
       break;
     }
@@ -273,9 +338,9 @@ export async function runBuildLoop(
     } catch {}
   }
 
-  // Determine final status
+  // Determine final status: full delivery strictly requires minimum verification coverage (>= 0.8)
   let status: LoopResult["status"];
-  if (stopReason === "success") {
+  if (stopReason === "success" && bestCoverage >= minCoverage) {
     status = "delivered";
   } else if (bestScore >= input.thresholds.partial) {
     status = "delivered_partial";

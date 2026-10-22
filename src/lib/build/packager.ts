@@ -114,6 +114,15 @@ export async function packageDelivery(
     `- Behavioral Parity: ${formatDimensionScore(parity.behavioral)} (weight: 0.35)`,
     `- Build Health: ${formatDimensionScore(parity.buildHealth)} (weight: 0.15)`,
     "",
+    "## Dimension Verification Status",
+    ...(parity.visual === null ? ["- Visual Parity: NOT VERIFIED (no visual capture baseline)"] : ["- Visual Parity: VERIFIED"]),
+    ...(parity.structural === null ? ["- Structural Parity: NOT VERIFIED (no structural routes specified)"] : ["- Structural Parity: VERIFIED"]),
+    ...(parity.behavioral === null ? ["- Behavioral Parity: NOT VERIFIED (no behavioral checks executed)"] : ["- Behavioral Parity: VERIFIED"]),
+    `- Build Health: ${parity.buildHealth > 0 ? "VERIFIED" : "FAILED"}`,
+    ...(parity.coverage < 0.8
+      ? [`- Coverage Limitation: Coverage is ${(parity.coverage * 100).toFixed(1)}% (< 80.0% delivery minimum). Final delivery capped at partial status.`]
+      : []),
+    "",
     "## Unmet Obligations",
     unmet.length === 0
       ? "- None (all functional obligations satisfied or verified)."

@@ -318,5 +318,5 @@ PASS  [TG] npm audit (no high/critical in prod deps)
 PASS  [TG] playwright lists >= 12 tests
 
 T0: 32/32  T1: 29/29  T2: 33/33  T3: 39/39  T4: 44/44  T5: 68/68  T6: 44/44  T7: 21/21  TG: 8/8
-commit=28401b8 date=2026-10-22T10:27:49.723Z
+commit=fe080ed date=2026-10-22T11:38:07.816Z
 ALL SELECTED CHECKS PASSED

@@ -68,13 +68,13 @@ export function resolveSafePath(
     const parts = forwardRel.split("/");
     const fileName = parts[parts.length - 1] || "";
 
-    // Reject .git/**
-    if (parts[0] === ".git") {
+    // Reject .git segment at any depth (e.g. .git/**, sub/.git/HEAD)
+    if (parts.includes(".git")) {
       throw new Error("Cannot write to .git directory");
     }
 
-    // Reject node_modules/**
-    if (parts[0] === "node_modules") {
+    // Reject node_modules segment at any depth (e.g. node_modules/**, sub/node_modules/**)
+    if (parts.includes("node_modules")) {
       throw new Error("Cannot write to node_modules directory");
     }
 

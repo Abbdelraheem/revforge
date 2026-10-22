@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { computeParityScore, compareImages, PARITY_WEIGHTS } from "@/lib/build/parity";
+import { computeParityScore, compareImages, PARITY_WEIGHTS, isParityPassed } from "@/lib/build/parity";
+import { resolveSafePath } from "@/lib/build/fs-guard";
 
 describe("Parity Evaluation Suite", () => {
   it("enforces canonical weights (0.35 visual, 0.15 structural, 0.35 behavioral, 0.15 buildHealth)", () => {
@@ -75,5 +76,47 @@ describe("Parity Evaluation Suite", () => {
       });
       expect(score.overall).toBeCloseTo(expected, 2);
     });
+  });
+
+  it("enforces minimum 80% coverage in isParityPassed", () => {
+    // Only buildHealth + structural: coverage is 0.30 (even with 100% score)
+    const lowCoverageScore = computeParityScore({
+      visual: null,
+      structural: 1.0,
+      behavioral: null,
+      buildHealth: 1.0,
+    });
+    expect(lowCoverageScore.coverage).toBe(0.3);
+    expect(lowCoverageScore.overall).toBe(1.0);
+    expect(isParityPassed(lowCoverageScore, 0.85, 0.8)).toBe(false);
+
+    // Full coverage with high score: passes
+    const fullScore = computeParityScore({
+      visual: 0.95,
+      structural: 1.0,
+      behavioral: 0.9,
+      buildHealth: 1.0,
+    });
+    expect(fullScore.coverage).toBe(1.0);
+    expect(isParityPassed(fullScore, 0.85, 0.8)).toBe(true);
+  });
+
+  it("fs-guard strictly refuses .git and node_modules segments at ANY depth for writes", () => {
+    const dummyRoot = process.cwd();
+    expect(() =>
+      resolveSafePath(dummyRoot, "packages/ui/.git/HEAD", { forWrite: true })
+    ).toThrow("Cannot write to .git directory");
+
+    expect(() =>
+      resolveSafePath(dummyRoot, "sub/deep/node_modules/evil.js", { forWrite: true })
+    ).toThrow("Cannot write to node_modules directory");
+
+    // Root-level still refused
+    expect(() =>
+      resolveSafePath(dummyRoot, ".git/config", { forWrite: true })
+    ).toThrow("Cannot write to .git directory");
+    expect(() =>
+      resolveSafePath(dummyRoot, "node_modules/lodash/index.js", { forWrite: true })
+    ).toThrow("Cannot write to node_modules directory");
   });
 });
