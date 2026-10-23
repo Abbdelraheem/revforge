@@ -163,6 +163,7 @@ export const technicalReports = pgTable("technical_reports", {
   summary: text("summary").notNull(),
   confidence: real("confidence").notNull(),
   schemaVersion: integer("schema_version").default(1).notNull(),
+  promptVersion: text("prompt_version"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
@@ -337,6 +338,7 @@ export const buildJobs = pgTable("build_jobs", {
   spentCents: integer("spent_cents").default(0).notNull(),
   parityScore: real("parity_score"),
   stage: text("stage").default("initializing").notNull(),
+  promptVersion: text("prompt_version"),
   error: text("error"),
   heartbeatAt: timestamp("heartbeat_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
@@ -521,6 +523,7 @@ export const studioEdits = pgTable("studio_edits", {
   }).default("pending").notNull(),
   tokensHeldCents: integer("tokens_held_cents").default(0).notNull(),
   tokensSettledCents: integer("tokens_settled_cents").default(0).notNull(),
+  promptVersion: text("prompt_version"),
   diffStat: jsonb("diff_stat").$type<{
     filesChanged: number;
     insertions: number;

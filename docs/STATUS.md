@@ -108,6 +108,15 @@ The old preview route served a source file directly out of the version ZIP. That
 
 **V8 Part 2 verification (local, 2026-10-23):** `npm run typecheck` pass; `npm test` 21 files / 238 tests pass; `npm run lint` pass; `npm run build` pass; `node scripts/audit.mjs --all` 310/310 pass. Schema drift remains skipped locally because no Postgres is listening. The margin page has not been viewed against live data because the smoke stack is unavailable; its numbers come from the same real tables and pure contract, with no demo rows.
 
+### V8 Part 3: versioned prompts and eval harness
+
+- **Exact contract.** `src/lib/prompts/index.ts` exports `getPrompt(role)` returning `{ system, version }` for `analyst`, `planner`, `builder`, `edit_planner`, and `edit_builder`. Every system string is static (no template placeholders), at least 1500 characters, contains lowercase `untrusted` and `unknown`, and the builder roles require `npm run build` plus tests. `PROMPT_VERSION` is `2026-10-23.v8`.
+- **Role specifications.** The analyst prompt covers clean-room evidence statuses (`seen`, `inferred`, `unknown_server_side`), confidence, route/API/auth/entity/token/responsive/accessibility inventories, risks, a formula-based effort rubric, and two worked examples. The planner prompt covers ordered obligations, dependency DAG, testable acceptance ids, file layout, design tokens, and a unit/integration/route/build/visual test plan. The builder prompt covers workspace safety, the implement-and-verify loop, real behaviour, accessibility, and honest failure reporting. The edit planner prompt defines the minimal brief, original-language handling, existing-file-only targets, one-question clarification, and safety refusals. The edit builder prompt requires inspection, minimal diffs, real verification, and no test weakening.
+- **Wiring.** Analysis uses `getPrompt("analyst")`; build agents use `getPrompt("builder")`; Studio’s enhancer uses `getPrompt("edit_planner")`; Studio’s builder uses `getPrompt("edit_builder")`. `drizzle/0006_prompt_versions.sql` adds `prompt_version` to `technical_reports`, `build_jobs`, and `studio_edits`, and the creation paths write the active version.
+- **Evaluation.** `npm run prompts:eval` runs five offline fixtures plus static checks for all five roles. `npm run prompts:live` is an opt-in model-backed smoke test that refuses to run in CI and requires `ANTHROPIC_API_KEY` and `LLM_MODEL_FAST`. It has not been run locally.
+
+**V8 Part 3 verification (local, 2026-10-23):** `npm run typecheck` pass; `npm run prompts:eval` 5 roles / 5 fixtures pass; `npm test` 22 files / 241 tests pass (schema drift skipped: no Postgres); `npm run lint` pass; `npm run build` pass; `node scripts/audit.mjs --all` 310/310 pass. `prompts:live` was not run because that requires a real API key and spending; it is not part of CI.
+
 ---
 
 ## 2. What Is Real & Verified

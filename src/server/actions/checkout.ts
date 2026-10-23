@@ -7,6 +7,8 @@ import { requireSession } from "@/lib/auth";
 import { getPaymentProvider } from "@/lib/billing/provider";
 import { transitionProject } from "@/db/state-machine";
 import { deductCredits } from "@/lib/billing/credits";
+import { env } from "@/env";
+import { getPrompt } from "@/lib/prompts";
 
 export interface InitiateCheckoutParams {
   projectId: string;
@@ -107,9 +109,10 @@ export async function initiateCheckoutAction(params: InitiateCheckoutParams) {
             projectId: project.id,
             orderId: order.id,
             status: "queued",
-            costCapCents: Math.round(activeQuote.subtotalCents * 0.4),
+            costCapCents: Math.round(activeQuote.subtotalCents * env.COST_CAP_RATIO),
             spentCents: 0,
             stage: "queued",
+            promptVersion: getPrompt("builder").version,
           })
           .returning();
 

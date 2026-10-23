@@ -14,6 +14,7 @@ import { priceQuote, DEFAULT_PRICING_CONFIG_V1, FeatureInput } from "@/lib/prici
 import { clampFeatureHours } from "@/lib/pricing/bands";
 import { recordCostEvent } from "@/lib/billing/costs";
 import { env } from "@/env";
+import { getPrompt } from "@/lib/prompts";
 
 export interface PersistAnalysisParams {
   tx: DbTx;
@@ -85,6 +86,7 @@ export async function persistAnalysisReport({
       summary: report.summary,
       confidence,
       schemaVersion: 1,
+      promptVersion: getPrompt("analyst").version,
     })
     .returning();
 

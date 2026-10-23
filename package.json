@@ -11,7 +11,9 @@
     "test": "vitest run && tsx scripts/check-schema-drift.ts",
     "test:drift": "tsx scripts/check-schema-drift.ts --require-db",
     "smoke": "tsx scripts/smoke.ts",
-    "preview:worker": "tsx scripts/preview-worker.ts"
+    "preview:worker": "tsx scripts/preview-worker.ts",
+    "prompts:eval": "tsx scripts/prompts-eval.ts",
+    "prompts:live": "tsx scripts/prompts-live.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.135.0",

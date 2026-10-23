@@ -13,6 +13,7 @@ import { transitionProject } from "@/db/state-machine";
 import { dispatchOutbox } from "@/lib/queue/outbox";
 import { eq, sql } from "drizzle-orm";
 import { env } from "@/env";
+import { getPrompt } from "@/lib/prompts";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -157,6 +158,7 @@ export async function POST(req: NextRequest) {
               costCapCents,
               spentCents: 0,
               stage: "queued",
+              promptVersion: getPrompt("builder").version,
             })
             .returning();
 

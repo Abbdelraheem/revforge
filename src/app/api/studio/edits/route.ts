@@ -6,6 +6,7 @@ import { loadStudioRouteData } from "@/lib/studio/route-context";
 import { executeStudioEdit } from "@/lib/studio/worker";
 import { studioEdits } from "@/db/schema";
 import { withTenant } from "@/db/tenant";
+import { getPrompt } from "@/lib/prompts";
 
 export const runtime = "nodejs";
 
@@ -99,6 +100,7 @@ export async function POST(req: NextRequest) {
             parentVersionId: parentVersionIdValue,
             promptRaw: prompt.trim(),
             tokensHeldCents: Math.floor(Number(maxCents)),
+            promptVersion: getPrompt("edit_planner").version,
             status: "pending",
           })
           .returning();

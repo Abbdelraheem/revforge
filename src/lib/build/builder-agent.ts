@@ -6,6 +6,7 @@ import { Anthropic } from "@anthropic-ai/sdk";
 import { env } from "@/env";
 import { executeTool, ToolInvocation } from "./tools";
 import { resolveSafePath } from "./fs-guard";
+import { getPrompt } from "@/lib/prompts";
 
 const execFileAsync = promisify(execFile);
 
@@ -13,6 +14,7 @@ export interface BuilderAgentOptions {
   workspaceDir: string;
   role: "FAST" | "STANDARD" | "PREMIUM";
   modelName: string;
+  promptRole?: "builder" | "edit_builder";
   runCommand?: (cmd: string, args: string[], cwd: string) => Promise<{ exitCode: number; stdout: string; stderr: string }>;
 }
 
@@ -30,11 +32,13 @@ export class BuilderAgent {
   private workspaceDir: string;
   private client: Anthropic;
   private model: string;
+  private systemPrompt: string;
   private customRunCommand?: BuilderAgentOptions["runCommand"];
 
   constructor(options: BuilderAgentOptions) {
     this.workspaceDir = path.resolve(options.workspaceDir);
     this.model = options.modelName;
+    this.systemPrompt = getPrompt(options.promptRole || "builder").system;
     this.customRunCommand = options.runCommand;
     const apiKey = env.ANTHROPIC_API_KEY;
     if (!apiKey) {
@@ -173,7 +177,7 @@ export class BuilderAgent {
       const response = await this.client.messages.create({
         model: this.model,
         max_tokens: 4096,
-        system: "You are an expert full-stack engineer rebuilding an application cleanly from specifications. Use provided tools (write_file, read_file, run_command) to implement code, run build/typecheck, and verify clean compilation.",
+        system: this.systemPrompt,
         messages,
         tools,
       });

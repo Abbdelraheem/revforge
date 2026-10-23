@@ -750,6 +750,7 @@ function defaultRunBuilder(): StudioRunBuilder {
       workspaceDir,
       role: "STANDARD",
       modelName: model,
+      promptRole: "edit_builder",
     });
 
     const { task, specification } = buildPromptForBuilder(
