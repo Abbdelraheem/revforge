@@ -405,6 +405,21 @@ export const deliveries = pgTable("deliveries", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
+// 22b. Git delivery archives generated from real Studio version history.
+export const deliveryGitArchives = pgTable("delivery_git_archives", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  workspaceId: uuid("workspace_id").references(() => workspaces.id, { onDelete: "cascade" }).notNull(),
+  projectId: uuid("project_id").references(() => projects.id, { onDelete: "cascade" }).notNull(),
+  sourceVersionId: uuid("source_version_id"),
+  storageKey: text("storage_key").notNull(),
+  sha256: text("sha256").notNull(),
+  sizeBytes: integer("size_bytes").notNull(),
+  commitCount: integer("commit_count").default(0).notNull(),
+  headCommit: text("head_commit").notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
 // 23. Audit Log (append-only)
 export const auditLog = pgTable("audit_log", {
   id: uuid("id").defaultRandom().primaryKey(),

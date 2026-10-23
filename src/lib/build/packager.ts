@@ -3,6 +3,7 @@ import path from "node:path";
 import crypto from "node:crypto";
 import * as fflate from "fflate";
 import { type ParityBreakdown } from "./parity";
+import { buildDeployGuide } from "@/lib/delivery/deploy-guide";
 
 export interface PackageDeliveryOptions {
   workspaceDir: string;
@@ -162,6 +163,49 @@ export async function packageDelivery(
     "and verified below the 0.25 similarity boundary.",
   ].join("\n");
   zipEntries["LICENSE-NOTICE.md"] = fflate.strToU8(licenseNoticeContent);
+
+  // 4b. Deployment guide and machine-readable delivery metadata.
+  zipEntries["DEPLOY.md"] = fflate.strToU8(buildDeployGuide());
+  zipEntries["DELIVERY_METADATA.json"] = fflate.strToU8(
+    JSON.stringify(
+      {
+        projectId,
+        jobId,
+        status: options.status,
+        parity: {
+          overall: parity.overall,
+          coverage: parity.coverage,
+          visual: parity.visual,
+          structural: parity.structural,
+          behavioral: parity.behavioral,
+          buildHealth: parity.buildHealth,
+        },
+        maxReferenceSimilarity: leakage.maxSimilarity,
+        generatedAt: new Date().toISOString(),
+      },
+      null,
+      2
+    )
+  );
+
+  // 4c. CHECKSUMS.txt covers every entry that will be archived except itself.
+  const checksumLines = Object.keys(zipEntries)
+    .sort()
+    .map((entryPath) => {
+      const digest = crypto
+        .createHash("sha256")
+        .update(zipEntries[entryPath]!)
+        .digest("hex");
+      return `${digest}  ${entryPath}`;
+    });
+  zipEntries["CHECKSUMS.txt"] = fflate.strToU8(
+    [
+      "# SHA-256 checksums for the delivered files.",
+      "# Verify from the archive root with: sha256sum -c CHECKSUMS.txt",
+      ...checksumLines,
+      "",
+    ].join("\n")
+  );
 
   // 5. Compress using fflate
   const compressedBytes = fflate.zipSync(zipEntries, { level: 6 });

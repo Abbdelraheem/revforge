@@ -85,6 +85,46 @@ export async function sendAnalysisReadyEmail(to: string, projectName: string, pr
   });
 }
 
+export async function sendDeliveryReadyEmail(params: {
+  to: string;
+  projectName: string;
+  deliveryUrl: string;
+  sha256?: string;
+  sizeBytes?: number;
+  expiresAt: Date;
+  versionLabel?: string;
+}) {
+  const { to, projectName, deliveryUrl, sha256, sizeBytes, expiresAt, versionLabel } = params;
+  const sizeMb =
+    sizeBytes != null ? `${(sizeBytes / (1024 * 1024)).toFixed(2)} MB` : null;
+  const digestLine = sha256
+    ? `<p>SHA-256: <code style="word-break: break-all;">${sha256}</code>${sizeMb ? `<br />Archive size: ${sizeMb}` : ""}<br />Retained until: ${expiresAt.toISOString()}</p>`
+    : `<p>Retained until: ${expiresAt.toISOString()}</p>`;
+  const textDigest = [
+    sha256 ? `SHA-256: ${sha256}.` : "",
+    sizeMb ? `Size: ${sizeMb}.` : "",
+    `Retained until ${expiresAt.toISOString()}.`,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  return sendEmail({
+    to,
+    subject: `Delivery ready: ${projectName}`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2>Your delivery is ready</h2>
+        <p>The verified archive for <strong>${projectName}</strong> is available in your workspace.</p>
+        ${versionLabel ? `<p>Version: <strong>${versionLabel}</strong></p>` : ""}
+        ${digestLine}
+        <p><a href="${deliveryUrl}" style="display: inline-block; padding: 10px 20px; background-color: #c2410c; color: #fff; text-decoration: none; border-radius: 4px;">Open delivery</a></p>
+        <p style="color: #666; font-size: 12px; margin-top: 30px;">The email links to your authenticated workspace. It does not contain a long-lived storage credential.</p>
+      </div>
+    `,
+    text: `Delivery ready for ${projectName}.${versionLabel ? ` Version: ${versionLabel}.` : ""} ${textDigest} Open: ${deliveryUrl}`,
+  });
+}
+
 export async function sendBuildFinishedEmail(to: string, projectName: string, downloadUrl: string) {
   return sendEmail({
     to,

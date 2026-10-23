@@ -75,6 +75,14 @@ const envSchema = z
     PREVIEW_MAX_RESPONSE_BYTES: z.coerce.number().default(5_000_000),
     PREVIEW_TUNNEL_SECRET: z.string().min(16).optional(),
     WORKER_TUNNEL_URL: z.string().url().default("http://127.0.0.1:3001"),
+
+    // Delivery
+    DELIVERY_RETENTION_DAYS: z.coerce.number().int().positive().default(90),
+    ENABLE_GITHUB_PUSH: z
+      .string()
+      .transform((value) => value === "true" || value === "1")
+      .default("false"),
+    GITHUB_TOKEN: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     // Skip strict production validation during build phase
@@ -162,6 +170,8 @@ function parseEnv() {
       PREVIEW_REQUEST_TIMEOUT_MS: 15000,
       PREVIEW_MAX_RESPONSE_BYTES: 5000000,
       WORKER_TUNNEL_URL: "http://127.0.0.1:3001",
+      DELIVERY_RETENTION_DAYS: 90,
+      ENABLE_GITHUB_PUSH: false,
     } as any;
   }
 
@@ -211,6 +221,8 @@ function parseEnv() {
         PREVIEW_REQUEST_TIMEOUT_MS: 15000,
         PREVIEW_MAX_RESPONSE_BYTES: 5000000,
         WORKER_TUNNEL_URL: "http://127.0.0.1:3001",
+        DELIVERY_RETENTION_DAYS: 90,
+        ENABLE_GITHUB_PUSH: false,
       }) as z.infer<typeof envSchema>;
 }
 

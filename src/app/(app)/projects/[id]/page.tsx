@@ -164,9 +164,9 @@ export default async function ProjectDetailPage({ params, searchParams }: Projec
                 </Link>
               </Button>
               <Button asChild size="sm" variant="outline" className="text-sm font-bold shadow-sm">
-                <Link href={`/api/download/${project.id}`}>
+                <Link href={`/projects/${project.id}/delivery`}>
                   <Download className="me-1.5 h-3.5 w-3.5" />
-                  <span>Download Package</span>
+                  <span>Delivery</span>
                 </Link>
               </Button>
             </>

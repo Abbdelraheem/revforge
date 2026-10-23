@@ -10,6 +10,7 @@ import {
   orders,
   evidenceItems as evidenceItemsTable,
   technicalReports,
+  users,
 } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { BuilderAgent } from "./builder-agent";
@@ -27,6 +28,7 @@ import { recordCostEvent } from "@/lib/billing/costs";
 import { storage } from "@/lib/storage";
 import { transitionProject } from "@/db/state-machine";
 import { issueCredits } from "@/lib/billing/credits";
+import { sendDeliveryReadyEmail } from "@/lib/email/send";
 import {
   DEFAULT_BUILD_LIMITS,
   calculateCreditRefund,
@@ -354,7 +356,11 @@ export async function runBuild(jobId: string): Promise<BuildResult> {
     storage,
   });
 
-  // 11. Record Delivery in deliveries table
+  // 11. Record Delivery in deliveries table. Retention is configuration, not
+  // a hardcoded week; the download gate returns 410 after this timestamp.
+  const deliveryExpiresAt = new Date(
+    Date.now() + env.DELIVERY_RETENTION_DAYS * 24 * 60 * 60 * 1000
+  );
   await systemDb.insert(deliveries).values({
     workspaceId: project.workspaceId,
     jobId: job.id,
@@ -362,8 +368,30 @@ export async function runBuild(jobId: string): Promise<BuildResult> {
     sha256: pkgResult.sha256,
     sizeBytes: pkgResult.sizeBytes,
     status: effectiveStatus === "delivered" ? "full" : "partial",
-    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    expiresAt: deliveryExpiresAt,
   });
+
+  // Delivery email is best-effort. A mail outage must not invalidate an archive
+  // that is already stored and recorded.
+  try {
+    const [owner] = await systemDb
+      .select({ email: users.email })
+      .from(users)
+      .where(eq(users.id, project.userId))
+      .limit(1);
+    if (owner?.email) {
+      await sendDeliveryReadyEmail({
+        to: owner.email,
+        projectName: project.name,
+        deliveryUrl: `${env.APP_URL}/projects/${project.id}/delivery`,
+        sha256: pkgResult.sha256,
+        sizeBytes: pkgResult.sizeBytes,
+        expiresAt: deliveryExpiresAt,
+      });
+    }
+  } catch {
+    // The delivery page and resend action remain available.
+  }
 
   // 12. Update job and project status with platform credit refunds on partial/failed
   await systemDb.transaction(async (tx) => {

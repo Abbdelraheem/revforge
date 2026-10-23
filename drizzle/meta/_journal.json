@@ -57,6 +57,13 @@
       "when": 1792746200000,
       "tag": "0007_studio_cancel",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792747200000,
+      "tag": "0008_delivery_git_archives",
+      "breakpoints": true
     }
   ]
 }

@@ -1,10 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { withTenant } from "@/db/tenant";
-import { projects, orders, buildJobs, deliveries, auditLog } from "@/db/schema";
+import {
+  projects,
+  orders,
+  buildJobs,
+  deliveries,
+  studioVersions,
+  auditLog,
+} from "@/db/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { storage } from "@/lib/storage";
 import { authorizeDownload } from "@/lib/delivery/authorize";
+import { versionExpiresAt } from "@/lib/delivery/context";
+import { env } from "@/env";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -14,6 +23,7 @@ export async function GET(
   { params }: { params: Promise<{ projectId: string }> }
 ) {
   const { projectId } = await params;
+  const versionId = req.nextUrl.searchParams.get("versionId");
   const session = await getSession();
 
   if (!session) {
@@ -83,19 +93,53 @@ export async function GET(
         deliveryRecord = del;
       }
 
+      let selectedVersion: typeof studioVersions.$inferSelect | null = null;
+      if (versionId) {
+        const [version] = await tx
+          .select()
+          .from(studioVersions)
+          .where(
+            and(
+              eq(studioVersions.id, versionId),
+              eq(studioVersions.projectId, projectId),
+              eq(studioVersions.workspaceId, workspaceId)
+            )
+          )
+          .limit(1);
+        selectedVersion = version || null;
+      }
+
       return {
         project: proj,
         orders: projectOrders,
         delivery: deliveryRecord,
+        selectedVersion,
       };
     }
   );
+
+  if (versionId && !data?.selectedVersion) {
+    return NextResponse.json(
+      { error: "The requested Studio version does not exist for this project." },
+      { status: 404 }
+    );
+  }
+
+  const version = data?.selectedVersion || null;
+  const authDelivery = version
+    ? {
+        id: version.id,
+        storageKey: version.zipStorageKey,
+        expiresAt: versionExpiresAt(version, env.DELIVERY_RETENTION_DAYS),
+        createdAt: version.createdAt,
+      }
+    : data?.delivery || null;
 
   const authResult = authorizeDownload({
     session,
     project: data?.project || null,
     orders: data?.orders || [],
-    delivery: data?.delivery || null,
+    delivery: authDelivery,
     now: Date.now(),
   });
 
@@ -122,7 +166,9 @@ export async function GET(
         resourceId: projectId,
         metadata: {
           storageKey: authResult.storageKey,
-          deliveryId: data?.delivery?.id,
+          deliveryId: version ? null : data?.delivery?.id,
+          versionId: version?.id ?? null,
+          versionNumber: version?.versionNumber ?? null,
         },
       });
     }

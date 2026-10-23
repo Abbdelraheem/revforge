@@ -85,7 +85,7 @@ export function authorizeDownload(
   // 6. 410 (expired)
   if (params.delivery.expiresAt) {
     const expTime = new Date(params.delivery.expiresAt).getTime();
-    if (now > expTime) {
+    if (now >= expTime) {
       return { ok: false, status: 410, error: "Delivery archive link has expired" };
     }
   }
