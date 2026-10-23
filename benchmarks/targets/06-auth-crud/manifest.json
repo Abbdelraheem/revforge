@@ -1,0 +1,43 @@
+{
+  "id": "06-auth-crud",
+  "name": "TaskFlow Workspace Manager",
+  "difficultyTier": "crud",
+  "targetType": "web",
+  "entryPoint": "index.html",
+  "expectedRoutes": [
+    "/",
+    "/login",
+    "/tasks",
+    "/tasks/new"
+  ],
+  "expectedFeatures": [
+    "Authentication form",
+    "Task item listing",
+    "Task create/edit form",
+    "Task deletion and status toggle"
+  ],
+  "estimatedHours": 7.5,
+  "scriptedEdits": [
+    {
+      "id": "edit-1",
+      "instruction": "Change high priority badge color to red #ef4444",
+      "checkType": "contains_text",
+      "targetFile": "taskflow.css",
+      "expectedPattern": "#ef4444"
+    },
+    {
+      "id": "edit-2",
+      "instruction": "Add due date field to task creation form",
+      "checkType": "contains_text",
+      "targetFile": "new-task.html",
+      "expectedPattern": "type=\"date\""
+    },
+    {
+      "id": "edit-3",
+      "instruction": "Fix empty task title check on submit",
+      "checkType": "contains_text",
+      "targetFile": "tasks.js",
+      "expectedPattern": "title.trim()"
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "id": "02-multipage-marketing",
+  "name": "Aura Cloud Marketing Site",
+  "difficultyTier": "multi-page",
+  "targetType": "web",
+  "entryPoint": "index.html",
+  "expectedRoutes": [
+    "/",
+    "/about",
+    "/pricing",
+    "/contact"
+  ],
+  "expectedFeatures": [
+    "Multi-page navigation",
+    "Tiered pricing plans",
+    "Contact inquiry form",
+    "Team bio profiles"
+  ],
+  "estimatedHours": 4.5,
+  "scriptedEdits": [
+    {
+      "id": "edit-1",
+      "instruction": "Change primary color to indigo #4f46e5",
+      "checkType": "contains_text",
+      "targetFile": "styles.css",
+      "expectedPattern": "#4f46e5"
+    },
+    {
+      "id": "edit-2",
+      "instruction": "Add milestone timeline to about page",
+      "checkType": "contains_text",
+      "targetFile": "about.html",
+      "expectedPattern": "timeline"
+    },
+    {
+      "id": "edit-3",
+      "instruction": "Fix contact form phone validation",
+      "checkType": "contains_text",
+      "targetFile": "contact.html",
+      "expectedPattern": "type=\"tel\""
+    }
+  ]
+}

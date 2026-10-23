@@ -1,0 +1,43 @@
+{
+  "id": "11-doc-portal",
+  "name": "RevForge Developer Documentation Portal",
+  "difficultyTier": "documentation",
+  "targetType": "web",
+  "entryPoint": "index.html",
+  "expectedRoutes": [
+    "/",
+    "/docs/getting-started",
+    "/docs/api",
+    "/docs/faq"
+  ],
+  "expectedFeatures": [
+    "Collapsible sidebar navigation tree",
+    "Code snippet clipboard copy action",
+    "On-page heading table of contents",
+    "Instant search bar modal"
+  ],
+  "estimatedHours": 6.5,
+  "scriptedEdits": [
+    {
+      "id": "edit-1",
+      "instruction": "Change code snippet background color to #18181b",
+      "checkType": "contains_text",
+      "targetFile": "docs.css",
+      "expectedPattern": "#18181b"
+    },
+    {
+      "id": "edit-2",
+      "instruction": "Add rate limits section to api docs",
+      "checkType": "contains_text",
+      "targetFile": "api.html",
+      "expectedPattern": "Rate Limits"
+    },
+    {
+      "id": "edit-3",
+      "instruction": "Fix copy snippet button tooltip duration",
+      "checkType": "contains_text",
+      "targetFile": "docs.js",
+      "expectedPattern": "setTimeout"
+    }
+  ]
+}

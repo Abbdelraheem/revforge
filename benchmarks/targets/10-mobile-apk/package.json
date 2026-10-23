@@ -1,0 +1,8 @@
+{
+  "name": "compass-mini",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "node -e 'process.exit(0)'",
+    "test": "node -e 'process.exit(0)'"
+  }
+}

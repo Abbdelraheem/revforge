@@ -1,0 +1,43 @@
+{
+  "id": "04-blog-cms",
+  "name": "Markdown Tech Journal",
+  "difficultyTier": "content",
+  "targetType": "web",
+  "entryPoint": "index.html",
+  "expectedRoutes": [
+    "/",
+    "/blog",
+    "/blog/first-post",
+    "/tags"
+  ],
+  "expectedFeatures": [
+    "Article feed listing",
+    "Markdown renderer",
+    "Tag filter categories",
+    "Estimated reading time"
+  ],
+  "estimatedHours": 5,
+  "scriptedEdits": [
+    {
+      "id": "edit-1",
+      "instruction": "Change link highlight color to sky #0284c7",
+      "checkType": "contains_text",
+      "targetFile": "blog.css",
+      "expectedPattern": "#0284c7"
+    },
+    {
+      "id": "edit-2",
+      "instruction": "Add author bio section to blog post",
+      "checkType": "contains_text",
+      "targetFile": "post.html",
+      "expectedPattern": "class=\"author-bio\""
+    },
+    {
+      "id": "edit-3",
+      "instruction": "Fix search bar empty query check",
+      "checkType": "contains_text",
+      "targetFile": "blog.js",
+      "expectedPattern": "trim()"
+    }
+  ]
+}

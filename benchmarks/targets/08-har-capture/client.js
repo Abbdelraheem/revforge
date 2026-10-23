@@ -1,0 +1,1 @@
+async function checkout(payload) { return fetch("/api/checkout", { method: "POST", body: JSON.stringify(payload) }); }

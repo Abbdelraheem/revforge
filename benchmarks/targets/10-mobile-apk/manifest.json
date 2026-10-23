@@ -1,0 +1,41 @@
+{
+  "id": "10-mobile-apk",
+  "name": "Compass Mini Android Sample",
+  "difficultyTier": "mobile",
+  "targetType": "apk",
+  "entryPoint": "AndroidManifest.xml",
+  "expectedRoutes": [
+    "/main",
+    "/calibration"
+  ],
+  "expectedFeatures": [
+    "Android manifest XML definition",
+    "Sensor hardware listener stub",
+    "Fine location permission tag",
+    "Vector compass indicator"
+  ],
+  "estimatedHours": 7,
+  "scriptedEdits": [
+    {
+      "id": "edit-1",
+      "instruction": "Change application label to Precision Compass",
+      "checkType": "contains_text",
+      "targetFile": "AndroidManifest.xml",
+      "expectedPattern": "Precision Compass"
+    },
+    {
+      "id": "edit-2",
+      "instruction": "Add vibration permission to AndroidManifest",
+      "checkType": "contains_text",
+      "targetFile": "AndroidManifest.xml",
+      "expectedPattern": "android.permission.VIBRATE"
+    },
+    {
+      "id": "edit-3",
+      "instruction": "Fix sensor accuracy calibration check",
+      "checkType": "contains_text",
+      "targetFile": "resources.json",
+      "expectedPattern": "calibrationThreshold"
+    }
+  ]
+}

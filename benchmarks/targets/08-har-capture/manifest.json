@@ -1,0 +1,42 @@
+{
+  "id": "08-har-capture",
+  "name": "Acme Payments Network Flow (HAR)",
+  "difficultyTier": "har",
+  "targetType": "har",
+  "entryPoint": "session.har",
+  "expectedRoutes": [
+    "/",
+    "/api/checkout",
+    "/api/verify"
+  ],
+  "expectedFeatures": [
+    "HAR v1.2 log specification",
+    "POST /api/checkout JSON transaction",
+    "GET /api/verify signature check",
+    "Response status inspection"
+  ],
+  "estimatedHours": 6,
+  "scriptedEdits": [
+    {
+      "id": "edit-1",
+      "instruction": "Change default currency in payment schema to EUR",
+      "checkType": "contains_text",
+      "targetFile": "session.har",
+      "expectedPattern": "EUR"
+    },
+    {
+      "id": "edit-2",
+      "instruction": "Add webhook notification URL parameter",
+      "checkType": "contains_text",
+      "targetFile": "session.har",
+      "expectedPattern": "webhook_url"
+    },
+    {
+      "id": "edit-3",
+      "instruction": "Fix payment timeout retry handling",
+      "checkType": "contains_text",
+      "targetFile": "client.js",
+      "expectedPattern": "maxRetries"
+    }
+  ]
+}

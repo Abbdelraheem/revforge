@@ -1,0 +1,40 @@
+{
+  "id": "09-electron-asar",
+  "name": "DeskNotes Lightweight Desktop App",
+  "difficultyTier": "desktop",
+  "targetType": "asar",
+  "entryPoint": "main.js",
+  "expectedRoutes": [
+    "/"
+  ],
+  "expectedFeatures": [
+    "Electron application entrypoint",
+    "Preload context bridge isolation",
+    "Renderer markdown editing canvas",
+    "Local storage persistence"
+  ],
+  "estimatedHours": 8.5,
+  "scriptedEdits": [
+    {
+      "id": "edit-1",
+      "instruction": "Change default window width to 1024",
+      "checkType": "contains_text",
+      "targetFile": "main.js",
+      "expectedPattern": "1024"
+    },
+    {
+      "id": "edit-2",
+      "instruction": "Add export notes menu item",
+      "checkType": "contains_text",
+      "targetFile": "main.js",
+      "expectedPattern": "Export Notes"
+    },
+    {
+      "id": "edit-3",
+      "instruction": "Fix IPC bridge message argument validation",
+      "checkType": "contains_text",
+      "targetFile": "preload.js",
+      "expectedPattern": "typeof"
+    }
+  ]
+}

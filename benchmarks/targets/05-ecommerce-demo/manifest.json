@@ -1,0 +1,43 @@
+{
+  "id": "05-ecommerce-demo",
+  "name": "Kite Minimalist Storefront",
+  "difficultyTier": "ecommerce",
+  "targetType": "web",
+  "entryPoint": "index.html",
+  "expectedRoutes": [
+    "/",
+    "/products",
+    "/cart",
+    "/checkout"
+  ],
+  "expectedFeatures": [
+    "Product grid gallery",
+    "Slide-over cart state",
+    "Item quantity modifiers",
+    "Checkout order summary"
+  ],
+  "estimatedHours": 10,
+  "scriptedEdits": [
+    {
+      "id": "edit-1",
+      "instruction": "Change primary button color to teal #0d9488",
+      "checkType": "contains_text",
+      "targetFile": "store.css",
+      "expectedPattern": "#0d9488"
+    },
+    {
+      "id": "edit-2",
+      "instruction": "Add promo code input field to cart",
+      "checkType": "contains_text",
+      "targetFile": "cart.html",
+      "expectedPattern": "id=\"promo-code\""
+    },
+    {
+      "id": "edit-3",
+      "instruction": "Fix checkout postal code format validation",
+      "checkType": "contains_text",
+      "targetFile": "checkout.js",
+      "expectedPattern": "postalCode"
+    }
+  ]
+}

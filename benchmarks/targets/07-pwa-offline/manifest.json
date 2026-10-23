@@ -1,0 +1,42 @@
+{
+  "id": "07-pwa-offline",
+  "name": "CacheFirst Weather PWA",
+  "difficultyTier": "pwa",
+  "targetType": "pwa",
+  "entryPoint": "index.html",
+  "expectedRoutes": [
+    "/",
+    "/offline",
+    "/settings"
+  ],
+  "expectedFeatures": [
+    "Web App Manifest configuration",
+    "Service Worker cache registration",
+    "Offline fallback screen",
+    "Temperature unit toggle"
+  ],
+  "estimatedHours": 4,
+  "scriptedEdits": [
+    {
+      "id": "edit-1",
+      "instruction": "Change theme_color in manifest to #0284c7",
+      "checkType": "contains_text",
+      "targetFile": "manifest.webmanifest",
+      "expectedPattern": "#0284c7"
+    },
+    {
+      "id": "edit-2",
+      "instruction": "Add reload button to offline banner",
+      "checkType": "contains_text",
+      "targetFile": "offline.html",
+      "expectedPattern": "location.reload()"
+    },
+    {
+      "id": "edit-3",
+      "instruction": "Fix service worker cache name versioning",
+      "checkType": "contains_text",
+      "targetFile": "sw.js",
+      "expectedPattern": "v2"
+    }
+  ]
+}

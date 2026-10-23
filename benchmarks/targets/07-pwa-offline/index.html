@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html>
+<head><title>Weather PWA</title><link rel="manifest" href="manifest.webmanifest"></head>
+<body>
+  <h1>Current Weather</h1>
+  <div id="temp">22&deg;C</div>
+  <script>if ("serviceWorker" in navigator) { navigator.serviceWorker.register("/sw.js"); }</script>
+</body>
+</html>

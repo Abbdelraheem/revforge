@@ -1,0 +1,41 @@
+{
+  "id": "01-static-landing",
+  "name": "Nova SaaS Landing Page",
+  "difficultyTier": "landing",
+  "targetType": "web",
+  "entryPoint": "index.html",
+  "expectedRoutes": [
+    "/"
+  ],
+  "expectedFeatures": [
+    "Hero section with CTA",
+    "Feature highlights grid",
+    "Pricing cards",
+    "FAQ accordion",
+    "Footer navigation"
+  ],
+  "estimatedHours": 2.5,
+  "scriptedEdits": [
+    {
+      "id": "edit-1",
+      "instruction": "Change primary theme color to emerald #059669",
+      "checkType": "contains_text",
+      "targetFile": "styles.css",
+      "expectedPattern": "#059669"
+    },
+    {
+      "id": "edit-2",
+      "instruction": "Add an About section to landing page",
+      "checkType": "contains_text",
+      "targetFile": "index.html",
+      "expectedPattern": "id=\"about\""
+    },
+    {
+      "id": "edit-3",
+      "instruction": "Fix newsletter form validation",
+      "checkType": "contains_text",
+      "targetFile": "index.html",
+      "expectedPattern": "required"
+    }
+  ]
+}

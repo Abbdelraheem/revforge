@@ -1,0 +1,1 @@
+function loadMetrics() { return fetch("/api/metrics").catch(() => ({ users: 1240 })); } loadMetrics();

@@ -1,0 +1,1 @@
+document.querySelectorAll("article").forEach(a => console.log(a.innerText));

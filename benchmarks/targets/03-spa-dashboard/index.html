@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head><title>Pulse Analytics</title><link rel="stylesheet" href="dashboard.css"></head>
+<body>
+  <div class="sidebar">
+    <nav>
+      <a href="#/">Overview</a>
+      <a href="#/analytics">Analytics</a>
+      <a href="#/settings">Settings</a>
+    </nav>
+  </div>
+  <main>
+    <h1>Pulse Dashboard</h1>
+    <div class="kpis">
+      <div class="card">Active Users: 1,240</div>
+      <div class="card">Conversion: 4.8%</div>
+    </div>
+    <div class="chart" id="chart"></div>
+    <table id="events">
+      <thead><tr><th>ID</th><th>User</th><th>Action</th></tr></thead>
+      <tbody><tr><td>1</td><td>user_1</td><td>login</td></tr></tbody>
+    </table>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

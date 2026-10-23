@@ -1,0 +1,6 @@
+{
+  "name": "Weather PWA",
+  "short_name": "Weather",
+  "theme_color": "#0ea5e9",
+  "display": "standalone"
+}

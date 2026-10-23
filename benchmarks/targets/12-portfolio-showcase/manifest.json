@@ -1,0 +1,43 @@
+{
+  "id": "12-portfolio-showcase",
+  "name": "Studio Artisan Portfolio",
+  "difficultyTier": "portfolio",
+  "targetType": "web",
+  "entryPoint": "index.html",
+  "expectedRoutes": [
+    "/",
+    "/projects",
+    "/project/case-study",
+    "/contact"
+  ],
+  "expectedFeatures": [
+    "Hero brand introduction",
+    "Category filterable project grid",
+    "Case study modal viewer",
+    "Client inquiry request form"
+  ],
+  "estimatedHours": 5.5,
+  "scriptedEdits": [
+    {
+      "id": "edit-1",
+      "instruction": "Change accent color to violet #7c3aed",
+      "checkType": "contains_text",
+      "targetFile": "portfolio.css",
+      "expectedPattern": "#7c3aed"
+    },
+    {
+      "id": "edit-2",
+      "instruction": "Add awards recognition section",
+      "checkType": "contains_text",
+      "targetFile": "index.html",
+      "expectedPattern": "id=\"awards\""
+    },
+    {
+      "id": "edit-3",
+      "instruction": "Fix inquiry budget select validation",
+      "checkType": "contains_text",
+      "targetFile": "contact.html",
+      "expectedPattern": "required"
+    }
+  ]
+}
