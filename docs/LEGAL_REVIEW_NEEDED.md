@@ -1,0 +1,45 @@
+# RevForge AI — Matters Requiring Independent Legal Counsel
+
+This document records the specific intellectual property, regulatory, and commercial contractual domains where RevForge operations require formal review by qualified legal counsel prior to high-volume commercial launch.
+
+---
+
+## 1. Statutory Clean-Room Interoperability Exemptions (US & EU)
+
+### [LEGAL_COUNSEL_REQUIRED: 17 U.S.C. § 1201(f) & EU Software Directive 2009/24/EC]
+- **Context**: RevForge performs clean-room reverse engineering for interoperability, migration, and software maintenance. Under United States Copyright Law (17 U.S.C. § 1201(f)), reverse engineering is permitted solely for the purpose of achieving interoperability with an independently created computer program.
+- **Specific Legal Questions for Counsel**:
+  1. Does our automated attestation requirement (requiring customers to declare interoperability/audit purposes) sufficiently insulate RevForge as an infrastructure service provider from secondary copyright infringement liability?
+  2. For European Union customers, does automated observation of compiled assets comply with Article 6 of Directive 2009/24/EC (decompilation strictly for interoperability)?
+  3. Does the 30% AST / token leakage ceiling (`maxLeakageSimilarity <= 0.30`) satisfy the "substantial similarity" standard established in *Computer Associates v. Altai* (Abstraction-Filtration-Comparison test)?
+
+---
+
+## 2. Digital Millennium Copyright Act (DMCA) Safe Harbor (§ 512)
+
+### [LEGAL_COUNSEL_REQUIRED: 17 U.S.C. § 512(c) Designated Agent Registration]
+- **Context**: RevForge accepts customer-supplied binaries, HAR captures, and URLs to generate clean-room implementations.
+- **Specific Actions for Counsel**:
+  1. File formal Designated DMCA Agent registration with the United States Copyright Office.
+  2. Review our expedited 24-hour quarantine procedure in `src/app/(admin)/admin/abuse/page.tsx` to confirm compliance with notice-and-takedown statutory obligations.
+  3. Review the customer counter-notice procedure to protect legitimate reverse engineers against bad-faith anticompetitive takedown notices.
+
+---
+
+## 3. Terms of Service & Affirmative Ownership Attestation
+
+### [LEGAL_COUNSEL_REQUIRED: Enforceability of Pre-Rebuild Attestation Deeds]
+- **Context**: For rebuild orders exceeding $500, RevForge mandates affirmative cryptographic attestation (`src/lib/security/attestation.ts`), requiring legal entity registration numbers and uploaded proofs of authority (e.g. DNS TXT records).
+- **Specific Questions for Counsel**:
+  1. Does the digital signature and tamper-evident HMAC audit trail satisfy evidentiary requirements in commercial contract disputes?
+  2. Are our indemnification clauses (where customers hold RevForge harmless against third-party IP claims) enforceable across Delaware and English law jurisdictions?
+
+---
+
+## 4. Merchant of Record (Paddle) Contractual Liabilities
+
+### [LEGAL_COUNSEL_REQUIRED: Paddle Terms & Cross-Border SaaS Tax Allocation]
+- **Context**: Paddle acts as Merchant of Record for global checkout and VAT/sales tax remittance.
+- **Specific Questions for Counsel**:
+  1. Review `docs/PADDLE_REVIEW.md` ensuring strict adherence to Paddle SaaS Acceptable Use Policy.
+  2. Align refund dispute procedures between Paddle Radar fraud rules and RevForge internal quality guarantee platform credit policies.

@@ -6,6 +6,7 @@ import { abuseReports } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +32,7 @@ export default async function AdminAbusePage() {
           Abuse & DMCA Takedown Notices
         </h1>
         <p className="text-sm text-muted-foreground">
-          Review incoming copyright takedown notices, malicious target reports, and contact inquiries.
+          Review incoming copyright takedown notices, malicious target reports, and quarantine workflows.
         </p>
       </div>
 
@@ -51,6 +52,7 @@ export default async function AdminAbusePage() {
                     <th className="p-3 text-start font-semibold">Target / Reason</th>
                     <th className="p-3 text-start font-semibold">Details</th>
                     <th className="p-3 text-start font-semibold">Status</th>
+                    <th className="p-3 text-end font-semibold">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -61,11 +63,31 @@ export default async function AdminAbusePage() {
                       </td>
                       <td className="p-3 font-mono text-sm">{r.reporterEmail}</td>
                       <td className="p-3 font-semibold text-foreground">{r.reason}</td>
-                      <td className="p-3 text-muted-foreground max-w-sm truncate">{r.details}</td>
+                      <td className="p-3 text-muted-foreground max-w-sm truncate" title={r.details || ""}>
+                        {r.details || "No details provided"}
+                      </td>
                       <td className="p-3">
-                        <Badge variant={r.status === "pending" ? "destructive" : "default"}>
+                        <Badge variant={r.status === "pending" ? "destructive" : "default"} className="text-sm">
                           {r.status}
                         </Badge>
+                      </td>
+                      <td className="p-3 text-end space-x-2">
+                        {r.status === "pending" && (
+                          <>
+                            <form action={`/api/admin/abuse/${r.id}`} method="POST" className="inline-block">
+                              <input type="hidden" name="action" value="quarantine" />
+                              <Button size="sm" variant="destructive" className="text-sm">
+                                Quarantine
+                              </Button>
+                            </form>
+                            <form action={`/api/admin/abuse/${r.id}`} method="POST" className="inline-block">
+                              <input type="hidden" name="action" value="dismiss" />
+                              <Button size="sm" variant="outline" className="text-sm">
+                                Dismiss
+                              </Button>
+                            </form>
+                          </>
+                        )}
                       </td>
                     </tr>
                   ))}
