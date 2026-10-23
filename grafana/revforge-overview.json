@@ -1,0 +1,117 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "id": 1,
+      "title": "Queue Depth",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "revforge_queue_depth{queue=\"build\"}",
+          "legendFormat": "Queued Builds",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 },
+      "id": 2,
+      "title": "Active Workers",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "revforge_workers_active",
+          "legendFormat": "Reporting Workers",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 0 },
+      "id": 3,
+      "title": "Gross Margin %",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "revforge_gross_margin_percent",
+          "legendFormat": "Margin %",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 0 },
+      "id": 4,
+      "title": "Active Studio Previews",
+      "type": "stat",
+      "targets": [
+        {
+          "expr": "revforge_preview_sessions_active",
+          "legendFormat": "Preview Containers",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "id": 5,
+      "title": "Job Status Distribution",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "revforge_jobs_status",
+          "legendFormat": "{{status}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+      "id": 6,
+      "title": "Provider Cost vs Revenue (Cents)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "revforge_provider_cost_cents_total",
+          "legendFormat": "Provider Cost",
+          "refId": "A"
+        },
+        {
+          "expr": "revforge_revenue_cents_total",
+          "legendFormat": "Order Revenue",
+          "refId": "B"
+        }
+      ]
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["revforge", "operations"],
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": ["5s", "10s", "30s", "1m", "5m"]
+  },
+  "timezone": "browser",
+  "title": "RevForge Operations Overview",
+  "uid": "revforge-overview",
+  "version": 1
+}
