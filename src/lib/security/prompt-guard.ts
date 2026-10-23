@@ -68,6 +68,10 @@ export function sanitizePromptInput(input: string): string {
   let sanitized = sanitizeDelimitedContent(input);
   // Neutralize common prompt injection keywords & shell payload attempts
   sanitized = sanitized.replace(/SYSTEM\s*OVERRIDE/gi, "[BLOCKED_INJECTION]");
+  sanitized = sanitized.replace(/\bDAN\b(\s*\(Do Anything Now\))?/gi, "[BLOCKED_JAILBREAK]");
+  sanitized = sanitized.replace(/<\s*script[^>]*>[\s\S]*?<\s*\/\s*script\s*>/gi, "[BLOCKED_SCRIPT]");
+  sanitized = sanitized.replace(/<\s*script[^>]*>/gi, "[BLOCKED_SCRIPT]");
+  sanitized = sanitized.replace(/javascript\s*:/gi, "blocked_javascript:");
   sanitized = sanitized.replace(/SYSTEM\s*:/gi, "USER_INPUT:");
   sanitized = sanitized.replace(/rm\s+-rf/gi, "[BLOCKED_COMMAND]");
   sanitized = sanitized.replace(/execute_bash/gi, "[BLOCKED_TOOL]");
