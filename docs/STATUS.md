@@ -37,7 +37,7 @@ V7 closes the defects found by running the application against a database built 
 
 ### V7 verification (2026-10-23)
 
-Working tree: `10643d9` plus the uncommitted V7 changes described above.
+Commit: `c51d201` (`v7: close pre-run blockers with schema drift and credit hold ordering`).
 
 | Check | Result |
 |---|---|
