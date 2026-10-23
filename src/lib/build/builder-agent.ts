@@ -7,6 +7,7 @@ import { env } from "@/env";
 import { executeTool, ToolInvocation } from "./tools";
 import { resolveSafePath } from "./fs-guard";
 import { getPrompt } from "@/lib/prompts";
+import { executeWithRetryAndBreaker } from "@/lib/llm/resilience";
 
 const execFileAsync = promisify(execFile);
 
@@ -174,13 +175,15 @@ export class BuilderAgent {
 
     while (keepGoing && iterations < MAX_TOOL_STEPS) {
       iterations++;
-      const response = await this.client.messages.create({
-        model: this.model,
-        max_tokens: 4096,
-        system: this.systemPrompt,
-        messages,
-        tools,
-      });
+      const response = await executeWithRetryAndBreaker(() =>
+        this.client.messages.create({
+          model: this.model,
+          max_tokens: 4096,
+          system: this.systemPrompt,
+          messages,
+          tools,
+        })
+      );
 
       tokensUsed.input += response.usage.input_tokens;
       tokensUsed.output += response.usage.output_tokens;

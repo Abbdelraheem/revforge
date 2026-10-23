@@ -1,12 +1,15 @@
 import { systemDb } from "@/db";
 import { workerHeartbeats } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { createAnalysisWorker } from "./analysis-worker";
+import { createBuildWorker } from "./build-worker";
 import { dispatchOutbox } from "@/lib/queue/outbox";
-import { sql } from "drizzle-orm";
+import { reapStuckJobs } from "@/lib/worker/reaper";
 
 const WORKER_ID = process.env.WORKER_ID || `worker-${process.pid}-${Date.now().toString(36)}`;
 const HEARTBEAT_INTERVAL_MS = 10_000;
 const OUTBOX_INTERVAL_MS = 5_000;
+const REAPER_INTERVAL_MS = 60_000;
 
 async function recordHeartbeat(): Promise<void> {
   try {
@@ -29,14 +32,23 @@ async function recordHeartbeat(): Promise<void> {
   }
 }
 
+async function removeHeartbeat(): Promise<void> {
+  try {
+    await systemDb
+      .delete(workerHeartbeats)
+      .where(eq(workerHeartbeats.id, WORKER_ID));
+  } catch {}
+}
+
 async function startWorkers(): Promise<void> {
   process.stdout.write(`[Worker] Starting RevForge worker daemon with ID: ${WORKER_ID}\n`);
 
   // 1. Initial heartbeat
   await recordHeartbeat();
 
-  // 2. Start analysis worker
+  // 2. Start analysis & build workers
   const analysisWorker = createAnalysisWorker();
+  const buildWorker = createBuildWorker();
 
   // 3. Heartbeat timer
   const heartbeatTimer = setInterval(async () => {
@@ -52,12 +64,37 @@ async function startWorkers(): Promise<void> {
     }
   }, OUTBOX_INTERVAL_MS);
 
-  // Graceful shutdown
+  // 5. Stuck-job reaper timer
+  const reaperTimer = setInterval(async () => {
+    try {
+      const summary = await reapStuckJobs();
+      if (summary.reapedJobs.length > 0) {
+        process.stdout.write(`[Reaper] Handled ${summary.reapedJobs.length} stuck jobs.\n`);
+      }
+    } catch (err) {
+      console.error("[Worker] Reaper error:", err);
+    }
+  }, REAPER_INTERVAL_MS);
+
+  // Graceful shutdown (SIGTERM / SIGINT)
+  let isShuttingDown = false;
   const shutdown = async () => {
-    process.stdout.write("[Worker] Shutting down workers gracefully...\n");
+    if (isShuttingDown) return;
+    isShuttingDown = true;
+    process.stdout.write("[Worker] SIGTERM/SIGINT received. Draining workers gracefully...\n");
+
     clearInterval(heartbeatTimer);
     clearInterval(outboxTimer);
-    await analysisWorker.close();
+    clearInterval(reaperTimer);
+
+    // Close BullMQ workers (waits for active jobs to finish or abort safely)
+    await Promise.allSettled([
+      analysisWorker.close(),
+      buildWorker.close(),
+      removeHeartbeat(),
+    ]);
+
+    process.stdout.write("[Worker] All workers drained. Exiting clean.\n");
     process.exit(0);
   };
 

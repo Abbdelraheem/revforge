@@ -55,4 +55,16 @@ export class WorkspaceCheckpointManager {
       shell: false,
     });
   }
+
+  async getLatestCheckpoint(): Promise<string | null> {
+    try {
+      const rev = await execFileAsync("git", ["rev-parse", "HEAD"], {
+        cwd: this.workspaceDir,
+        shell: false,
+      });
+      return rev.stdout.trim() || null;
+    } catch {
+      return null;
+    }
+  }
 }

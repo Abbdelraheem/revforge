@@ -5,6 +5,9 @@ import { MarketingFooter } from "@/components/shared/marketing-footer";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BRAND } from "@/config/brand";
+import { systemDb } from "@/db";
+import { workerHeartbeats } from "@/db/schema";
+import { desc } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +30,15 @@ export default async function StatusPage() {
   } catch {
     // Graceful fallback if probe throws
   }
+
+  let activeWorkers: Array<{ id: string; lastSeen: Date; capacity: number; version: string }> = [];
+  try {
+    activeWorkers = await systemDb
+      .select()
+      .from(workerHeartbeats)
+      .orderBy(desc(workerHeartbeats.lastSeen))
+      .limit(5);
+  } catch {}
 
   const isOperational = health.status === "healthy";
   const isDegraded = health.status === "degraded";
@@ -107,6 +119,45 @@ export default async function StatusPage() {
               </CardContent>
             </Card>
           ))}
+        </div>
+
+        {/* Worker Fleet Telemetry */}
+        <div className="space-y-4">
+          <h2 className="text-xl font-serif font-bold">Worker Fleet Nodes</h2>
+          <Card className="border-border bg-card">
+            <CardContent className="p-0">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/40 border-b border-border">
+                  <tr>
+                    <th className="p-3 text-start font-semibold">Worker Node</th>
+                    <th className="p-3 text-start font-semibold">Version</th>
+                    <th className="p-3 text-start font-semibold">Capacity</th>
+                    <th className="p-3 text-start font-semibold">Last Heartbeat</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {activeWorkers.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="p-4 text-center text-muted-foreground">
+                        No active background compilation workers connected.
+                      </td>
+                    </tr>
+                  ) : (
+                    activeWorkers.map((w) => (
+                      <tr key={w.id} className="border-b border-border last:border-0">
+                        <td className="p-3 font-mono">{w.id}</td>
+                        <td className="p-3 font-mono text-muted-foreground">{w.version}</td>
+                        <td className="p-3 font-mono">{w.capacity} jobs</td>
+                        <td className="p-3 font-mono text-muted-foreground">
+                          {new Date(w.lastSeen).toLocaleTimeString()}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </CardContent>
+          </Card>
         </div>
       </main>
 
