@@ -1,6 +1,6 @@
 import type { DbTx } from "@/db/tenant";
 import { creditsLedger } from "@/db/schema";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 
 export class InsufficientCreditsError extends Error {
   readonly availableCents: number;
@@ -104,6 +104,22 @@ export async function settleCredits(
     sql`SELECT pg_advisory_xact_lock(hashtext(${workspaceId}))`
   );
 
+  // A cancellation release is final. Never settle (or partially refund) again.
+  const [released] = await tx
+    .select({ id: creditsLedger.id })
+    .from(creditsLedger)
+    .where(
+      and(
+        eq(creditsLedger.workspaceId, workspaceId),
+        eq(creditsLedger.reason, `studio_release:${editId}`)
+      )
+    )
+    .limit(1);
+
+  if (released) {
+    return { chargedCents: 0, refundedCents: 0 };
+  }
+
   const [existing] = await tx
     .select({ id: creditsLedger.id })
     .from(creditsLedger)
@@ -128,4 +144,55 @@ export async function settleCredits(
     chargedCents: charge,
     refundedCents: refundCents,
   };
+}
+
+/**
+ * Releases an entire Studio hold after a user cancellation. The release reason
+ * is distinct from settlement and is idempotent, so a worker that notices the
+ * cancel flag late cannot refund the hold twice.
+ */
+export async function releaseCredits(
+  tx: DbTx,
+  {
+    workspaceId,
+    editId,
+    heldCents,
+  }: {
+    workspaceId: string;
+    editId: string;
+    heldCents: number;
+  }
+): Promise<{ releasedCents: number }> {
+  const held =
+    Number.isFinite(heldCents) && heldCents > 0 ? Math.floor(heldCents) : 0;
+  if (held === 0) return { releasedCents: 0 };
+
+  await tx.execute(
+    sql`SELECT pg_advisory_xact_lock(hashtext(${workspaceId}))`
+  );
+
+  const [existing] = await tx
+    .select({ id: creditsLedger.id })
+    .from(creditsLedger)
+    .where(
+      and(
+        eq(creditsLedger.workspaceId, workspaceId),
+        inArray(creditsLedger.reason, [
+          `studio_release:${editId}`,
+          `studio_settle:${editId}`,
+        ])
+      )
+    )
+    .limit(1);
+
+  if (existing) return { releasedCents: 0 };
+
+  await tx.insert(creditsLedger).values({
+    workspaceId,
+    deltaCents: held,
+    reason: `studio_release:${editId}`,
+    kind: "studio_settle",
+  });
+
+  return { releasedCents: held };
 }

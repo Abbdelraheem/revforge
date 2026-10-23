@@ -117,6 +117,18 @@ The old preview route served a source file directly out of the version ZIP. That
 
 **V8 Part 3 verification (local, 2026-10-23):** `npm run typecheck` pass; `npm run prompts:eval` 5 roles / 5 fixtures pass; `npm test` 22 files / 241 tests pass (schema drift skipped: no Postgres); `npm run lint` pass; `npm run build` pass; `node scripts/audit.mjs --all` 310/310 pass. `prompts:live` was not run because that requires a real API key and spending; it is not part of CI.
 
+### V8 Part 4: Studio UX completion
+
+- **Asynchronous edit execution.** `POST /api/studio/edits` now validates the workspace balance, locks the project row, rejects a second active edit with `409 edit_in_progress`, returns `402 insufficient_tokens` with the real balance and required hold when the balance is short, creates the edit, and returns `202` with an edit id and stream URL. The worker continues in the Node process; the browser never receives a fabricated completion.
+- **Real status stream.** `GET /api/studio/edits/[editId]/events` is a tenant-checked Server-Sent Events stream that polls the persisted edit row, emits only changes, sends heartbeats, and closes on `committed`, `failed`, or `refunded`. The Studio client falls back to real polling if `EventSource` is unavailable or disconnects. The timeline is the sequence of statuses actually received.
+- **Cancellation with full release.** `POST /api/studio/edits/[editId]/cancel` locks the edit, writes `cancel_requested`, releases the entire `studio_hold:<editId>` as `studio_release:<editId>`, and marks the row `refunded` with zero settlement. The worker checks cancellation before the hold, after interpretation, before final verification, before packaging, and before inserting a version. `settleCredits` refuses to settle after a release, so a late worker cannot both release and charge.
+- **Chat and composer.** The Studio left pane is a real edit timeline with per-edit status, failure reason, diff stat, hold/settlement, quick prompt chips, keyboard submission, a cancel control, and a real token balance. It does not say an edit is instant or verified before the worker reports it.
+- **Token purchase.** `POST /api/studio/tokens` accepts only the three configured packs (`$10`, `$25`, `$50`), creates a `studio_pack` order, and returns the payment provider checkout URL. The signed webhook grants exactly the paid subtotal to the append-only credit ledger; it no longer enqueues an analysis for a studio pack.
+- **Version and evidence panes.** `code`, `tests`, `parity`, and `history` tabs replace the old mixed pane. `code` shows the stored file manifest, `tests` states that raw test output is not persisted and does not claim pass/fail, `parity` shows only a stored score, and `history` shows persisted edits. Mobile has real `Chat`, `Preview`, and `Details` panes.
+- **Migration.** `drizzle/0007_studio_cancel.sql` adds `studio_edits.cancel_requested`.
+
+**V8 Part 4 verification (local, 2026-10-23):** `npm run typecheck` pass; `npm test` 23 files / 243 tests pass (schema drift skipped: no Postgres); `npm run lint` pass; `npm run build` pass, including the new edit, cancel, events, and token routes; `node scripts/audit.mjs --all` 310/310 pass. The full Studio edit flow, cancellation race, token webhook, and SSE stream were not exercised against live Postgres/Redis/S3/worker because that stack is not running locally. No live browser session was used for this part.
+
 ---
 
 ## 2. What Is Real & Verified

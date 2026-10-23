@@ -524,6 +524,7 @@ export const studioEdits = pgTable("studio_edits", {
   tokensHeldCents: integer("tokens_held_cents").default(0).notNull(),
   tokensSettledCents: integer("tokens_settled_cents").default(0).notNull(),
   promptVersion: text("prompt_version"),
+  cancelRequested: boolean("cancel_requested").default(false).notNull(),
   diffStat: jsonb("diff_stat").$type<{
     filesChanged: number;
     insertions: number;

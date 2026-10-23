@@ -24,6 +24,7 @@ import { env } from "@/env";
 import {
   holdCredits,
   InsufficientCreditsError,
+  releaseCredits,
   settleCredits,
 } from "./credits";
 import {
@@ -813,6 +814,23 @@ export async function executeStudioEdit(
   let clarification: string | undefined;
   let providerSpendCents = 0;
   let enhanceCostCents = 0;
+  let canceled = false;
+
+  const cancellationRequested = async (): Promise<boolean> => {
+    const [row] = await systemDb
+      .select({ cancelRequested: studioEdits.cancelRequested })
+      .from(studioEdits)
+      .where(eq(studioEdits.id, editId))
+      .limit(1);
+    return Boolean(row?.cancelRequested);
+  };
+
+  const assertNotCanceled = async (): Promise<void> => {
+    if (await cancellationRequested()) {
+      canceled = true;
+      throw new Error("Edit canceled by the user; held credits will be released.");
+    }
+  };
 
   const finalizeEditRow = async (
     outcome: EditOutcome,
@@ -862,9 +880,20 @@ export async function executeStudioEdit(
     const fileTree = parentManifest.map((entry) => entry.path);
     const { context, evidence } = await loadProjectContext(project, fileTree);
 
+    await assertNotCanceled();
+
     // Credits are held before any paid model call. A workspace with no balance
     // must fail here without touching the enhancer or the builder.
     await systemDb.transaction(async (tx) => {
+      const [current] = await tx
+        .select({ cancelRequested: studioEdits.cancelRequested })
+        .from(studioEdits)
+        .where(eq(studioEdits.id, editId))
+        .for("update");
+      if (current?.cancelRequested) {
+        canceled = true;
+        throw new Error("Edit canceled by the user; no credits were held.");
+      }
       await holdCredits(tx, { workspaceId, cents: maxCents, editId });
       await tx
         .update(studioEdits)
@@ -910,6 +939,8 @@ export async function executeStudioEdit(
       inputTokens: enhanceUsage.inputTokens,
       outputTokens: enhanceUsage.outputTokens,
     });
+
+    await assertNotCanceled();
 
     if (!enhanced.brief) {
       clarification = enhanced.clarification || "The request needs clarification.";
@@ -1094,6 +1125,8 @@ export async function executeStudioEdit(
       .set({ status: "verifying" })
       .where(eq(studioEdits.id, editId));
 
+    await assertNotCanceled();
+
     // Final verification, safety, and leakage checks on the workspace that
     // will actually be delivered.
     const after = await verifyStudioWorkspace({
@@ -1152,6 +1185,8 @@ export async function executeStudioEdit(
             }))
           );
 
+          await assertNotCanceled();
+
           const packaged = await packageDelivery({
             workspaceDir,
             workspaceId,
@@ -1164,6 +1199,8 @@ export async function executeStudioEdit(
             evidenceItems: evidence,
             storage: dbStorage,
           });
+
+          await assertNotCanceled();
 
           const nextVersionNumber = parentVersion.versionNumber + 1;
           const [newVersion] = await systemDb
@@ -1219,11 +1256,60 @@ export async function executeStudioEdit(
           ? err.message
           : String(err);
   } finally {
+    const wasCanceled =
+      canceled ||
+      (await cancellationRequested().catch(() => false));
+
+    if (wasCanceled) {
+      canceled = true;
+      finalOutcome = "failed";
+      chargeCents = 0;
+      failureReason =
+        "Canceled by the user. The full held amount was released; no partial charge was settled.";
+    }
+
     if (!holdApplied) {
       try {
-        await finalizeEditRow("failed", 0, failureReason);
+        await finalizeEditRow(
+          wasCanceled ? "no_changes" : "failed",
+          0,
+          wasCanceled
+            ? "Canceled by the user before a credit hold was applied."
+            : failureReason
+        );
       } catch {
         // Best-effort terminal update; the original error is returned.
+      }
+    } else if (wasCanceled) {
+      try {
+        await systemDb.transaction(async (tx) => {
+          await releaseCredits(tx, {
+            workspaceId,
+            editId,
+            heldCents: maxCents,
+          });
+          await tx
+            .update(studioEdits)
+            .set({
+              status: "refunded",
+              tokensSettledCents: 0,
+              failureReason,
+              resultingVersionId: null,
+              diffStat: null,
+              finishedAt: new Date(now()),
+            })
+            .where(eq(studioEdits.id, editId));
+        });
+      } catch (releaseErr) {
+        try {
+          await finalizeEditRow(
+            "no_changes",
+            0,
+            releaseErr instanceof Error ? releaseErr.message : String(releaseErr)
+          );
+        } catch {
+          // Nothing else can be done inside the finally block.
+        }
       }
     } else {
       const settlement = settleEdit({

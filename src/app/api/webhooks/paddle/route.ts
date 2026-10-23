@@ -8,6 +8,7 @@ import {
   buildJobs,
   outbox,
   auditLog,
+  creditsLedger,
 } from "@/db/schema";
 import { transitionProject } from "@/db/state-machine";
 import { dispatchOutbox } from "@/lib/queue/outbox";
@@ -177,6 +178,28 @@ export async function POST(req: NextRequest) {
               payload: { jobId: job.id, projectId: order.projectId },
             });
           }
+        } else if (order.kind === "studio_pack") {
+          // Studio token packs are prepaid platform credit. The amount is the
+          // real parsed payment subtotal; no bonus balance is invented.
+          await tx.insert(creditsLedger).values({
+            workspaceId: order.workspaceId,
+            deltaCents: event.subtotalCents,
+            reason: `studio_pack:${order.id}`,
+            orderId: order.id,
+            kind: "grant",
+          });
+
+          await tx.insert(auditLog).values({
+            workspaceId: order.workspaceId,
+            actorType: "webhook",
+            action: "studio_tokens.purchased",
+            resourceType: "orders",
+            resourceId: order.id,
+            metadata: {
+              amountCents: event.subtotalCents,
+              providerTxnId: event.providerTxnId,
+            },
+          });
         } else {
           // Analysis fee order paid
           await tx.insert(outbox).values({
