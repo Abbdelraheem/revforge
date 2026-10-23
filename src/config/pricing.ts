@@ -73,3 +73,26 @@ export function calculateUsageCostCents(usage: {
   const outputCost = (usage.outputTokens / 1_000_000) * pricing.outputCentsPerMillion;
   return Math.ceil(inputCost + outputCost);
 }
+
+/**
+ * Exact usage cost in micro-cents (1 cent = 1,000 micros). This keeps
+ * fractional-cent provider charges in the cost ledger instead of rounding
+ * every small call up to a cent.
+ */
+export function calculateUsageCostMicros(usage: {
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+}): number {
+  const pricing = TOKEN_PRICING[usage.model];
+  if (!pricing) {
+    throw new Error(
+      `[Pricing] Unknown model "${usage.model}". Pricing is strictly configured without fallback.`
+    );
+  }
+  const inputCostCents =
+    (usage.inputTokens / 1_000_000) * pricing.inputCentsPerMillion;
+  const outputCostCents =
+    (usage.outputTokens / 1_000_000) * pricing.outputCentsPerMillion;
+  return Math.round((inputCostCents + outputCostCents) * 1000);
+}

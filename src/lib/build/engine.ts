@@ -48,6 +48,16 @@ export interface LoopDeps {
     outputTokens: number;
   }): number /* cents */;
 
+  /** Optional real-usage sink. Receives every builder call exactly once. */
+  onUsage?(
+    usage: {
+      model: string;
+      inputTokens: number;
+      outputTokens: number;
+    },
+    iteration: number
+  ): void | Promise<void>;
+
   now(): number;
 
   emit(type: string, payload: any): void;
@@ -198,6 +208,17 @@ export async function runBuildLoop(
     // Accumulate real spend
     const iterCost = deps.priceUsage(builderRes.usage);
     spentCents += iterCost;
+
+    if (deps.onUsage) {
+      try {
+        await deps.onUsage(builderRes.usage, iteration);
+      } catch (err: any) {
+        safeEmit("cost.record.failed", {
+          iteration,
+          error: err?.message || String(err),
+        });
+      }
+    }
 
     // 2. scanSafety
     let safety;

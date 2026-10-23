@@ -19,6 +19,7 @@ import {
 } from "@/db/schema";
 import { BUILD_MODELS } from "@/config/models";
 import { calculateUsageCostCents } from "@/config/pricing";
+import { recordCostEvent } from "@/lib/billing/costs";
 import { env } from "@/env";
 import {
   holdCredits,
@@ -899,6 +900,16 @@ export async function executeStudioEdit(
           });
     providerSpendCents += enhanceCostCents;
 
+    await recordCostEvent(systemDb, {
+      workspaceId,
+      projectId: input.projectId,
+      source: "studio_edit",
+      refId: `${editId}:enhance`,
+      model: enhanceUsage.model || BUILD_MODELS.FAST,
+      inputTokens: enhanceUsage.inputTokens,
+      outputTokens: enhanceUsage.outputTokens,
+    });
+
     if (!enhanced.brief) {
       clarification = enhanced.clarification || "The request needs clarification.";
       finalOutcome = "no_changes";
@@ -1022,6 +1033,18 @@ export async function executeStudioEdit(
 
       priceUsage(usage) {
         return calculateUsageCostCents(usage);
+      },
+
+      async onUsage(usage, iteration) {
+        await recordCostEvent(systemDb, {
+          workspaceId,
+          projectId: input.projectId,
+          source: "studio_edit",
+          refId: `${editId}:builder:${iteration}`,
+          model: usage.model,
+          inputTokens: usage.inputTokens,
+          outputTokens: usage.outputTokens,
+        });
       },
 
       now,

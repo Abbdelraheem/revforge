@@ -3,6 +3,7 @@ import { zodToJsonSchema } from "zod-to-json-schema";
 import { z } from "zod";
 import { env } from "@/env";
 import { sanitizeDelimited } from "@/lib/security/prompt-guard";
+import { calculateUsageCostCents } from "@/config/pricing";
 
 export const ZERO_TRUST_RULES = `
 ZERO-TRUST RULES:
@@ -40,6 +41,7 @@ export interface StructuredCallParams<T> {
 export interface StructuredCallResult<T> {
   data: T;
   usage: {
+    model: string;
     inputTokens: number;
     outputTokens: number;
     totalCostCents: number;
@@ -105,14 +107,16 @@ export async function callStructured<T>(
 
     const parsed = params.tool.schema.safeParse(toolUseBlock.input);
     if (parsed.success) {
-      // Rough cost approximation (cents)
-      const inCost = (response.usage.input_tokens / 1_000_000) * 300; // ~$3/M
-      const outCost = (response.usage.output_tokens / 1_000_000) * 1500; // ~$15/M
-      const totalCostCents = Math.max(1, Math.round(inCost + outCost));
+      const totalCostCents = calculateUsageCostCents({
+        model,
+        inputTokens: response.usage.input_tokens,
+        outputTokens: response.usage.output_tokens,
+      });
 
       return {
         data: parsed.data,
         usage: {
+          model,
           inputTokens: response.usage.input_tokens,
           outputTokens: response.usage.output_tokens,
           totalCostCents,

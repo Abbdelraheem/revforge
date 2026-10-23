@@ -32,7 +32,12 @@ export interface BuildReportDeps {
     untrusted: string;
   }): Promise<{
     report: TechnicalReportOutput;
-    usage?: { promptTokens: number; completionTokens: number; totalCostCents?: number };
+    usage?: {
+      promptTokens: number;
+      completionTokens: number;
+      totalCostCents?: number;
+      model?: string;
+    };
   }>;
   fixtures: {
     getFixtureForKind(kind: string): TechnicalReportOutput;
@@ -41,7 +46,12 @@ export interface BuildReportDeps {
 
 export interface BuildReportResult {
   report: TechnicalReportOutput;
-  usage: { promptTokens: number; completionTokens: number; totalCostCents: number };
+  usage: {
+    promptTokens: number;
+    completionTokens: number;
+    totalCostCents: number;
+    model?: string;
+  };
   source: "llm" | "fixture";
 }
 
@@ -144,6 +154,7 @@ Extract observable component evidence, itemize features for clean-room reconstru
       promptTokens: structuredResult.usage?.promptTokens || 0,
       completionTokens: structuredResult.usage?.completionTokens || 0,
       totalCostCents: structuredResult.usage?.totalCostCents || 0,
+      model: structuredResult.usage?.model,
     },
     source: "llm",
   };

@@ -12,6 +12,8 @@ import { TechnicalReportOutput } from "./types";
 import { computeEvidenceConfidence } from "./confidence";
 import { priceQuote, DEFAULT_PRICING_CONFIG_V1, FeatureInput } from "@/lib/pricing/engine";
 import { clampFeatureHours } from "@/lib/pricing/bands";
+import { recordCostEvent } from "@/lib/billing/costs";
+import { env } from "@/env";
 
 export interface PersistAnalysisParams {
   tx: DbTx;
@@ -22,6 +24,7 @@ export interface PersistAnalysisParams {
     promptTokens: number;
     completionTokens: number;
     totalCostCents: number;
+    model?: string;
   };
 }
 
@@ -49,6 +52,7 @@ export async function persistAnalysisReport({
             promptTokens: modelUsage.promptTokens,
             completionTokens: modelUsage.completionTokens,
             totalCostCents: modelUsage.totalCostCents,
+            model: modelUsage.model,
           }
         : undefined,
     })
@@ -56,6 +60,18 @@ export async function persistAnalysisReport({
 
   if (!analysis) {
     throw new Error("Failed to insert analysis record.");
+  }
+
+  if (modelUsage?.model) {
+    await recordCostEvent(tx, {
+      workspaceId,
+      projectId,
+      source: "analysis",
+      refId: analysis.id,
+      model: modelUsage.model,
+      inputTokens: modelUsage.promptTokens,
+      outputTokens: modelUsage.completionTokens,
+    });
   }
 
   // 3. Insert Technical Report
@@ -123,6 +139,15 @@ export async function persistAnalysisReport({
 
   const pricingRes = priceQuote(featureInputs, DEFAULT_PRICING_CONFIG_V1, 0);
 
+  // Margin guard: the projected maximum provider spend is the build cost cap.
+  // If that cap would leave less than MIN_BUILD_MARGIN_PCT of the price, flag
+  // the quote for an admin instead of silently accepting a loss-making build.
+  const projectedCostCents = Math.round(pricingRes.totalCents * env.COST_CAP_RATIO);
+  const minimumAllowedCostCents = Math.floor(
+    pricingRes.totalCents * (1 - env.MIN_BUILD_MARGIN_PCT / 100)
+  );
+  const belowMinimumMargin = projectedCostCents > minimumAllowedCostCents;
+
   const [quote] = await tx
     .insert(quotes)
     .values({
@@ -135,7 +160,7 @@ export async function persistAnalysisReport({
       subtotalCents: pricingRes.subtotalCents,
       creditsAppliedCents: pricingRes.creditsAppliedCents,
       totalCents: pricingRes.totalCents,
-      needsReview: pricingRes.needsReview,
+      needsReview: pricingRes.needsReview || belowMinimumMargin,
     })
     .returning();
 

@@ -23,6 +23,7 @@ import { packageDelivery } from "./packager";
 import { WorkspaceCheckpointManager } from "./checkpoint";
 import { runBuildLoop, LoopDeps, LoopInput } from "./engine";
 import { calculateUsageCostCents } from "@/config/pricing";
+import { recordCostEvent } from "@/lib/billing/costs";
 import { storage } from "@/lib/storage";
 import { transitionProject } from "@/db/state-machine";
 import { issueCredits } from "@/lib/billing/credits";
@@ -247,6 +248,18 @@ export async function runBuild(jobId: string): Promise<BuildResult> {
 
     priceUsage(usage) {
       return calculateUsageCostCents(usage);
+    },
+
+    async onUsage(usage, iteration) {
+      await recordCostEvent(systemDb, {
+        workspaceId: job.workspaceId,
+        projectId: job.projectId,
+        source: "build",
+        refId: `${job.id}:iteration:${iteration}`,
+        model: usage.model,
+        inputTokens: usage.inputTokens,
+        outputTokens: usage.outputTokens,
+      });
     },
 
     now() {

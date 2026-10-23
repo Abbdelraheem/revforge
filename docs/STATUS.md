@@ -99,6 +99,15 @@ The old preview route served a source file directly out of the version ZIP. That
 
 **Not claimed:** a live container start, a real tunnel round-trip, screenshot fallback persistence, or Playwright preview screenshots. These require Docker, the preview worker, and the live database/S3 stack.
 
+### V8 Part 2: profit accounting
+
+- **Cost ledger.** `drizzle/0005_cost_events.sql` adds the append-only, RLS-exempt `cost_events` table with `provider_cost_cents` plus `provider_cost_micros`, model, input/output tokens, source, and ref id. `src/lib/billing/costs.ts` appends a row from the real usage object; analysis, each build-loop builder call, and the Studio enhancer call now write rows. `calculateUsageCostMicros` uses the explicit `config/pricing.ts` table and throws for unknown models.
+- **Pure margin contracts.** `src/lib/billing/margin.ts` implements `computeProjectMargin` and `computeStudioEditMargin`. Revenue recognizes cash payments minus refunds, deferred credit grants plus consumed credits; fees use `PAYMENT_FEE_PERCENT`/`PAYMENT_FEE_FIXED_CENTS`; provider cost sums micros; `byStage` is analysis/build/studio/preview; unspent credit is `liabilityCents`; `marginPct` is `null` when revenue is zero.
+- **Admin page.** `/admin/margins` shows real per-project and per-day revenue, fees, provider cost, contribution, margin, and liability, with date/project filters, CSV export, an alert banner for `MARGIN_ALERT_PCT` and cost-cap hits, and a pricing-health card whose suggestions are labelled as computed suggestions.
+- **Build margin guard.** Quote creation records the projected cost cap and flags `needsReview` when the projected spend would leave less than `MIN_BUILD_MARGIN_PCT` of the price. Customer-facing quote UI still shows only price/tokens, never provider cost.
+
+**V8 Part 2 verification (local, 2026-10-23):** `npm run typecheck` pass; `npm test` 21 files / 238 tests pass; `npm run lint` pass; `npm run build` pass; `node scripts/audit.mjs --all` 310/310 pass. Schema drift remains skipped locally because no Postgres is listening. The margin page has not been viewed against live data because the smoke stack is unavailable; its numbers come from the same real tables and pure contract, with no demo rows.
+
 ---
 
 ## 2. What Is Real & Verified

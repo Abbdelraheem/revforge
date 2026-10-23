@@ -8,6 +8,7 @@ import {
   real,
   jsonb,
   bigserial,
+  bigint,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
@@ -137,6 +138,7 @@ export const analyses = pgTable("analyses", {
     promptTokens: number;
     completionTokens: number;
     totalCostCents: number;
+    model?: string;
   }>(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
@@ -271,6 +273,23 @@ export const payments = pgTable("payments", {
   provider: text("provider").notNull(),
   providerTxnId: text("provider_txn_id").notNull(),
   payload: jsonb("payload"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+// 15b. Cost Events (append-only, RLS-exempt like audit)
+export const costEvents = pgTable("cost_events", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  workspaceId: uuid("workspace_id").references(() => workspaces.id, { onDelete: "cascade" }).notNull(),
+  projectId: uuid("project_id").references(() => projects.id, { onDelete: "cascade" }).notNull(),
+  source: text("source", {
+    enum: ["analysis", "build", "studio_edit", "preview", "infra"],
+  }).notNull(),
+  refId: text("ref_id"),
+  model: text("model"),
+  inputTokens: integer("input_tokens").default(0).notNull(),
+  outputTokens: integer("output_tokens").default(0).notNull(),
+  providerCostCents: integer("provider_cost_cents").default(0).notNull(),
+  providerCostMicros: bigint("provider_cost_micros", { mode: "number" }).default(0).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 

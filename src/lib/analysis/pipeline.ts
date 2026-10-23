@@ -81,6 +81,7 @@ export async function analysisPipeline(projectId: string): Promise<TechnicalRepo
               promptTokens: res.usage.inputTokens,
               completionTokens: res.usage.outputTokens,
               totalCostCents: res.usage.totalCostCents,
+              model: res.usage.model,
             },
           };
         },
