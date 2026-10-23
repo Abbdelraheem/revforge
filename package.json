@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run && tsx scripts/check-schema-drift.ts",
     "test:drift": "tsx scripts/check-schema-drift.ts --require-db",
-    "smoke": "tsx scripts/smoke.ts"
+    "smoke": "tsx scripts/smoke.ts",
+    "preview:worker": "tsx scripts/preview-worker.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.135.0",

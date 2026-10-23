@@ -28,6 +28,12 @@ import { executeStudioEdit } from "../src/lib/studio/worker";
 import { fixtureEnhanceStructuredCall } from "../src/lib/studio/enhance";
 import { verifyBuildWorkspace } from "../src/lib/build/verifier";
 import { storage } from "../src/lib/storage";
+import {
+  buildPreviewArgv,
+  nextPreviewState,
+  startPreview,
+  stopPreview,
+} from "../src/lib/studio/preview-runtime";
 
 async function writeFixtureWorkspace(dir: string): Promise<void> {
   await fs.rm(dir, { recursive: true, force: true });
@@ -98,7 +104,7 @@ function collectFixtureFiles(
 async function runSmoke() {
   console.log("=== RevForge Live Wire Smoke Test (V6) ===");
 
-  console.log("[1/8] Probing system health dependencies...");
+  console.log("[1/9] Probing system health dependencies...");
   const health = await checkSystemHealth();
   console.log("Health Probe Results:", JSON.stringify(health, null, 2));
 
@@ -111,7 +117,7 @@ async function runSmoke() {
     process.exit(1);
   }
 
-  console.log("[2/8] Core services (Postgres, System Postgres, Redis, S3) are UP.");
+  console.log("[2/9] Core services (Postgres, System Postgres, Redis, S3) are UP.");
 
   const testUserId = crypto.randomUUID();
   const testWorkspaceId = crypto.randomUUID();
@@ -121,7 +127,7 @@ async function runSmoke() {
   const restoreDir = path.join(os.tmpdir(), `revforge-smoke-studio-restore-${testProjectId}`);
 
   try {
-    console.log("[3/8] Setting up temporary user, workspaces, and project...");
+    console.log("[3/9] Setting up temporary user, workspaces, and project...");
     await systemDb.insert(users).values({
       id: testUserId,
       email: `smoke-${Date.now()}@test.internal`,
@@ -144,7 +150,7 @@ async function runSmoke() {
       ownerId: testUserId,
     });
 
-    console.log("[4/8] Exercising real quote calculator...");
+    console.log("[4/9] Exercising real quote calculator...");
     const quote = priceQuote(
       [
         {
@@ -164,7 +170,7 @@ async function runSmoke() {
       `Quote calculated successfully: $${quote.totalCents / 100} (${quote.totalCents} cents).`
     );
 
-    console.log("[5/8] Testing RLS isolation across tenant boundaries...");
+    console.log("[5/9] Testing RLS isolation across tenant boundaries...");
     await withTenant({ userId: testUserId, workspaceId: testWorkspaceId }, async (tx) => {
       await tx.insert(projects).values({
         id: testProjectId,
@@ -209,7 +215,7 @@ async function runSmoke() {
     }
     console.log("RLS isolation verified: 0 rows leaked to different workspace.");
 
-    console.log("[6/8] Uploading a real base workspace archive to S3...");
+    console.log("[6/9] Uploading a real base workspace archive to S3...");
     await writeFixtureWorkspace(fixtureDir);
     const fixtureFiles = collectFixtureFiles(fixtureDir, fixtureDir);
     const baseZip = Buffer.from(zipSync(fixtureFiles, { level: 6 }));
@@ -308,7 +314,7 @@ async function runSmoke() {
 
     if (!edit) throw new Error("Failed to create smoke studio edit.");
 
-    console.log("[7/8] Running a real Studio edit with a scripted builder...");
+    console.log("[7/9] Running a real Studio edit with a scripted builder...");
     const result = await executeStudioEdit(
       {
         editId: edit.id,
@@ -383,7 +389,7 @@ async function runSmoke() {
       );
     }
 
-    console.log("[8/8] Rebuilding the produced Studio version archive...");
+    console.log("[8/9] Rebuilding the produced Studio version archive...");
     const producedZip = await storage.getObject(newVersion.zipStorageKey);
     const producedEntries = unzipSync(new Uint8Array(producedZip));
     await fs.rm(restoreDir, { recursive: true, force: true });
@@ -449,6 +455,60 @@ async function runSmoke() {
     console.log(
       `Studio edit accepted: version v${result.versionNumber}, charge ${result.tokensSettledCents}¢, files differ from parent, build verified.`
     );
+
+    console.log("[9/9] Exercising preview lifecycle with a fake Docker executor...");
+    const previewDir = path.join(fixtureDir, "preview");
+    await fs.mkdir(path.join(previewDir, ".next"), { recursive: true });
+    await fs.writeFile(
+      path.join(previewDir, "package.json"),
+      JSON.stringify({ name: "preview-smoke", scripts: { start: "next start" } }, null, 2)
+    );
+
+    const previewSessionId = crypto.randomUUID();
+    const previewArgv = buildPreviewArgv({
+      sessionId: previewSessionId,
+      workspaceDir: previewDir,
+      port: 4421,
+      env: { NODE_ENV: "production", SANDBOX_RUNTIME: "runsc" },
+    });
+    if (
+      !previewArgv.includes("--cap-drop=ALL") ||
+      !previewArgv.includes("--read-only") ||
+      !previewArgv.includes("--runtime=runsc") ||
+      !previewArgv.includes(`revforge.preview=${previewSessionId}`)
+    ) {
+      throw new Error("Preview argv is missing required hardening flags.");
+    }
+    if (nextPreviewState("requested", "build_started") !== "building") {
+      throw new Error("Preview state machine did not enter building.");
+    }
+    if (nextPreviewState("ready", "stop_requested") !== "stopping") {
+      throw new Error("Preview state machine did not enter stopping.");
+    }
+
+    const startedPreview = await startPreview(
+      {
+        projectId: testProjectId,
+        versionId: newVersion.id,
+        workspaceDir: previewDir,
+        sessionId: previewSessionId,
+      },
+      {
+        build: false,
+        execFile: async () => ({ stdout: "fake-preview-container\n", stderr: "" }),
+      }
+    );
+    if (startedPreview.containerId !== "fake-preview-container") {
+      throw new Error("Preview start did not return the fake Docker container id.");
+    }
+
+    await stopPreview(previewSessionId, {
+      execFile: async () => ({ stdout: "", stderr: "" }),
+    });
+    console.log(
+      "Preview contract and fake-Docker lifecycle passed. Real preview still requires Docker, the preview worker, and network access."
+    );
+
     console.log("=== ALL SMOKE TESTS PASSED ===");
     process.exit(0);
   } finally {

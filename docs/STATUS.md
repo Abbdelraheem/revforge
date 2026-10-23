@@ -1,4 +1,4 @@
-# RevForge System Status & Verification Report (V6)
+# RevForge System Status & Verification Report (V8, in progress)
 
 Last Updated: October 2026
 Audit Referee: `scripts/audit.mjs`
@@ -84,6 +84,20 @@ FATAL: Required core services are DOWN: postgres, postgresSystem, redis, s3, doc
 ```
 
 Smoke therefore stops at stage 1 of 8. No live Studio edit, build, settlement, or ZIP round-trip has been claimed as passing.
+
+### V8 Part 1: live preview runtime
+
+The old preview route served a source file directly out of the version ZIP. That route now has a real session lifecycle and proxies to a running container through the worker tunnel.
+
+- **Pure argv contract.** `src/lib/studio/preview-runtime.ts` exposes `buildPreviewArgv({sessionId, workspaceDir, port, env})` and `nextPreviewState(state, event)`. The argv is separate array entries, includes `--cap-drop=ALL`, `--read-only`, `--security-opt=no-new-privileges`, `--user 10001`, pids/memory/CPU limits, a private `revforge-preview` network, a `revforge.preview=<sessionId>` label, a read-only workspace mount, and `--runtime=runsc`; production rejects `runc`.
+- **Lifecycle.** Sessions are `requested → building → starting → ready → stopping → stopped | error`, with `lastError`, build logs, container id, internal port, heartbeat and timestamps in `studio_preview_sessions`. `drizzle/0004_preview_runtime.sql` adds these fields and `preview_tunnel_requests`.
+- **Outbound worker tunnel.** `/api/worker/tunnel` authenticates a short-lived HMAC token from `PREVIEW_TUNNEL_SECRET`; the worker claims requests, forwards them to the loopback-published container port, and posts the response. `/api/studio/preview/[projectId]/[...path]` re-runs `authorizeStudio` on every request, strips cookies/Authorization, enforces response size/time limits, and returns a real 503/504 state instead of source files.
+- **Worker.** `npm run preview:worker` restores the immutable version ZIP, builds when needed, starts the hardened container, waits for the server, heartbeats, enforces idle/hard TTLs, and stops containers. It requires Docker and the worker process to be online.
+- **UI.** The Studio center pane has 390/768/1280 widths, route picker, start/stop, reload, open-in-new-tab, a real state badge, logs drawer, and a screenshot-compare notice. It only renders an iframe when the session is actually `ready`; otherwise it shows the real state without a fake spinner. No verified screenshot fallback is claimed because the current capture path does not persist screenshots.
+
+**V8 Part 1 verification (local, 2026-10-23):** `npm run typecheck` pass; `npm test` 20 files / 235 tests pass (schema-drift skipped: no Postgres on `127.0.0.1:5432`); `npm run lint` pass; `npm run build` pass; `node scripts/audit.mjs --all` 310/310 pass. `npm run smoke` was not run to completion because Postgres/Redis/S3/Docker are not available locally; the smoke script now has a preview contract + fake-Docker stage, but it still cannot pass stage 1 without those services.
+
+**Not claimed:** a live container start, a real tunnel round-trip, screenshot fallback persistence, or Playwright preview screenshots. These require Docker, the preview worker, and the live database/S3 stack.
 
 ---
 

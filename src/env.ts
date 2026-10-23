@@ -60,6 +60,17 @@ const envSchema = z
     ALLOW_RUNC: z.string().transform((v) => v === "true" || v === "1").optional(),
     BUILD_AGENT_CONCURRENCY: z.coerce.number().default(6),
     WORKER_IDLE_SHUTDOWN_MIN: z.coerce.number().default(30),
+
+    // Live preview
+    PREVIEW_ORIGIN: z.string().url().default("http://localhost:4100"),
+    PREVIEW_PORT_BASE: z.coerce.number().default(4100),
+    PREVIEW_MAX_CONCURRENT: z.coerce.number().default(2),
+    PREVIEW_IDLE_TTL_MIN: z.coerce.number().default(10),
+    PREVIEW_HARD_TTL_MIN: z.coerce.number().default(60),
+    PREVIEW_REQUEST_TIMEOUT_MS: z.coerce.number().default(15_000),
+    PREVIEW_MAX_RESPONSE_BYTES: z.coerce.number().default(5_000_000),
+    PREVIEW_TUNNEL_SECRET: z.string().min(16).optional(),
+    WORKER_TUNNEL_URL: z.string().url().default("http://127.0.0.1:3001"),
   })
   .superRefine((data, ctx) => {
     // Skip strict production validation during build phase
@@ -134,6 +145,14 @@ function parseEnv() {
       SANDBOX_RUNTIME: "runc",
       BUILD_AGENT_CONCURRENCY: 6,
       WORKER_IDLE_SHUTDOWN_MIN: 30,
+      PREVIEW_ORIGIN: "http://localhost:4100",
+      PREVIEW_PORT_BASE: 4100,
+      PREVIEW_MAX_CONCURRENT: 2,
+      PREVIEW_IDLE_TTL_MIN: 10,
+      PREVIEW_HARD_TTL_MIN: 60,
+      PREVIEW_REQUEST_TIMEOUT_MS: 15000,
+      PREVIEW_MAX_RESPONSE_BYTES: 5000000,
+      WORKER_TUNNEL_URL: "http://127.0.0.1:3001",
     } as any;
   }
 
@@ -170,6 +189,14 @@ function parseEnv() {
         SANDBOX_RUNTIME: "runc",
         BUILD_AGENT_CONCURRENCY: 6,
         WORKER_IDLE_SHUTDOWN_MIN: 30,
+        PREVIEW_ORIGIN: "http://localhost:4100",
+        PREVIEW_PORT_BASE: 4100,
+        PREVIEW_MAX_CONCURRENT: 2,
+        PREVIEW_IDLE_TTL_MIN: 10,
+        PREVIEW_HARD_TTL_MIN: 60,
+        PREVIEW_REQUEST_TIMEOUT_MS: 15000,
+        PREVIEW_MAX_RESPONSE_BYTES: 5000000,
+        WORKER_TUNNEL_URL: "http://127.0.0.1:3001",
       }) as z.infer<typeof envSchema>;
 }
 

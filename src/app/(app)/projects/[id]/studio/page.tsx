@@ -48,6 +48,26 @@ export default async function StudioPage({ params }: StudioPageProps) {
     createdAt: version.createdAt.toISOString(),
   }));
 
+  const routeSet = new Set<string>();
+  for (const version of data.versions) {
+    for (const file of version.filesManifest || []) {
+      const match = file.path.match(
+        /(?:^|\/)(?:src\/)?app\/(.*?)\/?page\.(?:tsx|jsx|ts|js)$/
+      );
+      if (match) {
+        const segment = match[1] ? `/${match[1].replace(/\/page$/, "")}` : "/";
+        routeSet.add(segment || "/");
+      }
+      const pagesMatch = file.path.match(
+        /(?:^|\/)(?:src\/)?pages\/(.*?)\.(?:tsx|jsx|ts|js)$/
+      );
+      if (pagesMatch?.[1] && !pagesMatch[1].startsWith("_")) {
+        routeSet.add(`/${pagesMatch[1]}`.replace(/\/index$/, "/"));
+      }
+    }
+  }
+  const initialRoutes = Array.from(routeSet).sort();
+
   const serializedEdits = data.edits.map((edit) => ({
     id: edit.id,
     promptRaw: edit.promptRaw,
@@ -67,6 +87,7 @@ export default async function StudioPage({ params }: StudioPageProps) {
       initialVersions={serializedVersions}
       initialEdits={serializedEdits}
       initialBalanceCents={auth.balanceCents ?? 0}
+      initialRoutes={initialRoutes}
     />
   );
 }

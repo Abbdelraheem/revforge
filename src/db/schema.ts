@@ -540,12 +540,48 @@ export const studioPreviewSessions = pgTable("studio_preview_sessions", {
   versionId: uuid("version_id").references(() => studioVersions.id, { onDelete: "cascade" }).notNull(),
   containerId: text("container_id"),
   port: integer("port"),
+  internalPort: integer("internal_port"),
   status: text("status", {
-    enum: ["starting", "running", "stopped", "failed"],
-  }).default("starting").notNull(),
+    enum: [
+      "requested",
+      "building",
+      "starting",
+      "ready",
+      "stopping",
+      "stopped",
+      "error",
+    ],
+  }).default("requested").notNull(),
+  lastError: text("last_error"),
+  buildLogs: text("build_logs"),
+  heartbeatAt: timestamp("heartbeat_at", { withTimezone: true }),
+  startedAt: timestamp("started_at", { withTimezone: true }),
+  stoppedAt: timestamp("stopped_at", { withTimezone: true }),
   authToken: text("auth_token").notNull(),
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+// 34. Preview Tunnel Requests (outbound-only worker <-> web bridge)
+export const previewTunnelRequests = pgTable("preview_tunnel_requests", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  sessionId: uuid("session_id").references(() => studioPreviewSessions.id, { onDelete: "cascade" }).notNull(),
+  workerId: text("worker_id"),
+  method: text("method").notNull(),
+  path: text("path").notNull(),
+  requestHeaders: jsonb("request_headers").$type<Record<string, string>>().notNull(),
+  requestBody: text("request_body"),
+  status: text("status", {
+    enum: ["pending", "claimed", "completed", "expired"],
+  }).default("pending").notNull(),
+  responseStatus: integer("response_status"),
+  responseHeaders: jsonb("response_headers").$type<Record<string, string>>(),
+  responseBody: text("response_body"),
+  error: text("error"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  claimedAt: timestamp("claimed_at", { withTimezone: true }),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
 });
 
 // Relations
