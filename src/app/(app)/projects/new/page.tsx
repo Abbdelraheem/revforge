@@ -16,12 +16,12 @@ export default async function NewProjectPage() {
   if (!session) redirect("/login");
 
   return (
-    <div className="p-8 max-w-4xl mx-auto space-y-8 font-sans">
+    <div className="mx-auto max-w-4xl space-y-8 font-sans">
       <div className="space-y-2 border-b border-border pb-4">
-        <Badge variant="outline" className="border-primary/40 text-primary text-sm">
+        <Badge variant="outline" className="border-primary/40 text-sm text-primary">
           CLEAN-ROOM RECONSTRUCTION
         </Badge>
-        <h1 className="text-3xl font-serif font-bold text-foreground">
+        <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
           Initialize New Project Analysis
         </h1>
         <p className="text-sm text-muted-foreground">
@@ -39,16 +39,27 @@ export default async function NewProjectPage() {
         <CardContent>
           <form action={submitTargetAction} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-foreground">Target URL or Source</label>
+              <label htmlFor="target-input" className="text-sm font-semibold text-foreground">
+                Target URL or Source
+              </label>
               <div className="relative">
-                <Globe className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Globe
+                  aria-hidden="true"
+                  className="absolute start-3 top-3 h-4 w-4 text-muted-foreground"
+                />
                 <Input
+                  id="target-input"
                   name="targetInput"
                   required
                   placeholder="https://example.com"
+                  aria-describedby="target-input-help"
                   className="ps-9 text-sm"
                 />
               </div>
+              <p id="target-input-help" className="text-sm text-muted-foreground">
+                Public URLs are observed through the sandboxed crawler. Upload targets use the
+                project workspace once created.
+              </p>
             </div>
 
             <div className="p-4 rounded-md border border-border bg-muted/20 space-y-2 text-sm text-muted-foreground">

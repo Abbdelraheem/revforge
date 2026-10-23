@@ -3,9 +3,8 @@ import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { withTenant } from "@/db/tenant";
 import { orders, creditsLedger } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
-import { getWorkspaceCreditBalance } from "@/lib/billing/credits";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { eq, desc, sql } from "drizzle-orm";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CreditCard, History, ShieldCheck } from "lucide-react";
 
@@ -15,9 +14,7 @@ export default async function BillingPage() {
   const session = await getSession();
   if (!session) redirect("/login");
 
-  const balanceCents = await getWorkspaceCreditBalance(session.workspace.id);
-
-  const { workspaceOrders, transactions } = await withTenant(
+  const { workspaceOrders, transactions, balanceCents } = await withTenant(
     { userId: session.user.id, workspaceId: session.workspace.id },
     async (tx) => {
       const ords = await tx
@@ -34,12 +31,23 @@ export default async function BillingPage() {
         .orderBy(desc(creditsLedger.createdAt))
         .limit(20);
 
-      return { workspaceOrders: ords, transactions: txns };
+      const [balanceRow] = await tx
+        .select({
+          total: sql<number>`coalesce(sum(${creditsLedger.deltaCents}), 0)::int`,
+        })
+        .from(creditsLedger)
+        .where(eq(creditsLedger.workspaceId, session.workspace.id));
+
+      return {
+        workspaceOrders: ords,
+        transactions: txns,
+        balanceCents: Math.max(0, Number(balanceRow?.total ?? 0)),
+      };
     }
   );
 
   return (
-    <div className="p-8 max-w-6xl mx-auto space-y-8 font-sans">
+    <div className="mx-auto max-w-6xl space-y-8 font-sans">
       <div className="space-y-2 border-b border-border pb-4">
         <Badge variant="outline" className="border-primary/40 text-primary text-sm">
           WORKSPACE BILLING & CREDITS
@@ -108,36 +116,61 @@ export default async function BillingPage() {
                 No orders processed yet.
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-muted/40 border-b border-border">
-                    <tr>
-                      <th className="p-3 text-start font-semibold">Order ID</th>
-                      <th className="p-3 text-start font-semibold">Kind</th>
-                      <th className="p-3 text-start font-semibold">Amount</th>
-                      <th className="p-3 text-start font-semibold">Status</th>
-                      <th className="p-3 text-start font-semibold">Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {workspaceOrders.map((ord) => (
-                      <tr key={ord.id} className="border-b border-border last:border-0 hover:bg-muted/10">
-                        <td className="p-3 font-mono text-sm">{ord.id.slice(0, 8)}...</td>
-                        <td className="p-3 capitalize">{ord.kind}</td>
-                        <td className="p-3 font-mono font-bold">${(ord.amountCents / 100).toFixed(2)}</td>
-                        <td className="p-3">
-                          <Badge variant={ord.status === "paid" || ord.status === "paid_by_credit" ? "default" : "secondary"}>
-                            {ord.status}
-                          </Badge>
-                        </td>
-                        <td className="p-3 text-muted-foreground">
+              <>
+                <ul className="divide-y divide-border md:hidden">
+                  {workspaceOrders.map((ord) => (
+                    <li key={ord.id} className="space-y-2 p-4">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className="font-mono text-sm text-muted-foreground">
+                            {ord.id.slice(0, 8)}...
+                          </p>
+                          <p className="font-semibold capitalize text-foreground">{ord.kind}</p>
+                        </div>
+                        <p className="font-mono font-bold">${(ord.amountCents / 100).toFixed(2)}</p>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Badge variant={ord.status === "paid" || ord.status === "paid_by_credit" ? "default" : "secondary"}>
+                          {ord.status}
+                        </Badge>
+                        <span className="font-mono text-sm text-muted-foreground">
                           {new Date(ord.createdAt).toLocaleDateString()}
-                        </td>
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                <div className="hidden overflow-x-auto md:block">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted/40 border-b border-border">
+                      <tr>
+                        <th className="p-3 text-start font-semibold">Order ID</th>
+                        <th className="p-3 text-start font-semibold">Kind</th>
+                        <th className="p-3 text-start font-semibold">Amount</th>
+                        <th className="p-3 text-start font-semibold">Status</th>
+                        <th className="p-3 text-start font-semibold">Date</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {workspaceOrders.map((ord) => (
+                        <tr key={ord.id} className="border-b border-border last:border-0 hover:bg-muted/10">
+                          <td className="p-3 font-mono text-sm">{ord.id.slice(0, 8)}...</td>
+                          <td className="p-3 capitalize">{ord.kind}</td>
+                          <td className="p-3 font-mono font-bold">${(ord.amountCents / 100).toFixed(2)}</td>
+                          <td className="p-3">
+                            <Badge variant={ord.status === "paid" || ord.status === "paid_by_credit" ? "default" : "secondary"}>
+                              {ord.status}
+                            </Badge>
+                          </td>
+                          <td className="p-3 text-muted-foreground">
+                            {new Date(ord.createdAt).toLocaleDateString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
@@ -153,32 +186,52 @@ export default async function BillingPage() {
                 No credit transactions recorded.
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-muted/40 border-b border-border">
-                    <tr>
-                      <th className="p-3 text-start font-semibold">Transaction ID</th>
-                      <th className="p-3 text-start font-semibold">Adjustment</th>
-                      <th className="p-3 text-start font-semibold">Reason</th>
-                      <th className="p-3 text-start font-semibold">Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {transactions.map((tx) => (
-                      <tr key={tx.id} className="border-b border-border last:border-0 hover:bg-muted/10">
-                        <td className="p-3 font-mono text-sm">{tx.id.slice(0, 8)}...</td>
-                        <td className="p-3 font-mono font-bold">
+              <>
+                <ul className="divide-y divide-border md:hidden">
+                  {transactions.map((tx) => (
+                    <li key={tx.id} className="space-y-1 p-4">
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="font-mono text-sm text-muted-foreground">
+                          {tx.id.slice(0, 8)}...
+                        </p>
+                        <p className="font-mono font-bold">
                           {tx.deltaCents >= 0 ? "+" : ""}${(tx.deltaCents / 100).toFixed(2)}
-                        </td>
-                        <td className="p-3 text-muted-foreground">{tx.reason}</td>
-                        <td className="p-3 text-muted-foreground">
-                          {new Date(tx.createdAt).toLocaleDateString()}
-                        </td>
+                        </p>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{tx.reason}</p>
+                      <p className="font-mono text-sm text-muted-foreground">
+                        {new Date(tx.createdAt).toLocaleDateString()}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+                <div className="hidden overflow-x-auto md:block">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted/40 border-b border-border">
+                      <tr>
+                        <th className="p-3 text-start font-semibold">Transaction ID</th>
+                        <th className="p-3 text-start font-semibold">Adjustment</th>
+                        <th className="p-3 text-start font-semibold">Reason</th>
+                        <th className="p-3 text-start font-semibold">Date</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {transactions.map((tx) => (
+                        <tr key={tx.id} className="border-b border-border last:border-0 hover:bg-muted/10">
+                          <td className="p-3 font-mono text-sm">{tx.id.slice(0, 8)}...</td>
+                          <td className="p-3 font-mono font-bold">
+                            {tx.deltaCents >= 0 ? "+" : ""}${(tx.deltaCents / 100).toFixed(2)}
+                          </td>
+                          <td className="p-3 text-muted-foreground">{tx.reason}</td>
+                          <td className="p-3 text-muted-foreground">
+                            {new Date(tx.createdAt).toLocaleDateString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>

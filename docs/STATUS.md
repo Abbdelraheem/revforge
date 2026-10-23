@@ -143,6 +143,15 @@ The old preview route served a source file directly out of the version ZIP. That
 
 **V8 Part 5 verification (local, 2026-10-23):** `npm run typecheck` pass; `npm test` 26 files / 255 tests pass (schema drift skipped: no Postgres); `npm run lint` pass; `npm run build` pass, including the delivery page and all four delivery API routes; `node scripts/audit.mjs --all` 310/310 pass. The Git archive test executed the real local `git` binary and verified two commits. Not exercised locally: S3 upload/presign, Postgres migration execution, Resend delivery, and GitHub push (feature flag off and no token). No live browser session was used for this part.
 
+### V8 Part 6: Whole-app UI/UX pass
+
+- **Unified responsive shells.** `src/components/layout/app-shell.tsx` and `src/components/layout/admin-shell.tsx` provide persistent workspace and administrative navigation with responsive side drawers for mobile (390px), tablet (768px), and desktop (1280px). Adheres strictly to the paper-first design system with zero glass/glow/blur effects, thin borders, visible focus rings, and explicit semantic structure.
+- **Screen audits & telemetry.** The dashboard, new project wizard, project details, billing, settings, team, and notifications screens operate exclusively on real persisted models without fabricated mock stats or decorative placeholders. Empty states, loading spinners, and error boundaries are cleanly integrated.
+- **WCAG contrast compliance.** `scripts/check-contrast.ts` validates that the palette achieves 16.62:1 contrast for Paper vs. Ink (exceeding WCAG AAA 7:1) and 4.92:1 for Paper vs. Vermilion (exceeding WCAG AA 4.5:1).
+- **Responsive screenshot verification.** `e2e/screenshots.spec.ts` defines multi-viewport Playwright visual tests across 390px, 768px, and 1280px breakpoints.
+
+**V8 Part 6 verification (local, 2026-10-23):** `npm run typecheck` pass; `npm test` 26 files / 255 tests pass; `npm run lint` pass; `npm run build` pass; `node scripts/audit.mjs --all` 310/310 pass; `npx tsx scripts/check-contrast.ts` pass; `npm run prompts:eval` pass. Live database, Redis, S3, Docker containers, and external payment webhooks remain mock/offline in this local development environment as documented.
+
 ---
 
 ## 2. What Is Real & Verified

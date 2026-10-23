@@ -151,8 +151,8 @@ export default async function ProjectDetailPage({ params, searchParams }: Projec
           </p>
         </div>
 
-        <div className="flex items-center space-x-3">
-          <Badge variant="outline" className="text-sm font-mono uppercase">
+        <div className="flex flex-wrap items-center gap-2">
+          <Badge variant="outline" className="font-mono text-sm uppercase">
             {project.status.replace(/_/g, " ")}
           </Badge>
           {(project.status === "delivered" || project.status === "delivered_partial") && (
@@ -224,8 +224,11 @@ export default async function ProjectDetailPage({ params, searchParams }: Projec
               ) : (
                 <div className="divide-y divide-border font-sans text-sm">
                   {quoteLinesList.map((line) => (
-                    <div key={line.id} className="py-3 flex items-start justify-between">
-                      <div className="space-y-1">
+                    <div
+                      key={line.id}
+                      className="flex flex-col gap-2 py-3 sm:flex-row sm:items-start sm:justify-between"
+                    >
+                      <div className="min-w-0 space-y-1">
                         <div className="flex items-center space-x-2">
                           <span className="font-semibold text-foreground text-sm">{line.featureName}</span>
                           <Badge variant="outline" className="text-sm font-mono">

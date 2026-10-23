@@ -1,407 +1,322 @@
-"use client";
-
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { desc, sql } from "drizzle-orm";
 import {
-  Terminal,
-  Shield,
-  ShieldAlert,
-  ShieldCheck,
-  Cpu,
-  Database,
   Activity,
-  Server,
-  AlertTriangle,
-  Play,
-  Square,
-  RefreshCw,
-  ExternalLink,
-  Lock,
-  DollarSign,
-  TrendingUp,
-  Clock,
   ArrowRight,
+  Banknote,
+  CheckCircle2,
+  FolderGit2,
+  ShieldCheck,
+  Users,
 } from "lucide-react";
+import { getSession } from "@/lib/auth";
+import { systemDb } from "@/db";
+import {
+  auditLog,
+  buildJobs,
+  projects,
+  users,
+  workspaceMembers,
+  workspaces,
+} from "@/db/schema";
+import { loadMarginReport } from "@/lib/billing/margin-report";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { BrandLogo } from "@/components/shared/brand-logo";
-import { BRAND } from "@/config/brand";
 
-interface FleetJob {
-  id: string;
-  targetType: string;
-  source: string;
-  status: "running" | "completed" | "failed" | "quarantined";
-  progress: number;
-  runtimeSec: number;
-  memoryMb: number;
-  computeCostUsd: number;
-  priceUsd: number;
-  sandboxId: string;
+export const dynamic = "force-dynamic";
+
+function money(cents: number): string {
+  return `$${(cents / 100).toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
 }
 
-const INITIAL_JOBS: FleetJob[] = [
-  {
-    id: "proj-9012a-4f81",
-    targetType: "web_app",
-    source: "https://app.enterprise-media.com",
-    status: "running",
-    progress: 68,
-    runtimeSec: 142,
-    memoryMb: 412,
-    computeCostUsd: 4.85,
-    priceUsd: 49.0,
-    sandboxId: "gvisor-worker-04",
-  },
-  {
-    id: "proj-8841b-12c9",
-    targetType: "mobile_app",
-    source: "target-v2.1.apk (Upload)",
-    status: "completed",
-    progress: 100,
-    runtimeSec: 284,
-    memoryMb: 820,
-    computeCostUsd: 9.40,
-    priceUsd: 99.0,
-    sandboxId: "gvisor-worker-02",
-  },
-  {
-    id: "proj-7719c-99f2",
-    targetType: "enterprise_saas",
-    source: "https://github.com/enterprise/crm",
-    status: "completed",
-    progress: 100,
-    runtimeSec: 410,
-    memoryMb: 1150,
-    computeCostUsd: 22.10,
-    priceUsd: 249.0,
-    sandboxId: "gvisor-worker-01",
-  },
-  {
-    id: "proj-6102d-33a8",
-    targetType: "desktop_binary",
-    source: "malicious-sample.exe",
-    status: "quarantined",
-    progress: 12,
-    runtimeSec: 8,
-    memoryMb: 95,
-    computeCostUsd: 0.15,
-    priceUsd: 0.0,
-    sandboxId: "gvisor-worker-08",
-  },
-];
+function pct(value: number | null): string {
+  return value === null ? "—" : `${value.toFixed(1)}%`;
+}
 
-const SECURITY_AUDIT_LOGS = [
-  {
-    time: "07:28:14",
-    type: "SSRF_BLOCKED",
-    target: "http://169.254.169.254/latest/meta-data/",
-    severity: "CRITICAL",
-    action: "BLOCKED_PRE_DNS",
-  },
-  {
-    time: "07:22:40",
-    type: "PADDLE_WEBHOOK_VERIFIED",
-    target: "txn_01j7b9m8q2k3",
-    severity: "INFO",
-    action: "HMAC_SHA256_VALIDATED",
-  },
-  {
-    time: "07:15:02",
-    type: "PROMPT_INJECTION_STRIPPED",
-    target: "untrusted_binary_strings",
-    severity: "WARNING",
-    action: "XML_DELIMITERS_ENFORCED",
-  },
-  {
-    time: "07:02:19",
-    type: "MAGIC_BYTE_MISMATCH",
-    target: "exploit.pdf (Renamed .apk)",
-    severity: "HIGH",
-    action: "REJECTED_400",
-  },
-];
+function statusVariant(status: string): "default" | "secondary" | "destructive" | "success" {
+  if (status === "delivered" || status === "delivered_partial") return "success";
+  if (status === "build_failed") return "destructive";
+  if (status === "building" || status === "verifying") return "default";
+  return "secondary";
+}
 
-export default function AdminConsolePage() {
-  const [jobs, setJobs] = useState<FleetJob[]>(INITIAL_JOBS);
-  const [activeTab, setActiveTab] = useState<"fleet" | "security" | "economics">("fleet");
+export default async function AdminOverviewPage() {
+  const session = await getSession();
+  if (!session || session.user.platformRole !== "superadmin") {
+    redirect("/login");
+  }
 
-  const handleKillSandbox = (jobId: string) => {
-    setJobs((prev) =>
-      prev.map((job) =>
-        job.id === jobId ? { ...job, status: "quarantined", progress: 0 } : job
-      )
-    );
-  };
+  const [
+    projectCounts,
+    workspaceCounts,
+    userCounts,
+    memberCounts,
+    jobStatusRows,
+    recentJobs,
+    recentAudit,
+    margin,
+  ] = await Promise.all([
+    systemDb.select({ count: sql<number>`count(*)::int` }).from(projects),
+    systemDb.select({ count: sql<number>`count(*)::int` }).from(workspaces),
+    systemDb.select({ count: sql<number>`count(*)::int` }).from(users),
+    systemDb.select({ count: sql<number>`count(*)::int` }).from(workspaceMembers),
+    systemDb
+      .select({
+        status: buildJobs.status,
+        count: sql<number>`count(*)::int`,
+      })
+      .from(buildJobs)
+      .groupBy(buildJobs.status),
+    systemDb
+      .select({
+        id: buildJobs.id,
+        status: buildJobs.status,
+        stage: buildJobs.stage,
+        attempt: buildJobs.attempt,
+        parityScore: buildJobs.parityScore,
+        spentCents: buildJobs.spentCents,
+        costCapCents: buildJobs.costCapCents,
+        heartbeatAt: buildJobs.heartbeatAt,
+        createdAt: buildJobs.createdAt,
+        projectName: projects.name,
+      })
+      .from(buildJobs)
+      .leftJoin(projects, sql`${projects.id} = ${buildJobs.projectId}`)
+      .orderBy(desc(buildJobs.createdAt))
+      .limit(8),
+    systemDb
+      .select({
+        id: auditLog.id,
+        action: auditLog.action,
+        resourceType: auditLog.resourceType,
+        resourceId: auditLog.resourceId,
+        actorType: auditLog.actorType,
+        createdAt: auditLog.createdAt,
+      })
+      .from(auditLog)
+      .orderBy(desc(auditLog.createdAt))
+      .limit(8),
+    loadMarginReport(),
+  ]);
 
-  const totalCompute = jobs.reduce((acc, j) => acc + j.computeCostUsd, 0);
-  const totalRevenue = jobs.reduce((acc, j) => acc + (j.status === "completed" ? j.priceUsd : 0), 0);
-  const completionRate = jobs.length > 0 ? (((jobs.filter(j => j.status === "completed").length) / jobs.length) * 100).toFixed(1) : "100.0";
+  const statusCounts = new Map<string, number>(jobStatusRows.map((row) => [row.status, row.count]));
+  const activeJobs = ["queued", "building", "verifying"].reduce(
+    (sum, status) => sum + (statusCounts.get(status) ?? 0),
+    0
+  );
+  const deliveredJobs =
+    (statusCounts.get("delivered") ?? 0) + (statusCounts.get("delivered_partial") ?? 0);
+  const failedJobs = statusCounts.get("build_failed") ?? 0;
+
+  const stats = [
+    {
+      label: "Projects",
+      value: String(projectCounts[0]?.count ?? 0),
+      detail: `${workspaceCounts[0]?.count ?? 0} workspaces · ${memberCounts[0]?.count ?? 0} memberships`,
+      icon: FolderGit2,
+    },
+    {
+      label: "Active build jobs",
+      value: String(activeJobs),
+      detail: `${deliveredJobs} delivered · ${failedJobs} failed`,
+      icon: Activity,
+    },
+    {
+      label: "Registered users",
+      value: String(userCounts[0]?.count ?? 0),
+      detail: "All platform accounts",
+      icon: Users,
+    },
+    {
+      label: "Contribution",
+      value: money(margin.totals.grossProfitCents),
+      detail: `${money(margin.totals.revenueCents)} recorded revenue · ${pct(margin.totals.marginPct)}`,
+      icon: Banknote,
+    },
+  ];
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground font-mono">
-      {/* Top Console Navigation */}
-      <header className="border-b border-border bg-card sticky top-0 z-50 px-6 py-3.5 flex items-center justify-between">
-        <div className="flex items-center space-x-3 rtl:space-x-reverse">
-          <Link href="/" className="flex items-center space-x-2.5 rtl:space-x-reverse">
-            <div className="h-8 w-8 rounded border border-border bg-muted/40 flex items-center justify-center">
-              <BrandLogo className="h-4 w-4" />
-            </div>
-            <span className="font-bold text-sm text-foreground">{BRAND.name}</span>
-          </Link>
-          <span className="text-muted-foreground text-sm">•</span>
-          <Badge variant="outline" className="border-border text-foreground text-sm font-semibold">
-            Operations Fleet Console
+    <div className="mx-auto w-full max-w-[1200px] space-y-6 p-4 font-sans sm:p-6 lg:p-8">
+      <div className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-2">
+          <Badge variant="outline" className="border-primary/40 text-sm text-primary">
+            PLATFORM ADMINISTRATION
           </Badge>
+          <h1 className="font-serif text-2xl font-bold text-foreground">Operating overview</h1>
+          <p className="max-w-3xl text-sm text-muted-foreground">
+            Counts, build health, and contribution are read from persisted platform rows. No demo
+            fleet, sample audit events, or estimated spend is shown here.
+          </p>
         </div>
-
-        <div className="flex items-center space-x-3">
-          <Link href="/dashboard" className="text-sm text-muted-foreground hover:text-foreground">
-            Studio Dashboard
-          </Link>
-          <Link href="/">
-            <Button size="sm" variant="outline" className="text-sm">
-              Home
-            </Button>
-          </Link>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild size="sm" variant="outline" className="text-sm">
+            <Link href="/admin/margins">
+              Open margin report
+              <ArrowRight className="ms-1.5 h-3.5 w-3.5" />
+            </Link>
+          </Button>
+          <Button asChild size="sm" className="text-sm">
+            <Link href="/admin/jobs">Build jobs</Link>
+          </Button>
         </div>
-      </header>
+      </div>
 
-      {/* Main Console Content */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-6 space-y-8">
-        {/* Metric Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="border-border bg-card">
-            <CardHeader className="pb-2">
-              <div className="text-sm text-muted-foreground uppercase flex items-center justify-between">
-                <span>Active Sandboxes</span>
-                <Cpu className="h-3.5 w-3.5 text-primary" />
-              </div>
-              <CardTitle className="text-2xl font-bold font-mono text-foreground">
-                3 / 16 Nodes
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              gVisor runsc runtime • 18.7% CPU quota
-            </CardContent>
-          </Card>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {stats.map((stat) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={stat.label} className="border-border bg-card shadow-sm">
+              <CardContent className="space-y-2 p-4">
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>{stat.label}</span>
+                  <Icon className="h-4 w-4 text-primary" />
+                </div>
+                <p className="font-mono text-2xl font-bold text-foreground">{stat.value}</p>
+                <p className="text-sm text-muted-foreground">{stat.detail}</p>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
 
-          <Card className="border-border bg-card">
-            <CardHeader className="pb-2">
-              <div className="text-sm text-muted-foreground uppercase flex items-center justify-between">
-                <span>Job Completion Rate</span>
-                <TrendingUp className="h-3.5 w-3.5 text-primary" />
-              </div>
-              <CardTitle className="text-2xl font-bold font-mono text-primary">
-                {completionRate}%
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              Fleet execution reliability
-            </CardContent>
-          </Card>
-
-          <Card className="border-border bg-card">
-            <CardHeader className="pb-2">
-              <div className="text-sm text-muted-foreground uppercase flex items-center justify-between">
-                <span>Infrastructure Compute Cost</span>
-                <DollarSign className="h-3.5 w-3.5 text-foreground" />
-              </div>
-              <CardTitle className="text-2xl font-bold font-mono text-foreground">
-                ${totalCompute.toFixed(2)}
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              Anthropic API + gVisor sandbox runtimes
-            </CardContent>
-          </Card>
-
-          <Card className="border-border bg-card">
-            <CardHeader className="pb-2">
-              <div className="text-sm text-muted-foreground uppercase flex items-center justify-between">
-                <span>Avg Turnaround Time</span>
-                <Clock className="h-3.5 w-3.5 text-foreground" />
-              </div>
-              <CardTitle className="text-2xl font-bold font-mono text-foreground">
-                4.2 min
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              Across all complexity tiers
-            </CardContent>
-          </Card>
+      {margin.alerts.length > 0 && (
+        <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-4" role="status">
+          <p className="font-serif font-bold text-destructive">
+            {margin.alerts.length} margin alert{margin.alerts.length === 1 ? "" : "s"}
+          </p>
+          <p className="mt-1 text-sm text-destructive">
+            Open the margin report for the measured project detail and cost-cap rows.
+          </p>
         </div>
+      )}
 
-        {/* Tab Navigation */}
-        <div className="flex border-b border-border space-x-4 rtl:space-x-reverse text-sm font-semibold">
-          <button
-            onClick={() => setActiveTab("fleet")}
-            className={`pb-2.5 transition border-b-2 -mb-px ${
-              activeTab === "fleet"
-                ? "border-primary text-foreground"
-                : "border-transparent text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Live Sandbox Fleet ({jobs.length})
-          </button>
-          <button
-            onClick={() => setActiveTab("security")}
-            className={`pb-2.5 transition border-b-2 -mb-px ${
-              activeTab === "security"
-                ? "border-primary text-foreground"
-                : "border-transparent text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            Zero-Trust Security Log ({SECURITY_AUDIT_LOGS.length})
-          </button>
-        </div>
-
-        {/* Fleet Table */}
-        {activeTab === "fleet" && (
-          <Card className="border-border bg-card">
-            <CardHeader className="pb-3 border-b border-border">
-              <CardTitle className="text-sm font-bold flex items-center space-x-2 rtl:space-x-reverse">
-                <Server className="h-4 w-4 text-primary" />
-                <span>Isolated Container Jobs</span>
-              </CardTitle>
-              <CardDescription className="text-sm">
-                Ephemeral gVisor containers executing headless Ghidra, JADX, and clean-room synthesis workers.
-              </CardDescription>
-            </CardHeader>
-
-            <CardContent className="p-0">
-              <div className="overflow-x-auto" dir="ltr">
-                <table className="w-full text-sm text-left divide-y divide-border font-mono">
-                  <thead className="bg-muted/40 text-muted-foreground uppercase text-sm">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <Card className="border-border bg-card shadow-sm xl:col-span-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 border-b border-border pb-3">
+            <CardTitle className="font-serif text-base">Recent build jobs</CardTitle>
+            <Link
+              href="/admin/jobs"
+              className="text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            >
+              View all
+            </Link>
+          </CardHeader>
+          <CardContent className="p-0">
+            {recentJobs.length === 0 ? (
+              <p className="p-6 text-sm text-muted-foreground">No build jobs are recorded yet.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="border-b border-border bg-muted/40">
                     <tr>
-                      <th className="p-3">Project / Target</th>
-                      <th className="p-3">Sandbox Node</th>
-                      <th className="p-3">Status</th>
-                      <th className="p-3">Progress</th>
-                      <th className="p-3">Compute / Price</th>
-                      <th className="p-3 text-right">Actions</th>
+                      <th className="p-3 text-start font-semibold">Project / job</th>
+                      <th className="p-3 text-start font-semibold">Status</th>
+                      <th className="p-3 text-end font-semibold">Parity</th>
+                      <th className="p-3 text-end font-semibold">Spend</th>
+                      <th className="p-3 text-start font-semibold">Created</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border">
-                    {jobs.map((job) => (
-                      <tr key={job.id} className="hover:bg-muted/20">
+                  <tbody>
+                    {recentJobs.map((job) => (
+                      <tr key={job.id} className="border-b border-border last:border-0">
                         <td className="p-3">
-                          <div className="font-bold text-foreground">{job.id}</div>
-                          <div className="text-sm text-muted-foreground truncate max-w-xs">{job.source}</div>
-                        </td>
-                        <td className="p-3 text-muted-foreground">
-                          <div>{job.sandboxId}</div>
-                          <div className="text-sm">{job.memoryMb} MB • {job.runtimeSec}s</div>
-                        </td>
-                        <td className="p-3">
-                          <Badge
-                            variant="outline"
-                            className={`text-sm ${
-                              job.status === "running"
-                                ? "border-primary text-primary"
-                                : job.status === "completed"
-                                ? "border-emerald-500 text-emerald-500"
-                                : "border-destructive text-destructive"
-                            }`}
-                          >
-                            {job.status.toUpperCase()}
-                          </Badge>
+                          <p className="font-semibold text-foreground">
+                            {job.projectName || "Unknown project"}
+                          </p>
+                          <p className="font-mono text-sm text-muted-foreground">
+                            {job.id.slice(0, 8)} · attempt {job.attempt} · {job.stage}
+                          </p>
                         </td>
                         <td className="p-3">
-                          <div className="w-24 bg-muted h-1.5 rounded-full overflow-hidden">
-                            <div
-                              className="bg-primary h-full transition-all"
-                              style={{ width: `${job.progress}%` }}
-                            />
-                          </div>
-                          <div className="text-sm text-muted-foreground mt-0.5">{job.progress}%</div>
+                          <Badge variant={statusVariant(job.status)}>{job.status}</Badge>
                         </td>
-                        <td className="p-3">
-                          <div className="text-foreground">${job.priceUsd.toFixed(2)}</div>
-                          <div className="text-sm text-muted-foreground">Compute: ${job.computeCostUsd.toFixed(2)}</div>
+                        <td className="p-3 text-end font-mono">
+                          {job.parityScore === null ? "—" : `${(job.parityScore * 100).toFixed(1)}%`}
                         </td>
-                        <td className="p-3 text-right">
-                          {job.status === "running" ? (
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => handleKillSandbox(job.id)}
-                              className="h-7 text-sm font-mono px-2"
-                            >
-                              <Square className="h-3 w-3 me-1" />
-                              <span>SIGKILL</span>
-                            </Button>
-                          ) : (
-                            <span className="text-sm text-muted-foreground">—</span>
-                          )}
+                        <td className="p-3 text-end font-mono">
+                          {money(job.spentCents)}
+                          <span className="block text-sm text-muted-foreground">
+                            cap {money(job.costCapCents)}
+                          </span>
+                        </td>
+                        <td className="p-3 font-mono text-muted-foreground">
+                          <time dateTime={job.createdAt.toISOString()}>
+                            {job.createdAt.toLocaleDateString()}
+                          </time>
                         </td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-            </CardContent>
-          </Card>
-        )}
+            )}
+          </CardContent>
+        </Card>
 
-        {/* Security Audit Table */}
-        {activeTab === "security" && (
-          <Card className="border-border bg-card">
-            <CardHeader className="pb-3 border-b border-border">
-              <CardTitle className="text-sm font-bold flex items-center space-x-2 rtl:space-x-reverse">
-                <ShieldAlert className="h-4 w-4 text-amber-500" />
-                <span>Zero-Trust Security Event Log</span>
-              </CardTitle>
-              <CardDescription className="text-sm">
-                Real-time intrusion prevention telemetry, SSRF pre-DNS blocks, and prompt injection isolations.
-              </CardDescription>
-            </CardHeader>
+        <Card className="border-border bg-card shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 border-b border-border pb-3">
+            <CardTitle className="font-serif text-base">Recent audit events</CardTitle>
+            <Link
+              href="/admin/audit"
+              className="text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            >
+              View all
+            </Link>
+          </CardHeader>
+          <CardContent className="p-0">
+            {recentAudit.length === 0 ? (
+              <p className="p-6 text-sm text-muted-foreground">No audit events are recorded yet.</p>
+            ) : (
+              <ul className="divide-y divide-border">
+                {recentAudit.map((entry) => (
+                  <li key={entry.id} className="space-y-1 p-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="break-words font-mono text-sm font-semibold text-foreground">
+                        {entry.action}
+                      </p>
+                      <Badge variant="outline" className="shrink-0">
+                        {entry.actorType}
+                      </Badge>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {entry.resourceType} · {entry.resourceId.slice(0, 12)}
+                    </p>
+                    <p className="font-mono text-sm text-muted-foreground">
+                      <time dateTime={entry.createdAt.toISOString()}>
+                        {entry.createdAt.toLocaleString()}
+                      </time>
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      </div>
 
-            <CardContent className="p-0">
-              <div className="overflow-x-auto" dir="ltr">
-                <table className="w-full text-sm text-left divide-y divide-border font-mono">
-                  <thead className="bg-muted/40 text-muted-foreground uppercase text-sm">
-                    <tr>
-                      <th className="p-3">Time</th>
-                      <th className="p-3">Event Classification</th>
-                      <th className="p-3">Target Payload / Artifact</th>
-                      <th className="p-3">Severity</th>
-                      <th className="p-3 text-right">Enforcement Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {SECURITY_AUDIT_LOGS.map((evt, idx) => (
-                      <tr key={idx} className="hover:bg-muted/20">
-                        <td className="p-3 text-muted-foreground">{evt.time}</td>
-                        <td className="p-3 font-bold text-foreground">{evt.type}</td>
-                        <td className="p-3 text-muted-foreground truncate max-w-sm">{evt.target}</td>
-                        <td className="p-3">
-                          <Badge
-                            variant="outline"
-                            className={`text-sm ${
-                              evt.severity === "CRITICAL"
-                                ? "border-destructive text-destructive"
-                                : evt.severity === "HIGH"
-                                ? "border-amber-500 text-amber-500"
-                                : "border-primary text-primary"
-                            }`}
-                          >
-                            {evt.severity}
-                          </Badge>
-                        </td>
-                        <td className="p-3 text-right">
-                          <span className="text-sm font-bold text-primary">{evt.action}</span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </main>
+      <Card className="border-border bg-card shadow-sm">
+        <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-2">
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+            <p className="text-sm text-muted-foreground">
+              Admin pages use the system database role. Customer pages keep tenant-scoped RLS.
+            </p>
+          </div>
+          <Link
+            href="/admin/audit"
+            className="inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          >
+            <CheckCircle2 className="h-4 w-4" />
+            Inspect audit log
+          </Link>
+        </CardContent>
+      </Card>
     </div>
   );
 }

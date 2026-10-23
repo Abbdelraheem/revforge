@@ -81,28 +81,28 @@ export default async function ProjectsListPage() {
             {workspaceProjects.map((p) => (
               <div
                 key={p.id}
-                className="p-5 flex items-center justify-between hover:bg-muted/20 transition-colors"
+                className="flex flex-col gap-4 p-4 transition-colors hover:bg-muted/20 sm:p-5 lg:flex-row lg:items-center lg:justify-between"
               >
-                <div className="space-y-1.5">
+                <div className="min-w-0 space-y-1.5">
                   <Link
                     href={`/projects/${p.id}`}
-                    className="text-base font-semibold text-foreground hover:text-primary transition-colors flex items-center space-x-2 font-serif"
+                    className="flex items-center gap-2 font-serif text-base font-semibold text-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   >
-                    <span>{p.name}</span>
+                    <span className="truncate">{p.name}</span>
                   </Link>
-                  <p className="text-sm text-muted-foreground line-clamp-1">
+                  <p className="line-clamp-1 text-sm text-muted-foreground">
                     {p.description || "Clean-room architectural analysis target"}
                   </p>
-                  <div className="text-sm text-muted-foreground font-mono">
+                  <div className="break-all font-mono text-sm text-muted-foreground">
                     ID: {p.id}
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-4">
-                  <Badge variant="outline" className="text-sm font-mono capitalize">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 lg:shrink-0">
+                  <Badge variant="outline" className="font-mono text-sm capitalize">
                     {p.status.replace(/_/g, " ")}
                   </Badge>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="font-mono text-sm text-muted-foreground">
                     {new Date(p.createdAt).toLocaleDateString()}
                   </span>
                   <Button asChild variant="outline" size="sm" className="text-sm font-semibold">
