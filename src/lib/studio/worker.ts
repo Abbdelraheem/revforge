@@ -811,7 +811,6 @@ export async function executeStudioEdit(
   let clarification: string | undefined;
   let providerSpendCents = 0;
   let enhanceCostCents = 0;
-  let terminalReasonSet = false;
 
   const finalizeEditRow = async (
     outcome: EditOutcome,
@@ -839,11 +838,6 @@ export async function executeStudioEdit(
   };
 
   try {
-    await systemDb
-      .update(studioEdits)
-      .set({ status: "enhancing" })
-      .where(eq(studioEdits.id, editId));
-
     const parentVersion = await resolveParentVersion(input, dbStorage);
     await fs.rm(workspaceDir, { recursive: true, force: true });
     const restored = await restoreVersion(workspaceDir, parentVersion, dbStorage);
@@ -866,6 +860,26 @@ export async function executeStudioEdit(
     const fileTree = parentManifest.map((entry) => entry.path);
     const { context, evidence } = await loadProjectContext(project, fileTree);
 
+    // Credits are held before any paid model call. A workspace with no balance
+    // must fail here without touching the enhancer or the builder.
+    await systemDb.transaction(async (tx) => {
+      await holdCredits(tx, { workspaceId, cents: maxCents, editId });
+      await tx
+        .update(studioEdits)
+        .set({
+          status: "held",
+          tokensHeldCents: maxCents,
+          parentVersionId: parentVersion.id,
+        })
+        .where(eq(studioEdits.id, editId));
+    });
+    holdApplied = true;
+
+    await systemDb
+      .update(studioEdits)
+      .set({ status: "enhancing" })
+      .where(eq(studioEdits.id, editId));
+
     const enhanced = await enhancePrompt(
       {
         userText: rawPrompt,
@@ -887,16 +901,14 @@ export async function executeStudioEdit(
 
     if (!enhanced.brief) {
       clarification = enhanced.clarification || "The request needs clarification.";
-      finalOutcome = "failed";
+      finalOutcome = "no_changes";
       failureReason = `clarification_required: ${clarification}`;
-      terminalReasonSet = true;
-      await finalizeEditRow("failed", 0, failureReason);
 
       return {
         success: false,
         editId,
         tokensSettledCents: 0,
-        outcome: "failed",
+        outcome: "no_changes",
         clarification,
         failureReason,
       };
@@ -908,24 +920,8 @@ export async function executeStudioEdit(
       .set({
         promptEnhanced: JSON.stringify(brief),
         parentVersionId: parentVersion.id,
-        status: "held",
-        tokensHeldCents: maxCents,
       })
       .where(eq(studioEdits.id, editId));
-
-    // Hold credits in the same transaction that records the hold on the edit.
-    await systemDb.transaction(async (tx) => {
-      await holdCredits(tx, { workspaceId, cents: maxCents, editId });
-      await tx
-        .update(studioEdits)
-        .set({
-          status: "held",
-          tokensHeldCents: maxCents,
-          parentVersionId: parentVersion.id,
-        })
-        .where(eq(studioEdits.id, editId));
-    });
-    holdApplied = true;
 
     const expectedRoutes = deriveExpectedRoutes(parentManifest);
     const runner = defaultVerificationRunner();
@@ -1054,7 +1050,11 @@ export async function executeStudioEdit(
           stagnationWindow: STUDIO_EDIT_LIMITS.stagnationWindow,
           minImprovement: STUDIO_EDIT_LIMITS.minImprovement,
         },
-        costCapCents: maxProviderCostForHold({ heldCents: maxCents, markup }),
+        costCapCents: Math.max(
+          0,
+          maxProviderCostForHold({ heldCents: maxCents, markup }) -
+            enhanceCostCents
+        ),
         thresholds: {
           success: 0.85,
           partial: 0.5,
@@ -1196,12 +1196,10 @@ export async function executeStudioEdit(
           : String(err);
   } finally {
     if (!holdApplied) {
-      if (!terminalReasonSet) {
-        try {
-          await finalizeEditRow("failed", 0, failureReason);
-        } catch {
-          // Best-effort terminal update; the original error is returned.
-        }
+      try {
+        await finalizeEditRow("failed", 0, failureReason);
+      } catch {
+        // Best-effort terminal update; the original error is returned.
       }
     } else {
       const settlement = settleEdit({

@@ -9,6 +9,24 @@ on:
 jobs:
   audit-and-test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: revforge
+          POSTGRES_PASSWORD: revforge
+          POSTGRES_DB: revforge
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U revforge"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgres://revforge:revforge@localhost:5432/revforge
+      SYSTEM_DATABASE_URL: postgres://revforge:revforge@localhost:5432/revforge
+      REQUIRE_SCHEMA_DRIFT: "1"
     steps:
       - uses: actions/checkout@v4
 
@@ -27,8 +45,8 @@ jobs:
       - name: ESLint Check (lint)
         run: npm run lint
 
-      - name: Unit & Integration Suites (vitest)
-        run: npx vitest run
+      - name: Unit & Integration Suites (vitest) + Schema Drift
+        run: npm test
 
       - name: End-to-End Test Suite (playwright)
         run: npx playwright test

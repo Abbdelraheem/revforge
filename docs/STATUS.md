@@ -26,6 +26,65 @@ V6 replaces that path end to end:
 - **Tenant isolation.** User-facing Studio pages and API routes use `withTenant` through a shared loader; `authorizeStudio` is pure and takes the loaded session/project/orders/balance. The preview proxy re-runs that gate on every request and serves the requested file from the immutable version archive, returning 404 when the archive has no such file instead of synthesising a page.
 - **Smoke coverage.** `npm run smoke` now runs a scripted Studio edit with the fixture enhancement call, asserts the produced version's real files differ from the parent, and extracts the produced ZIP and rebuilds/tests it. It still requires live Postgres, Redis, and S3.
 
+### V7: pre-run blockers closed
+
+V7 closes the defects found by running the application against a database built only from `drizzle/*.sql`:
+
+- **The missing credit-ledger migration now exists.** `drizzle/0003_credits_ledger_kind.sql` adds `credits_ledger.kind` with a default, a `CHECK` constraint, and a backfill that infers historical `studio_hold`, `studio_settle`, `grant`, and `deduction` rows. The Drizzle schema and billing writes use the same five values (`grant`, `deduction`, `studio_hold`, `studio_settle`, `adjustment`). The journal now lists all four migrations, not just `0000`.
+- **Schema drift is executable and wired into the test path.** `scripts/check-schema-drift.ts` creates a temporary database, applies every `drizzle/*.sql` file in order, introspects `information_schema.columns`, and compares every table, column, nullability, and default against `src/db/schema.ts`. `npm test` runs it after Vitest; CI uses `npm test` with a Postgres 16 service. The check is fatal when a database is available and `--require-db`/`REQUIRE_SCHEMA_DRIFT=1` is set, and skips with an explicit warning when no database can be reached locally.
+- **No paid call before the hold.** `executeStudioEdit` now resolves and restores the parent, then performs `holdCredits` in the same transaction that marks the edit `held`. Only after that does it call `enhancePrompt`, then the build loop. The loop's provider-cost cap is reduced by the enhancement spend. An enhancer clarification returns `outcome: "no_changes"` and the shared settlement path refunds the entire hold.
+- **Parity and tenant isolation were already correct in V6.** `studio-client.tsx` renders `NOT RECORDED` / `Not measured` when `parityScore` is null; the Studio page and API routes use `loadStudioRouteData`/`withTenant`; `systemDb` remains confined to the worker and admin paths.
+
+### V7 verification (2026-10-23)
+
+Working tree: `10643d9` plus the uncommitted V7 changes described above.
+
+| Check | Result |
+|---|---|
+| `npm run typecheck` | Pass |
+| `npm test` | 19 files / 230 tests pass; drift check skipped locally because nothing listens on `127.0.0.1:5432` |
+| `npm run lint` | Pass |
+| `npm run build` | Pass |
+| `node scripts/audit.mjs --all` | T0–T7: 310/310 pass |
+| Fresh Postgres from `drizzle/*.sql` | Pass: `33 tables / 296 columns match 4 migration files` |
+| Negative control without `0003` | Fails as required: `missing column: credits_ledger.kind` |
+| `npm run smoke` | **Blocked** (exit 1, no stages passed) |
+
+The fresh-database check was run against a temporary embedded Postgres on port 55432, with all four SQL files applied by `check-schema-drift.ts`:
+
+```text
+[schema-drift] OK: 33 tables / 296 columns match 4 migration files (0000_wet_wrecking_crew.sql, 0001_rls_policies_and_audit_triggers.sql, 0002_studio_schema_and_rls.sql, 0003_credits_ledger_kind.sql).
+```
+
+Removing `0003` from that same fresh database produced the expected failure:
+
+```text
+[schema-drift] FAIL: 1 mismatch(es) between src/db/schema.ts and drizzle/*.sql
+  - missing column: credits_ledger.kind
+```
+
+`npm run smoke` could not reach the live stack in this environment. Its actual output was:
+
+```text
+=== RevForge Live Wire Smoke Test (V6) ===
+[1/8] Probing system health dependencies...
+Health Probe Results: {
+  "status": "down",
+  "services": {
+    "postgres": false,
+    "postgresSystem": false,
+    "redis": false,
+    "s3": false,
+    "docker": false,
+    "worker": false
+  },
+  "timestamp": "2026-10-23T06:50:45.521Z"
+}
+FATAL: Required core services are DOWN: postgres, postgresSystem, redis, s3, docker, worker
+```
+
+Smoke therefore stops at stage 1 of 8. No live Studio edit, build, settlement, or ZIP round-trip has been claimed as passing.
+
 ---
 
 ## 2. What Is Real & Verified

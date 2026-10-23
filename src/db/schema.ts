@@ -295,7 +295,9 @@ export const creditsLedger = pgTable("credits_ledger", {
   workspaceId: uuid("workspace_id").references(() => workspaces.id, { onDelete: "cascade" }).notNull(),
   deltaCents: integer("delta_cents").notNull(),
   reason: text("reason").notNull(),
-  kind: text("kind"),
+  kind: text("kind", {
+    enum: ["grant", "deduction", "studio_hold", "studio_settle", "adjustment"],
+  }).default("adjustment").notNull(),
   orderId: uuid("order_id").references(() => orders.id, { onDelete: "set null" }),
   buildJobId: uuid("build_job_id"),
   createdBy: uuid("created_by").references(() => users.id, { onDelete: "set null" }),

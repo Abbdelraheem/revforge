@@ -8,6 +8,27 @@
       "when": 1792448822737,
       "tag": "0000_wet_wrecking_crew",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792448822738,
+      "tag": "0001_rls_policies_and_audit_triggers",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792448822739,
+      "tag": "0002_studio_schema_and_rls",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792737309025,
+      "tag": "0003_credits_ledger_kind",
+      "breakpoints": true
     }
   ]
 }

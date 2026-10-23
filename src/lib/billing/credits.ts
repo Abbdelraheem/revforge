@@ -39,6 +39,7 @@ export async function issueCredits(params: {
     workspaceId: params.workspaceId,
     deltaCents: Math.round(params.amountCents),
     reason: params.reason,
+    kind: "grant",
     orderId: params.orderId,
     buildJobId: params.buildJobId,
     createdBy: params.createdBy,
@@ -74,6 +75,7 @@ export async function deductCredits(params: {
     workspaceId: params.workspaceId,
     deltaCents: -Math.abs(Math.round(params.amountCents)),
     reason: params.reason || `Applied to order ${params.orderId}`,
+    kind: "deduction",
     orderId: params.orderId,
   });
 
