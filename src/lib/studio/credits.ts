@@ -1,135 +1,131 @@
-import { systemDb } from "@/db";
-import { creditsLedger, studioEdits } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
-import { settleEdit } from "./pricing";
+import type { DbTx } from "@/db/tenant";
+import { creditsLedger } from "@/db/schema";
+import { and, eq, sql } from "drizzle-orm";
 
 export class InsufficientCreditsError extends Error {
   readonly availableCents: number;
   readonly requiredCents: number;
 
   constructor(availableCents: number, requiredCents: number) {
-    super(`Insufficient credit balance: available ${availableCents}¢, required ${requiredCents}¢.`);
+    super(
+      `Insufficient credit balance: available ${availableCents}¢, required ${requiredCents}¢.`
+    );
     this.name = "InsufficientCreditsError";
     this.availableCents = availableCents;
     this.requiredCents = requiredCents;
   }
 }
 
-/**
- * Holds credits for a Studio edit using a transaction-level PostgreSQL advisory lock.
- * Checks that net balance >= maxCents, inserts hold row with delta_cents = -maxCents, kind = 'studio_hold'.
- * Returns the hold row id.
- */
-export async function holdCredits(
-  workspaceId: string,
-  maxCents: number,
-  editId?: string
-): Promise<string> {
-  if (maxCents <= 0) {
-    throw new Error("Credit hold amount must be positive integer cents.");
-  }
+export interface HoldCreditsInput {
+  workspaceId: string;
+  cents: number;
+  editId: string;
+}
 
-  return await systemDb.transaction(async (tx) => {
-    // 1. Transaction-level advisory lock serializes hold operations per workspace
-    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${workspaceId}))`);
-
-    // 2. Compute current balance under lock
-    const [balanceRow] = await tx
-      .select({
-        total: sql<number>`coalesce(sum(${creditsLedger.deltaCents}), 0)::int`,
-      })
-      .from(creditsLedger)
-      .where(eq(creditsLedger.workspaceId, workspaceId));
-
-    const balanceCents = balanceRow?.total ?? 0;
-    if (balanceCents < maxCents) {
-      throw new InsufficientCreditsError(balanceCents, maxCents);
-    }
-
-    // 3. Insert hold row
-    const [holdRow] = await tx
-      .insert(creditsLedger)
-      .values({
-        workspaceId,
-        deltaCents: -maxCents,
-        reason: `Studio edit hold for ${editId || "edit"}`,
-        kind: "studio_hold",
-      })
-      .returning({ id: creditsLedger.id });
-
-    if (!holdRow) {
-      throw new Error("Failed to insert hold record into credits ledger.");
-    }
-
-    // 4. Update edit record if provided
-    if (editId) {
-      await tx
-        .update(studioEdits)
-        .set({
-          tokensHeldCents: maxCents,
-          status: "held",
-        })
-        .where(eq(studioEdits.id, editId));
-    }
-
-    return holdRow.id;
-  });
+export interface SettleCreditsInput {
+  workspaceId: string;
+  editId: string;
+  heldCents: number;
+  chargeCents: number;
 }
 
 /**
- * Settles a credit hold by releasing the difference if actualCents < maxCents;
- * if actualCents === 0 (failed edit), refunds full maxCents with kind = 'studio_refund'.
+ * Holds credits inside the caller's transaction.
+ *
+ * A transaction-scoped advisory lock serializes holds per workspace, the
+ * balance is read under that lock, and the debit is written as
+ * `studio_hold:<editId>`. The caller supplies the transaction so the edit row
+ * and the hold commit or roll back together.
+ */
+export async function holdCredits(
+  tx: DbTx,
+  { workspaceId, cents, editId }: HoldCreditsInput
+): Promise<string> {
+  if (!Number.isFinite(cents) || cents <= 0) {
+    throw new Error("Credit hold amount must be a positive integer number of cents.");
+  }
+
+  const amount = Math.floor(cents);
+
+  await tx.execute(
+    sql`SELECT pg_advisory_xact_lock(hashtext(${workspaceId}))`
+  );
+
+  const [balanceRow] = await tx
+    .select({
+      total: sql<number>`coalesce(sum(${creditsLedger.deltaCents}), 0)::int`,
+    })
+    .from(creditsLedger)
+    .where(eq(creditsLedger.workspaceId, workspaceId));
+
+  const availableCents = Number(balanceRow?.total ?? 0);
+  if (availableCents < amount) {
+    throw new InsufficientCreditsError(availableCents, amount);
+  }
+
+  const [holdRow] = await tx
+    .insert(creditsLedger)
+    .values({
+      workspaceId,
+      deltaCents: -amount,
+      reason: `studio_hold:${editId}`,
+      kind: "studio_hold",
+    })
+    .returning({ id: creditsLedger.id });
+
+  if (!holdRow) {
+    throw new Error("Failed to write Studio credit hold to the ledger.");
+  }
+
+  return holdRow.id;
+}
+
+/**
+ * Settles a hold inside the caller's transaction.
+ *
+ * The refund row is `+(held - charge)` with reason `studio_settle:<editId>`.
+ * A pre-check plus the workspace advisory lock makes settlement idempotent:
+ * retrying the same edit cannot refund the unspent amount twice.
  */
 export async function settleCredits(
-  workspaceId: string,
-  holdId: string,
-  actualCents: number,
-  editId?: string
+  tx: DbTx,
+  { workspaceId, editId, heldCents, chargeCents }: SettleCreditsInput
 ): Promise<{ chargedCents: number; refundedCents: number }> {
-  return await systemDb.transaction(async (tx) => {
-    // 1. Lock workspace
-    await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtext(${workspaceId}))`);
+  const held = Number.isFinite(heldCents) && heldCents > 0
+    ? Math.floor(heldCents)
+    : 0;
+  const charge = Number.isFinite(chargeCents) && chargeCents > 0
+    ? Math.min(held, Math.floor(chargeCents))
+    : 0;
+  const refundCents = Math.max(0, held - charge);
+  const reason = `studio_settle:${editId}`;
 
-    // 2. Fetch original hold row
-    const [holdRow] = await tx
-      .select()
-      .from(creditsLedger)
-      .where(eq(creditsLedger.id, holdId));
+  await tx.execute(
+    sql`SELECT pg_advisory_xact_lock(hashtext(${workspaceId}))`
+  );
 
-    if (!holdRow) {
-      throw new Error(`Hold record "${holdId}" not found in credits ledger.`);
-    }
+  const [existing] = await tx
+    .select({ id: creditsLedger.id })
+    .from(creditsLedger)
+    .where(
+      and(
+        eq(creditsLedger.workspaceId, workspaceId),
+        eq(creditsLedger.reason, reason)
+      )
+    )
+    .limit(1);
 
-    const heldCents = Math.abs(holdRow.deltaCents);
-    const { chargeCents, refundCents } = settleEdit(heldCents, actualCents);
+  if (!existing) {
+    await tx.insert(creditsLedger).values({
+      workspaceId,
+      deltaCents: refundCents,
+      reason,
+      kind: "studio_settle",
+    });
+  }
 
-    // 3. If refundCents > 0, insert refund row
-    if (refundCents > 0) {
-      const isFullRefund = chargeCents === 0;
-      await tx.insert(creditsLedger).values({
-        workspaceId,
-        deltaCents: refundCents,
-        reason: isFullRefund
-          ? `Studio edit failed — full refund of ${refundCents}¢`
-          : `Studio edit settle — unspent refund of ${refundCents}¢`,
-        kind: "studio_refund",
-      });
-    }
-
-    // 4. Update edit record if provided
-    if (editId) {
-      await tx
-        .update(studioEdits)
-        .set({
-          tokensSettledCents: chargeCents,
-          status: chargeCents > 0 ? "committed" : "refunded",
-        })
-        .where(eq(studioEdits.id, editId));
-    }
-
-    return {
-      chargedCents: chargeCents,
-      refundedCents: refundCents,
-    };
-  });
+  return {
+    chargedCents: charge,
+    refundedCents: refundCents,
+  };
 }

@@ -1,12 +1,36 @@
-import { calculateUsageCostCents } from "@/config/pricing";
+/**
+ * Studio edit pricing contracts.
+ *
+ * These functions are deliberately pure and integer-safe. The amount a customer
+ * is charged is derived from the provider spend that actually occurred, never
+ * from a token estimate.
+ */
 
-export const STUDIO_MIN_FLOOR_CENTS = 50; // $0.50 minimum floor
-export const STUDIO_DEFAULT_CAP_CENTS = 200; // $2.00 default cap
-export const STUDIO_MARGIN_MULTIPLIER = 1.3; // 30% platform margin
+export const STUDIO_MIN_FLOOR_CENTS = 50; // $0.50 minimum charge
+export const STUDIO_DEFAULT_MARKUP = 3.0;
+export const STUDIO_DEFAULT_CAP_CENTS = 200;
 
-export interface EditPriceResult {
+/** Retained for callers that still express markup as a margin multiplier. */
+export const STUDIO_MARGIN_MULTIPLIER = 1.3;
+
+export interface PriceEditInput {
   providerCostCents: number;
-  userChargeCents: number;
+  markup: number;
+  minChargeCents: number;
+}
+
+export type EditOutcome =
+  | "accepted"
+  | "failed"
+  | "rejected_by_guard"
+  | "no_changes";
+
+export interface SettleEditInput {
+  heldCents: number;
+  providerCostCents: number;
+  markup: number;
+  minChargeCents: number;
+  outcome: EditOutcome;
 }
 
 export interface SettleEditResult {
@@ -15,59 +39,68 @@ export interface SettleEditResult {
 }
 
 /**
- * Calculates raw provider cost and customer charge for an edit.
- * User charge includes a 30% platform margin with a minimum floor of $0.50 (50 cents).
+ * priceEdit = max(minCharge, ceil(providerCost * markup)).
  */
-export function priceEdit(
-  model: string,
-  inputTokens: number,
-  outputTokens: number
-): EditPriceResult {
-  const providerCostCents = calculateUsageCostCents({
-    model,
-    inputTokens,
-    outputTokens,
-  });
+export function priceEdit({
+  providerCostCents,
+  markup,
+  minChargeCents,
+}: PriceEditInput): number {
+  const cost = Number.isFinite(providerCostCents) && providerCostCents > 0
+    ? providerCostCents
+    : 0;
+  const rate = Number.isFinite(markup) && markup > 0 ? markup : 0;
+  const floor = Number.isFinite(minChargeCents) && minChargeCents > 0
+    ? Math.ceil(minChargeCents)
+    : 0;
 
-  const costWithMargin = Math.ceil(providerCostCents * STUDIO_MARGIN_MULTIPLIER);
-  const userChargeCents = Math.max(STUDIO_MIN_FLOOR_CENTS, costWithMargin);
-
-  return {
-    providerCostCents,
-    userChargeCents,
-  };
+  return Math.max(floor, Math.ceil(cost * rate));
 }
 
 /**
- * Computes maximum provider LLM cost permissible under a customer-approved maximum charge cap.
+ * Maximum provider spend that can be incurred while still fitting inside the
+ * customer-approved hold: floor(heldCents / markup).
  */
-export function maxProviderCostForHold(maxChargeCents: number): number {
-  if (maxChargeCents <= 0) return 0;
-  return Math.floor(maxChargeCents / STUDIO_MARGIN_MULTIPLIER);
+export function maxProviderCostForHold({
+  heldCents,
+  markup,
+}: {
+  heldCents: number;
+  markup: number;
+}): number {
+  if (!Number.isFinite(heldCents) || heldCents <= 0) return 0;
+  if (!Number.isFinite(markup) || markup <= 0) return 0;
+  return Math.floor(heldCents / markup);
 }
 
 /**
- * Determines final charge and refund amounts from a credit hold.
- * If actualCents is 0 (edit failure), the full hold amount is refunded.
+ * Only an accepted edit is charged. Every other terminal outcome refunds the
+ * entire hold. charge + refund always equals held.
  */
-export function settleEdit(heldCents: number, actualCents: number): SettleEditResult {
-  if (heldCents <= 0) {
+export function settleEdit({
+  heldCents,
+  providerCostCents,
+  markup,
+  minChargeCents,
+  outcome,
+}: SettleEditInput): SettleEditResult {
+  const held = Number.isFinite(heldCents) && heldCents > 0
+    ? Math.floor(heldCents)
+    : 0;
+
+  if (held === 0) {
     return { chargeCents: 0, refundCents: 0 };
   }
 
-  if (actualCents <= 0) {
-    // 100% refund on failed or uncompleted edits
-    return {
-      chargeCents: 0,
-      refundCents: heldCents,
-    };
+  if (outcome !== "accepted") {
+    return { chargeCents: 0, refundCents: held };
   }
 
-  const chargeCents = Math.min(heldCents, actualCents);
-  const refundCents = Math.max(0, heldCents - chargeCents);
+  const price = priceEdit({ providerCostCents, markup, minChargeCents });
+  const chargeCents = Math.min(held, Math.max(0, price));
 
   return {
     chargeCents,
-    refundCents,
+    refundCents: held - chargeCents,
   };
 }

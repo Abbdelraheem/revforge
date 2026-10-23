@@ -1,16 +1,3 @@
-import { systemDb } from "@/db";
-import {
-  projects,
-  workspaces,
-  users,
-  workspaceMembers,
-  studioVersions,
-  creditsLedger,
-  deliveries,
-  buildJobs,
-} from "@/db/schema";
-import { eq, desc, and, sql } from "drizzle-orm";
-
 export class StudioAuthError extends Error {
   readonly status: number;
   readonly code: string;
@@ -23,144 +10,103 @@ export class StudioAuthError extends Error {
   }
 }
 
-export interface StudioAuthResult {
-  project: typeof projects.$inferSelect;
-  workspace: typeof workspaces.$inferSelect;
-  user: typeof users.$inferSelect;
-  activeVersion: typeof studioVersions.$inferSelect | null;
+export interface StudioSession {
+  user: { id: string };
+  workspace: { id: string };
+}
+
+export interface StudioProject {
+  id: string;
+  workspaceId: string;
+  status: string;
+}
+
+export interface StudioOrder {
+  kind: string;
+  status: string;
+}
+
+export interface AuthorizeStudioInput {
+  session: StudioSession | null;
+  project: StudioProject | null;
+  orders: StudioOrder[];
   balanceCents: number;
 }
 
+export interface AuthorizeStudioResult {
+  ok: boolean;
+  status: number;
+  error?: string;
+  balanceCents?: number;
+}
+
 /**
- * Authorizes a user to access the Studio editor for a given project.
- * Enforces strict order of gates:
- * 1. 401: Unauthenticated (no userId)
- * 2. 404: Project not found
- * 3. 403: Tenant mismatch (user does not belong to project's workspace)
- * 4. 409: Project not in ['delivered', 'delivered_partial']
+ * Pure Studio authorization gate, evaluated in strict order:
+ * 401 unauthenticated -> 404 project missing/cross-tenant ->
+ * 403 no paid build order (or a refunded build order) ->
+ * 409 project not delivered/delivered_partial -> ok.
  *
- * Returns project, workspace, user, activeVersion, and credit balance in cents.
+ * The route loads the project, orders, and balance through `withTenant` and
+ * passes them in. This function performs no database access.
  */
-export async function authorizeStudio(
-  projectId: string,
-  userId?: string | null
-): Promise<StudioAuthResult> {
-  // 1. 401: Unauthenticated
-  if (!userId) {
-    throw new StudioAuthError(401, "UNAUTHENTICATED", "Authentication required to access Studio.");
+export function authorizeStudio({
+  session,
+  project,
+  orders,
+  balanceCents,
+}: AuthorizeStudioInput): AuthorizeStudioResult {
+  // 1. 401: unauthenticated
+  if (!session?.user?.id || !session.workspace?.id) {
+    return {
+      ok: false,
+      status: 401,
+      error: "Authentication required to access Studio.",
+    };
   }
 
-  // Fetch user
-  const [user] = await systemDb
-    .select()
-    .from(users)
-    .where(eq(users.id, userId));
-
-  if (!user) {
-    throw new StudioAuthError(401, "UNAUTHENTICATED", "User not found.");
+  // 2. 404: project missing, or owned by another workspace
+  if (!project || project.workspaceId !== session.workspace.id) {
+    return {
+      ok: false,
+      status: 404,
+      error: "Project not found.",
+    };
   }
 
-  // 2. 404: Project not found
-  const [project] = await systemDb
-    .select()
-    .from(projects)
-    .where(eq(projects.id, projectId));
-
-  if (!project) {
-    throw new StudioAuthError(404, "NOT_FOUND", `Project "${projectId}" not found.`);
+  // 3. 403: a delivered project must have a paid build order that was not refunded
+  const buildOrders = (Array.isArray(orders) ? orders : []).filter(
+    (order) => order.kind === "build"
+  );
+  if (buildOrders.some((order) => order.status === "refunded")) {
+    return {
+      ok: false,
+      status: 403,
+      error: "Studio access is locked because the build order was refunded.",
+    };
+  }
+  const hasPaidBuildOrder = buildOrders.some(
+    (order) => order.status === "paid" || order.status === "paid_by_credit"
+  );
+  if (!hasPaidBuildOrder) {
+    return {
+      ok: false,
+      status: 403,
+      error: "Studio requires a paid build order.",
+    };
   }
 
-  // 3. 403: Tenant mismatch (must be member or owner of project's workspace)
-  const [workspace] = await systemDb
-    .select()
-    .from(workspaces)
-    .where(eq(workspaces.id, project.workspaceId));
-
-  if (!workspace) {
-    throw new StudioAuthError(404, "NOT_FOUND", "Project workspace not found.");
+  // 4. 409: project must be delivered
+  if (project.status !== "delivered" && project.status !== "delivered_partial") {
+    return {
+      ok: false,
+      status: 409,
+      error: `Studio editor requires project to be delivered or delivered_partial. Current status: ${project.status}`,
+    };
   }
-
-  const isOwner = workspace.ownerId === user.id;
-  if (!isOwner) {
-    const [membership] = await systemDb
-      .select()
-      .from(workspaceMembers)
-      .where(
-        and(
-          eq(workspaceMembers.workspaceId, project.workspaceId),
-          eq(workspaceMembers.userId, user.id)
-        )
-      );
-
-    if (!membership) {
-      throw new StudioAuthError(
-        403,
-        "TENANT_MISMATCH",
-        "Access forbidden: User does not belong to project workspace."
-      );
-    }
-  }
-
-  // 4. 409: Project not in ['delivered', 'delivered_partial']
-  const validStatuses = ["delivered", "delivered_partial"];
-  if (!validStatuses.includes(project.status)) {
-    throw new StudioAuthError(
-      409,
-      "INVALID_STATE",
-      `Studio editor requires project to be delivered or delivered_partial. Current status: ${project.status}`
-    );
-  }
-
-  // 5. Active Studio Version
-  let [activeVersion] = await systemDb
-    .select()
-    .from(studioVersions)
-    .where(eq(studioVersions.projectId, project.id))
-    .orderBy(desc(studioVersions.versionNumber))
-    .limit(1);
-
-  // If no studio version has been initialized yet, synthesize or bootstrap v1 from delivery
-  if (!activeVersion) {
-    const [delivery] = await systemDb
-      .select({ storageKey: deliveries.storageKey })
-      .from(deliveries)
-      .innerJoin(buildJobs, eq(deliveries.jobId, buildJobs.id))
-      .where(eq(buildJobs.projectId, project.id))
-      .orderBy(desc(deliveries.createdAt))
-      .limit(1);
-
-    if (delivery) {
-      const [bootstrapped] = await systemDb
-        .insert(studioVersions)
-        .values({
-          projectId: project.id,
-          workspaceId: project.workspaceId,
-          versionNumber: 1,
-          label: "v1: Initial Clean-Room Delivery",
-          zipStorageKey: delivery.storageKey,
-          createdBy: user.id,
-          filesManifest: [],
-        })
-        .returning();
-      activeVersion = bootstrapped;
-    }
-  }
-
-  // 6. Calculate Workspace Balance in cents
-  const [balanceRow] = await systemDb
-    .select({
-      total: sql<string>`coalesce(sum(${creditsLedger.deltaCents}), 0)`,
-    })
-    .from(creditsLedger)
-    .where(eq(creditsLedger.workspaceId, project.workspaceId));
-
-  const balanceCents = Number(balanceRow?.total || 0);
 
   return {
-    project,
-    workspace,
-    user,
-    activeVersion: activeVersion || null,
-    balanceCents,
+    ok: true,
+    status: 200,
+    balanceCents: Number.isFinite(balanceCents) ? balanceCents : 0,
   };
 }

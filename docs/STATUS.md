@@ -1,4 +1,4 @@
-# RevForge System Status & Verification Report (V5)
+# RevForge System Status & Verification Report (V6)
 
 Last Updated: October 2026
 Audit Referee: `scripts/audit.mjs`
@@ -10,6 +10,21 @@ Audit Referee: `scripts/audit.mjs`
 RevForge provides an automated clean-room software reconstruction pipeline and post-delivery visual studio editor. All simulated build progress, fake tenant accessors, constant parity scores, fabricated ZIP keys, and silent fixture fallbacks have been removed and replaced with real, contract-bound implementations. 
 
 Under V4 and V5, all delivery gates require real visual and behavioral measurement (minimum 80% parity coverage), runner fallbacks and mock keys are completely eradicated, model configurations and token rates are strictly configured from Anthropic published tables with startup assertions, filesystem guards block deep directory escapes (refusing `.git` and `node_modules` at any depth), and the build loop survives verifier runtime exceptions without rejecting.
+
+### V6: Studio edits are now real
+
+Before V6, Studio "edits" were non-functional and destructive. The worker overwrote each target file with a generated comment and `export default function Component() { return null; }`, overwrote every other file with `// Unmodified <path>`, invented `parityScore` (`parent ?? 0.88`), charged from an estimated `5000` tokens, and stored only a manifest plus a ZIP made of those placeholder strings. No builder ran, no build or test executed, no leakage/safety scan ran, and no guard could reject a broken result.
+
+V6 replaces that path end to end:
+
+- **Real files survive.** Every Studio version stores the full workspace ZIP in S3 and a real path/size/sha256 manifest in Postgres. An edit restores the parent version by unzipping its actual archive into an isolated temporary workspace; a new immutable version is created only after packaging the real edited workspace.
+- **Real execution.** The edit pipeline runs baseline `verifyBuildWorkspace` (install, build, tests, screenshots, behavioral checks), `runBuildLoop` with the edit brief and acceptance criteria, Anthropic tool-use through `executeTool`, `createLeakageScanner` against the original reference corpus, `scanBuildSafety`, and final verification. Zero source changes is reported as `no_changes`, not as a successful edit.
+- **Measured parity only.** The new version's `parityScore` is the verifier's measured `overall` value. Rejected edits never create a version and never charge.
+- **Honest settlement.** `priceEdit`, `maxProviderCostForHold`, and `settleEdit` implement the pure pricing contract. Charges are computed from actual provider token spend (`calculateUsageCostCents`) plus the real enhancement cost, capped by the hold, with the floor applied only to accepted edits. `holdCredits` and `settleCredits` take the caller's transaction, use a per-workspace advisory lock, and settle idempotently.
+- **Pure post-edit guard.** `evaluateEdit` rejects zero build health, overall regression beyond tolerance, or a coverage loss greater than 0.1.
+- **Contract-shaped enhancement.** `enhancePrompt` validates model output with Zod, places user text and project context only in the untrusted payload, caps the payload below 30,000 characters, returns `{brief:null, clarification}` for high ambiguity, and appends code-owned invariants. The keyword deny-list and heuristic fallback are removed.
+- **Tenant isolation.** User-facing Studio pages and API routes use `withTenant` through a shared loader; `authorizeStudio` is pure and takes the loaded session/project/orders/balance. The preview proxy re-runs that gate on every request and serves the requested file from the immutable version archive, returning 404 when the archive has no such file instead of synthesising a page.
+- **Smoke coverage.** `npm run smoke` now runs a scripted Studio edit with the fixture enhancement call, asserts the produced version's real files differ from the parent, and extracts the produced ZIP and rebuilds/tests it. It still requires live Postgres, Redis, and S3.
 
 ---
 

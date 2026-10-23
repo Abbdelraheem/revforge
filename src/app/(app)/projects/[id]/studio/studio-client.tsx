@@ -415,27 +415,26 @@ export function StudioClient({
                 <div className="space-y-4">
                   <span className="font-serif font-bold text-sm">Compilation & Safety Checks</span>
                   <div className="space-y-2 font-sans text-sm">
-                    <div className="p-3 rounded border border-border bg-background flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-emerald-600" />
-                        <span>TypeScript Clean Compilation</span>
+                    {[
+                      "TypeScript clean compilation",
+                      "Safety perimeter (no hostile code)",
+                      "Reference leakage scan",
+                    ].map((label) => (
+                      <div
+                        key={label}
+                        className="p-3 rounded border border-border bg-background flex items-center justify-between"
+                      >
+                        <div className="flex items-center space-x-2">
+                          <CheckCircle className="h-4 w-4 text-emerald-600" />
+                          <span>{label}</span>
+                        </div>
+                        <Badge variant="outline">
+                          {activeVersion?.parityScore != null
+                            ? "VERIFIED"
+                            : "NOT RECORDED"}
+                        </Badge>
                       </div>
-                      <Badge variant="default">PASS</Badge>
-                    </div>
-                    <div className="p-3 rounded border border-border bg-background flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-emerald-600" />
-                        <span>Safety Perimeter (No Hostile Code)</span>
-                      </div>
-                      <Badge variant="default">PASS</Badge>
-                    </div>
-                    <div className="p-3 rounded border border-border bg-background flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <CheckCircle className="h-4 w-4 text-emerald-600" />
-                        <span>Reference Leakage Zero-Corpus</span>
-                      </div>
-                      <Badge variant="default">PASS</Badge>
-                    </div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -445,10 +444,12 @@ export function StudioClient({
                   <span className="font-serif font-bold text-sm">Empirical Parity Verification</span>
                   <div className="p-4 rounded border border-border bg-background text-center space-y-2">
                     <div className="text-3xl font-bold font-serif text-primary">
-                      {((activeVersion?.parityScore ?? 0.88) * 100).toFixed(1)}%
+                      {activeVersion?.parityScore != null
+                        ? `${(activeVersion.parityScore * 100).toFixed(1)}%`
+                        : "Not measured"}
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      Parity relative to original captured specification.
+                      Measured parity recorded with this immutable version.
                     </p>
                   </div>
                 </div>

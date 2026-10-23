@@ -29,6 +29,19 @@ export const storage = {
     await s3Client.send(cmd);
   },
 
+  async getObject(key: string): Promise<Buffer> {
+    const cmd = new GetObjectCommand({
+      Bucket: bucket,
+      Key: key,
+    });
+    const response = await s3Client.send(cmd);
+    if (!response.Body) {
+      throw new Error(`Storage object "${key}" has no body.`);
+    }
+    const bytes = await response.Body.transformToByteArray();
+    return Buffer.from(bytes);
+  },
+
   async getSignedDownloadUrl(key: string, expiresInSec = 300): Promise<string> {
     const cmd = new GetObjectCommand({
       Bucket: bucket,

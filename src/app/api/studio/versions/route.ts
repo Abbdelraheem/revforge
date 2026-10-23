@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { authorizeStudio, StudioAuthError } from "@/lib/studio/authorize";
-import { systemDb } from "@/db";
-import { studioVersions } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { authorizeStudio } from "@/lib/studio/authorize";
+import { loadStudioRouteData } from "@/lib/studio/route-context";
 import { storage } from "@/lib/storage";
 
 export const runtime = "nodejs";
@@ -19,35 +17,44 @@ export async function GET(req: NextRequest) {
   const downloadVersionId = searchParams.get("download");
 
   if (!projectId) {
-    return NextResponse.json({ error: "projectId query parameter required" }, { status: 400 });
+    return NextResponse.json(
+      { error: "projectId query parameter required" },
+      { status: 400 }
+    );
   }
 
   try {
-    await authorizeStudio(projectId, session.user.id);
+    const data = await loadStudioRouteData(session, projectId);
+    const auth = authorizeStudio({
+      session,
+      project: data.project,
+      orders: data.orders,
+      balanceCents: data.balanceCents,
+    });
+
+    if (!auth.ok) {
+      return NextResponse.json({ error: auth.error }, { status: auth.status });
+    }
 
     if (downloadVersionId) {
-      const [v] = await systemDb
-        .select()
-        .from(studioVersions)
-        .where(eq(studioVersions.id, downloadVersionId));
+      const version = data.versions.find((item) => item.id === downloadVersionId);
 
-      if (!v || v.projectId !== projectId) {
+      if (!version) {
         return NextResponse.json({ error: "Version not found" }, { status: 404 });
       }
 
-      const downloadUrl = await storage.getSignedDownloadUrl(v.zipStorageKey, 300);
-      return NextResponse.json({ downloadUrl, version: v });
+      const downloadUrl = await storage.getSignedDownloadUrl(
+        version.zipStorageKey,
+        300
+      );
+      return NextResponse.json({ downloadUrl, version });
     }
 
-    const versions = await systemDb
-      .select()
-      .from(studioVersions)
-      .where(eq(studioVersions.projectId, projectId))
-      .orderBy(desc(studioVersions.versionNumber));
-
-    return NextResponse.json({ versions });
+    return NextResponse.json({ versions: data.versions });
   } catch (err: any) {
-    const status = err instanceof StudioAuthError ? err.status : 500;
-    return NextResponse.json({ error: err.message }, { status });
+    return NextResponse.json(
+      { error: err?.message || "Failed to load Studio versions." },
+      { status: 500 }
+    );
   }
 }
