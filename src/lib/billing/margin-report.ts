@@ -139,6 +139,10 @@ export async function loadMarginReport(filters: MarginFilters = {}): Promise<Mar
 
   const projectRowsOut: ProjectMarginRow[] = [];
 
+  const workerHourCostCents = Number(process.env.INFRA_WORKER_HOUR_CENTS || 10);
+  const storageCostCents = Number(process.env.INFRA_STORAGE_CENTS_PER_PROJECT || 5);
+  const deliveryCostCents = Number(process.env.INFRA_BANDWIDTH_CENTS_PER_DELIVERY || 2);
+
   for (const project of filteredProjects) {
     const projectPayments = paymentRows
       .filter(
@@ -168,6 +172,14 @@ export async function loadMarginReport(filters: MarginFilters = {}): Promise<Mar
         providerCostMicros: row.providerCostMicros,
       }));
 
+    const projectJobs = jobRows.filter((j) => j.projectId === project.id);
+    const workerHours = Math.max(0.1, projectJobs.length * 0.25);
+    const infraAllocationCents = Math.round(
+      workerHours * workerHourCostCents +
+        storageCostCents +
+        (projectJobs.length > 0 ? deliveryCostCents : 0)
+    );
+
     const margin = computeProjectMargin({
       payments: projectPayments,
       refundsCents,
@@ -176,7 +188,7 @@ export async function loadMarginReport(filters: MarginFilters = {}): Promise<Mar
       costEvents: projectEvents,
       feePercent: env.PAYMENT_FEE_PERCENT,
       feeFixedCents: env.PAYMENT_FEE_FIXED_CENTS,
-      infraAllocationCents: 0,
+      infraAllocationCents,
     });
 
     projectRowsOut.push({
@@ -240,15 +252,18 @@ export async function loadMarginReport(filters: MarginFilters = {}): Promise<Mar
       });
     }
   }
+
   for (const job of jobRows) {
-    if (job.spentCents >= job.costCapCents && job.costCapCents > 0) {
-      const project = projectRows.find((entry) => entry.id === job.projectId);
-      alerts.push({
-        projectId: job.projectId,
-        projectName: project?.name || job.projectId,
-        kind: "cost_cap",
-        detail: `Build job ${job.id.slice(0, 8)} reached its cost cap (${job.spentCents}¢ / ${job.costCapCents}¢, ${job.status}).`,
-      });
+    if (!filters.projectId || job.projectId === filters.projectId) {
+      if (job.spentCents !== null && job.costCapCents !== null && job.spentCents >= job.costCapCents) {
+        const project = projectRows.find((entry) => entry.id === job.projectId);
+        alerts.push({
+          projectId: job.projectId,
+          projectName: project?.name || job.projectId,
+          kind: "cost_cap",
+          detail: `Build job ${job.id.slice(0, 8)} reached its cost cap (${job.spentCents}¢ / ${job.costCapCents}¢, ${job.status}).`,
+        });
+      }
     }
   }
 
@@ -273,6 +288,8 @@ export async function loadMarginReport(filters: MarginFilters = {}): Promise<Mar
     .filter((row) => inRange(row.createdAt, filters) && (!filters.projectId || row.projectId === filters.projectId))
     .map((row) => ({ source: row.source, providerCostMicros: row.providerCostMicros }));
 
+  const totalInfraCents = projectRowsOut.reduce((sum, p) => sum + p.infraCents, 0);
+
   const totals = computeProjectMargin({
     payments: totalPayments,
     refundsCents: totalRefunds,
@@ -281,7 +298,7 @@ export async function loadMarginReport(filters: MarginFilters = {}): Promise<Mar
     costEvents: totalEvents,
     feePercent: env.PAYMENT_FEE_PERCENT,
     feeFixedCents: env.PAYMENT_FEE_FIXED_CENTS,
-    infraAllocationCents: 0,
+    infraAllocationCents: totalInfraCents,
   });
 
   const studioCharges = editRows

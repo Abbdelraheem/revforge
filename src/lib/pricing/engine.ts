@@ -31,6 +31,8 @@ export interface QuoteLine {
   selected: boolean;
 }
 
+export const MIN_BUILD_MARGIN_PCT = 50; // 50% minimum gross margin requirement
+
 export interface QuoteCalculationResult {
   lines: QuoteLine[];
   subtotalCents: number;
@@ -38,6 +40,17 @@ export interface QuoteCalculationResult {
   totalCents: number;
   pricingConfigVersion: number;
   needsReview: boolean;
+  projectedCostCents: number;
+  projectedMarginPct: number;
+  marginApproved: boolean;
+  rejectionReason?: string;
+  formulaInputs: {
+    hours: number;
+    marketHourlyRateCents: number;
+    platformDiscountBp: number;
+    minOrderCents: number;
+    estimatedProviderCostCents: number;
+  };
 }
 
 export const TIER_ORDER: TierKey[] = [
@@ -47,6 +60,15 @@ export const TIER_ORDER: TierKey[] = [
   "desktop_binary",
   "enterprise_saas",
 ];
+
+// Baseline historical provider cost estimates per tier in cents
+export const HISTORICAL_TIER_COST_CENTS: Record<TierKey, number> = {
+  portfolio: 35, // ~$0.35
+  web_app: 75,   // ~$0.75
+  mobile_app: 95, // ~$0.95
+  desktop_binary: 120, // ~$1.20
+  enterprise_saas: 180, // ~$1.80
+};
 
 export const DEFAULT_PRICING_CONFIG_V1: PricingConfig = {
   version: 1,
@@ -108,7 +130,8 @@ export function priceFeature(f: FeatureInput, cfg: PricingConfig): QuoteLine {
 export function priceQuote(
   features: FeatureInput[],
   cfg: PricingConfig,
-  creditsCents = 0
+  creditsCents = 0,
+  customTierCosts?: Partial<Record<TierKey, number>>
 ): QuoteCalculationResult {
   const lines = features.map((f) => priceFeature(f, cfg));
   const selected = lines.filter((l) => l.selected);
@@ -126,8 +149,29 @@ export function priceQuote(
   const credits = Math.min(Math.max(creditsCents, 0), floored);
   const totalCents = floored - credits;
 
+  // Estimate provider cost based on selected features & top tier
+  const tierCost = customTierCosts?.[topTier] ?? HISTORICAL_TIER_COST_CENTS[topTier];
+  const totalHours = selected.reduce((s, l) => s + l.hoursQ4 / 4, 0);
+  const projectedCostCents = Math.max(
+    tierCost,
+    Math.round((totalHours / 10) * tierCost)
+  );
+
+  // Projected margin calculation
+  const projectedMarginPct =
+    floored > 0
+      ? Math.round(((floored - projectedCostCents) / floored) * 1000) / 10
+      : 100;
+
+  const marginApproved =
+    floored === 0 || projectedMarginPct >= MIN_BUILD_MARGIN_PCT;
+
+  const rejectionReason = !marginApproved
+    ? `Projected gross margin (${projectedMarginPct}%) falls below required ${MIN_BUILD_MARGIN_PCT}% threshold for tier ${topTier}.`
+    : undefined;
+
   // Review threshold: total > $5,000 (500,000 cents)
-  const needsReview = totalCents > 500000;
+  const needsReview = totalCents > 500000 || !marginApproved;
 
   return {
     lines,
@@ -136,5 +180,16 @@ export function priceQuote(
     totalCents,
     pricingConfigVersion: cfg.version,
     needsReview,
+    projectedCostCents,
+    projectedMarginPct,
+    marginApproved,
+    rejectionReason,
+    formulaInputs: {
+      hours: totalHours,
+      marketHourlyRateCents: cfg.tiers[topTier].hourlyRateCents,
+      platformDiscountBp: cfg.factorBp,
+      minOrderCents: cfg.tiers[topTier].minOrderCents,
+      estimatedProviderCostCents: projectedCostCents,
+    },
   };
 }
