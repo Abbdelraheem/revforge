@@ -15,9 +15,8 @@ export default async function SettingsPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-8 font-sans">
       <div className="space-y-2 border-b border-border pb-4">
-        <Badge variant="outline" className="border-primary/40 text-sm text-primary">
-          WORKSPACE CONFIGURATION
-        </Badge>
+        <p className="text-sm font-semibold tracking-wider text-primary uppercase">WORKSPACE CONFIGURATION
+        </p>
         <h1 className="font-serif text-2xl font-bold text-foreground sm:text-3xl">
           Workspace Settings
         </h1>

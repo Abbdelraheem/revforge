@@ -28,9 +28,9 @@ export default function LandingPage() {
       <main className="flex-1 space-y-24 pb-20">
         {/* Hero Section */}
         <section className="pt-20 pb-12 px-6 max-w-7xl mx-auto text-center space-y-8">
-          <div className="inline-flex items-center space-x-2 border border-primary/30 bg-primary/5 px-3 py-1 rounded text-sm font-mono text-primary">
-            <span>Clean-Room Architecture &bull; Next.js 15 Synthesis</span>
-          </div>
+          <p className="text-sm font-semibold tracking-wider text-primary uppercase">
+            Clean-Room Architecture | Next.js 15 Synthesis
+          </p>
 
           <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-foreground max-w-5xl mx-auto leading-tight font-serif">
             Clean-Room Reverse Engineering &amp; Reconstruction
@@ -55,20 +55,20 @@ export default function LandingPage() {
           </div>
 
           {/* Telemetry Strip */}
-          <div className="pt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm font-mono text-muted-foreground">
+          <div className="pt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
             <div className="flex items-center space-x-2">
               <span className="h-2 w-2 rounded-full bg-primary" />
-              <span>Runtime: Sandboxed Container Runner</span>
+              <span>Sandboxed Container Runner</span>
             </div>
-            <span className="hidden sm:inline">&bull;</span>
+            <span className="hidden sm:inline text-muted-foreground/40">/</span>
             <div className="flex items-center space-x-2">
-              <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-              <span>Security: Pinned Safe Fetch</span>
+              <ShieldCheck className="h-4 w-4 text-primary" />
+              <span>Pinned Safe Fetch</span>
             </div>
-            <span className="hidden sm:inline">&bull;</span>
+            <span className="hidden sm:inline text-muted-foreground/40">/</span>
             <div className="flex items-center space-x-2">
-              <DollarSign className="h-3.5 w-3.5 text-primary" />
-              <span>Billing: Verified Webhooks</span>
+              <DollarSign className="h-4 w-4 text-primary" />
+              <span>Verified Webhooks</span>
             </div>
           </div>
         </section>

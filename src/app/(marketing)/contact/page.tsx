@@ -60,9 +60,8 @@ export default function ContactPage() {
       <main className="flex-1 py-16 px-6 max-w-6xl mx-auto w-full">
         {/* Header */}
         <div className="space-y-4 mb-12 border-b border-border pb-8">
-          <Badge variant="outline" className="border-primary/40 text-primary font-mono text-sm">
-            SECURE COMMUNICATIONS &amp; ENTERPRISE
-          </Badge>
+          <p className="text-sm font-semibold tracking-wider text-primary uppercase">SECURE COMMUNICATIONS &amp; ENTERPRISE
+          </p>
           <h1 className="text-3xl md:text-5xl font-serif font-bold tracking-tight">
             Contact Engineering &amp; Support
           </h1>

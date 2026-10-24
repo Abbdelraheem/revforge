@@ -67,7 +67,7 @@ export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageP
 
         <div className="text-center text-sm text-muted-foreground flex items-center justify-center space-x-1.5">
           <ShieldCheck className="h-4 w-4 text-primary" />
-          <span>Encrypted Session • Verified Infrastructure</span>
+          <span>Encrypted Session | Verified Infrastructure</span>
         </div>
       </div>
     </div>

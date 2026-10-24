@@ -62,9 +62,8 @@ export default async function BillingPage() {
   return (
     <div className="mx-auto max-w-6xl space-y-8 font-sans">
       <div className="space-y-2 border-b border-border pb-4">
-        <Badge variant="outline" className="border-primary/40 text-primary text-sm">
-          WORKSPACE BILLING & CREDITS
-        </Badge>
+        <p className="text-sm font-semibold tracking-wider text-primary uppercase">WORKSPACE BILLING & CREDITS
+        </p>
         <h1 className="text-3xl font-serif font-bold text-foreground">
           Platform Billing & Credits
         </h1>

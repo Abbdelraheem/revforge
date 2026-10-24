@@ -1026,7 +1026,7 @@ export function StudioClient({
             <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <span className="font-mono">Hold {formatCents(200)}</span>
-                <span className="text-muted-foreground/40">•</span>
+                <span className="text-muted-foreground/40">/</span>
                 <span className="font-mono text-sm opacity-80">⌘⏎ Run</span>
                 <span className="font-mono text-sm opacity-80">⌘K Focus</span>
                 <span className="font-mono text-sm opacity-80">Esc Cancel</span>

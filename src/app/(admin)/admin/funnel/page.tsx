@@ -21,9 +21,9 @@ export default async function AdminFunnelPage() {
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8 font-sans">
       <div className="space-y-2 border-b border-border pb-4">
-        <Badge variant="outline" className="border-primary/40 text-primary text-sm">
-          CONVERSION &amp; RETENTION
-        </Badge>
+        <p className="text-sm font-semibold tracking-wider text-primary uppercase">
+          Conversion and Retention
+        </p>
         <h1 className="text-3xl font-serif font-bold text-foreground">
           Conversion Funnel &amp; Cohort Telemetry
         </h1>

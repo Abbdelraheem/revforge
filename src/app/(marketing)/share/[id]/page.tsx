@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   if (!project) {
     return {
-      title: `Architectural Analysis Report — ${BRAND.name}`,
+      title: `Architectural Analysis Report | ${BRAND.name}`,
     };
   }
 

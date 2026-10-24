@@ -16,30 +16,37 @@ export default async function AdminJobsPage() {
     redirect("/login");
   }
 
-  // 1. All recent jobs
-  const jobs = await systemDb
-    .select()
-    .from(buildJobs)
-    .orderBy(desc(buildJobs.createdAt))
-    .limit(50);
+  let jobs: any[] = [];
+  let workers: any[] = [];
+
+  try {
+    jobs = await systemDb
+      .select()
+      .from(buildJobs)
+      .orderBy(desc(buildJobs.createdAt))
+      .limit(50);
+
+    workers = await systemDb
+      .select()
+      .from(workerHeartbeats)
+      .orderBy(desc(workerHeartbeats.lastSeen));
+  } catch (err: any) {
+    if (process.env.NODE_ENV !== "development") {
+      throw err;
+    }
+  }
 
   // 2. Dead-letter queue / Poison jobs
   const dlqJobs = jobs.filter((j) => j.status === "build_failed");
 
-  // 3. Worker fleet telemetry
-  const workers = await systemDb
-    .select()
-    .from(workerHeartbeats)
-    .orderBy(desc(workerHeartbeats.lastSeen));
-
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8 font-sans">
-      <div className="space-y-2 border-b border-border pb-4">
-        <Badge variant="outline" className="border-primary/40 text-primary text-sm">
-          OPERATIONS FLEET
-        </Badge>
+      <div className="space-y-1 border-b border-border pb-4">
+        <p className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+          Operations Fleet
+        </p>
         <h1 className="text-3xl font-serif font-bold text-foreground">
-          Autonomous Build Jobs & Dead-Letter Queue
+          Autonomous Build Jobs &amp; Dead-Letter Queue
         </h1>
         <p className="text-sm text-muted-foreground">
           Live inspection of sandboxed compilation jobs, lease heartbeats, and dead-letter recovery.
@@ -103,9 +110,9 @@ export default async function AdminJobsPage() {
             <CardTitle className="text-lg font-serif text-red-700">
               Dead-Letter Queue (DLQ) & Poison Jobs ({dlqJobs.length})
             </CardTitle>
-            <Badge variant="outline" className="border-red-600/40 text-red-600 text-sm">
-              TERMINAL FAILS
-            </Badge>
+            <span className="font-mono text-sm font-semibold uppercase text-red-600">
+              Terminal Fails
+            </span>
           </div>
         </CardHeader>
         <CardContent className="p-0">

@@ -7,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getChangelogReleases } from "@/lib/changelog";
 
 export const metadata = {
-  title: `Engineering Changelog — ${BRAND.name}`,
+  title: `Engineering Changelog | ${BRAND.name}`,
   description:
     "Chronological release notes, architecture improvements, security hardening passes, and sandbox runtime updates.",
 };
@@ -22,9 +22,8 @@ export default function ChangelogPage() {
       <main className="flex-1 py-16 px-6 max-w-4xl mx-auto w-full space-y-12">
         {/* Header */}
         <div className="space-y-4 border-b border-border pb-8">
-          <Badge variant="outline" className="border-primary/40 text-primary text-sm font-semibold">
-            ENGINEERING RELEASES
-          </Badge>
+          <p className="text-sm font-semibold tracking-wider text-primary uppercase">ENGINEERING RELEASES
+          </p>
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight font-serif text-foreground">
             Platform Changelog
           </h1>
@@ -66,7 +65,7 @@ export default function ChangelogPage() {
                         <ul className="space-y-2 text-sm text-muted-foreground">
                           {sec.items.map((item, iIdx) => (
                             <li key={iIdx} className="flex items-start gap-2">
-                              <span className="text-primary font-bold mt-0.5">•</span>
+                              <span className="text-primary font-bold mt-0.5">-</span>
                               <span className="leading-relaxed">{item}</span>
                             </li>
                           ))}

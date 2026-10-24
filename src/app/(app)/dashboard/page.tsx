@@ -115,7 +115,7 @@ export default async function DashboardPage() {
             Workspace Overview
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {session.workspace.name} &bull; Organization Workspace
+            {session.workspace.name} | Organization Workspace
           </p>
         </div>
         <div className="flex items-center space-x-3">
@@ -344,7 +344,7 @@ export default async function DashboardPage() {
             <div className="pt-3 border-t border-border">
               <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                 <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
-                <span>Clean-room isolation &bull; Multi-tenant row security</span>
+                <span>Clean-room isolation | Multi-tenant row security</span>
               </div>
             </div>
           </Card>

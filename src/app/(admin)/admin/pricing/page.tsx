@@ -15,20 +15,30 @@ export default async function AdminPricingPage() {
     redirect("/login");
   }
 
-  const [activeConfig] = await systemDb
-    .select()
-    .from(pricingConfig)
-    .orderBy(desc(pricingConfig.version))
-    .limit(1);
+  let activeConfig: any = null;
+  try {
+    const [row] = await systemDb
+      .select()
+      .from(pricingConfig)
+      .orderBy(desc(pricingConfig.version))
+      .limit(1);
+    activeConfig = row;
+  } catch (err) {
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[AdminPricingPage] Local database offline, using default config.");
+    } else {
+      throw err;
+    }
+  }
 
   const tiers = activeConfig?.tiers || {};
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8 font-sans">
       <div className="space-y-2 border-b border-border pb-4">
-        <Badge variant="outline" className="border-primary/40 text-primary text-sm">
-          PRICING ALGORITHM
-        </Badge>
+        <p className="text-sm font-semibold tracking-wider text-primary uppercase">
+          Pricing Algorithm
+        </p>
         <h1 className="text-3xl font-serif font-bold text-foreground">
           Dynamic Pricing Engine Configuration
         </h1>

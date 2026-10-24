@@ -140,8 +140,8 @@ export function AdminSupportClient({ initialTickets, cannedReplies }: Props) {
                     {selectedTicket.inquiryType}
                   </CardTitle>
                   <p className="text-sm text-muted-foreground">
-                    From {selectedTicket.name} &bull; {selectedTicket.email}
-                    {selectedTicket.organization && ` &bull; ${selectedTicket.organization}`}
+                    From {selectedTicket.name} | {selectedTicket.email}
+                    {selectedTicket.organization && ` | ${selectedTicket.organization}`}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">

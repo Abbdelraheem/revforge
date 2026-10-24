@@ -69,73 +69,91 @@ function dayKey(value: Date): string {
   return value.toISOString().slice(0, 10);
 }
 
-export async function loadMarginReport(filters: MarginFilters = {}): Promise<MarginReport> {
-  const [projectRows, paymentRows, refundRows, grantRows, editRows, eventRows, jobRows] =
-    await Promise.all([
-      systemDb.select().from(projects).orderBy(desc(projects.createdAt)),
-      systemDb
-        .select({
-          amountCents: payments.amountCents,
-          createdAt: payments.createdAt,
-          projectId: orders.projectId,
-          kind: orders.kind,
-          status: orders.status,
-        })
-        .from(payments)
-        .innerJoin(orders, eq(payments.orderId, orders.id)),
-      systemDb
-        .select({
-          amountCents: orders.amountCents,
-          createdAt: orders.updatedAt,
-          projectId: orders.projectId,
-        })
-        .from(orders)
-        .where(eq(orders.status, "refunded")),
-      systemDb
-        .select({
-          deltaCents: creditsLedger.deltaCents,
-          createdAt: creditsLedger.createdAt,
-          projectId: orders.projectId,
-          workspaceId: creditsLedger.workspaceId,
-        })
-        .from(creditsLedger)
-        .leftJoin(orders, eq(creditsLedger.orderId, orders.id))
-        .where(
-          and(
-            eq(creditsLedger.kind, "grant"),
-            sql`${creditsLedger.deltaCents} > 0`
-          )
-        ),
-      systemDb
-        .select({
-          projectId: studioEdits.projectId,
-          tokensSettledCents: studioEdits.tokensSettledCents,
-          createdAt: studioEdits.createdAt,
-        })
-        .from(studioEdits)
-        .where(eq(studioEdits.status, "committed")),
-      systemDb
-        .select({
-          projectId: costEvents.projectId,
-          source: costEvents.source,
-          providerCostMicros: costEvents.providerCostMicros,
-          createdAt: costEvents.createdAt,
-        })
-        .from(costEvents),
-      systemDb
-        .select({
-          id: buildJobs.id,
-          projectId: buildJobs.projectId,
-          spentCents: buildJobs.spentCents,
-          costCapCents: buildJobs.costCapCents,
-          status: buildJobs.status,
-        })
-        .from(buildJobs),
-    ]);
+export const EMPTY_MARGIN_REPORT: MarginReport = {
+  projects: [],
+  days: [],
+  alerts: [],
+  pricingHealth: {
+    studioAverageChargeCents: null,
+    studioAverageCostCents: null,
+    studioEffectiveMarkup: null,
+    averageBuildPriceCents: null,
+    averageBuildCostCents: null,
+    suggestedStudioMarkup: 1.5,
+    suggestedCostCapRatio: null,
+    notes: ["Local development mode: database connection offline."],
+  },
+  totals: computeProjectMargin({ payments: [], costEvents: [] }),
+};
 
-  const filteredProjects = filters.projectId
-    ? projectRows.filter((row) => row.id === filters.projectId)
-    : projectRows;
+export async function loadMarginReport(filters: MarginFilters = {}): Promise<MarginReport> {
+  try {
+    const [projectRows, paymentRows, refundRows, grantRows, editRows, eventRows, jobRows] =
+      await Promise.all([
+        systemDb.select().from(projects).orderBy(desc(projects.createdAt)),
+        systemDb
+          .select({
+            amountCents: payments.amountCents,
+            createdAt: payments.createdAt,
+            projectId: orders.projectId,
+            kind: orders.kind,
+            status: orders.status,
+          })
+          .from(payments)
+          .innerJoin(orders, eq(payments.orderId, orders.id)),
+        systemDb
+          .select({
+            amountCents: orders.amountCents,
+            createdAt: orders.updatedAt,
+            projectId: orders.projectId,
+          })
+          .from(orders)
+          .where(eq(orders.status, "refunded")),
+        systemDb
+          .select({
+            deltaCents: creditsLedger.deltaCents,
+            createdAt: creditsLedger.createdAt,
+            projectId: orders.projectId,
+            workspaceId: creditsLedger.workspaceId,
+          })
+          .from(creditsLedger)
+          .leftJoin(orders, eq(creditsLedger.orderId, orders.id))
+          .where(
+            and(
+              eq(creditsLedger.kind, "grant"),
+              sql`${creditsLedger.deltaCents} > 0`
+            )
+          ),
+        systemDb
+          .select({
+            projectId: studioEdits.projectId,
+            tokensSettledCents: studioEdits.tokensSettledCents,
+            createdAt: studioEdits.createdAt,
+          })
+          .from(studioEdits)
+          .where(eq(studioEdits.status, "committed")),
+        systemDb
+          .select({
+            projectId: costEvents.projectId,
+            source: costEvents.source,
+            providerCostMicros: costEvents.providerCostMicros,
+            createdAt: costEvents.createdAt,
+          })
+          .from(costEvents),
+        systemDb
+          .select({
+            id: buildJobs.id,
+            projectId: buildJobs.projectId,
+            spentCents: buildJobs.spentCents,
+            costCapCents: buildJobs.costCapCents,
+            status: buildJobs.status,
+          })
+          .from(buildJobs),
+      ]);
+
+    const filteredProjects = filters.projectId
+      ? projectRows.filter((row) => row.id === filters.projectId)
+      : projectRows;
 
   const projectRowsOut: ProjectMarginRow[] = [];
 
@@ -367,4 +385,10 @@ export async function loadMarginReport(filters: MarginFilters = {}): Promise<Mar
     },
     totals,
   };
+  } catch (err: any) {
+    if (process.env.NODE_ENV === "development") {
+      return EMPTY_MARGIN_REPORT;
+    }
+    throw err;
+  }
 }

@@ -14,9 +14,7 @@ export default function NotFound() {
         </div>
 
         <div className="space-y-2">
-          <Badge variant="outline" className="border-border text-muted-foreground text-sm">
-            ERR_404: RESOURCE_NOT_FOUND
-          </Badge>
+          <span className="font-mono text-sm uppercase text-muted-foreground font-semibold">ERR_404: Resource Not Found</span>
           <h1 className="text-xl font-bold text-foreground">
             Specified Endpoint Does Not Exist
           </h1>

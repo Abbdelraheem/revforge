@@ -5,7 +5,7 @@ import { MarketingFooter } from "@/components/shared/marketing-footer";
 import { Badge } from "@/components/ui/badge";
 
 export const metadata = {
-  title: `Terms of Service — ${BRAND.name}`,
+  title: `Terms of Service | ${BRAND.name}`,
   description: `Terms and conditions governing the use of the ${BRAND.name} reverse engineering and clean-room synthesis platform.`,
 };
 
@@ -16,14 +16,13 @@ export default function TermsPage() {
 
       <main className="flex-1 py-16 px-6 max-w-4xl mx-auto w-full">
         <div className="space-y-4 mb-10 border-b border-border pb-6">
-          <Badge variant="outline" className="border-primary/40 text-primary font-mono text-sm">
-            LEGAL & GOVERNANCE
-          </Badge>
+          <p className="text-sm font-semibold tracking-wider text-primary uppercase">LEGAL & GOVERNANCE
+          </p>
           <h1 className="text-3xl md:text-4xl font-serif font-bold tracking-tight">
             Terms of Service
           </h1>
           <div className="text-sm text-muted-foreground font-mono">
-            Effective Date: October 17, 2026 • Version 2.4
+            Effective Date: October 17, 2026 | Version 2.4
           </div>
         </div>
 

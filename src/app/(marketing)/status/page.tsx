@@ -71,9 +71,8 @@ export default async function StatusPage() {
 
       <main className="flex-1 py-16 px-6 max-w-5xl mx-auto w-full space-y-10">
         <div className="space-y-4 border-b border-border pb-6">
-          <Badge variant="outline" className="border-primary/40 text-primary text-sm">
-            REAL-TIME TELEMETRY
-          </Badge>
+          <p className="text-sm font-semibold tracking-wider text-primary uppercase">REAL-TIME TELEMETRY
+          </p>
           <h1 className="text-3xl md:text-5xl font-serif font-bold tracking-tight">
             System & Infrastructure Status
           </h1>
@@ -102,8 +101,8 @@ export default async function StatusPage() {
               {isOperational
                 ? "All Core Systems Operational"
                 : isDegraded
-                ? "System Degraded — Background Worker or Sandbox Idle"
-                : "System Outage — Core Infrastructure Unreachable"}
+                ? "System Degraded: Background Worker or Sandbox Idle"
+                : "System Outage: Core Infrastructure Unreachable"}
             </span>
           </div>
           <span className="font-mono text-sm text-muted-foreground">

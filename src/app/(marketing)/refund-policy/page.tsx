@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { BRAND } from "@/config/brand";
 
 export const metadata = {
-  title: `Refund Policy & Platform Credits — ${BRAND.name}`,
+  title: `Refund Policy & Platform Credits | ${BRAND.name}`,
   description: "Terms governing platform credit issuance, build failure compensations, and order adjustments.",
 };
 
@@ -16,14 +16,13 @@ export default function RefundPolicyPage() {
 
       <main className="flex-1 py-16 px-6 max-w-4xl mx-auto w-full space-y-10">
         <div className="space-y-4 border-b border-border pb-6">
-          <Badge variant="outline" className="border-primary/40 text-primary text-sm">
-            BILLING & CREDITS POLICY
-          </Badge>
+          <p className="text-sm font-semibold tracking-wider text-primary uppercase">BILLING & CREDITS POLICY
+          </p>
           <h1 className="text-3xl md:text-5xl font-serif font-bold tracking-tight">
             Refund Policy
           </h1>
           <p className="text-sm text-muted-foreground">
-            Effective Date: October 20, 2026 • Version 1.0
+            Effective Date: October 20, 2026 | Version 1.0
           </p>
         </div>
 

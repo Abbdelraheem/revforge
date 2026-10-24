@@ -53,10 +53,10 @@ export default function PricingPage() {
 
       <main className="flex-1 py-16 px-6 max-w-7xl mx-auto w-full space-y-16">
         {/* Header */}
-        <div className="text-center space-y-4 max-w-3xl mx-auto">
-          <Badge variant="outline" className="border-primary/40 text-primary text-sm font-semibold">
-            TRANSPARENT VALUE-FIRST PRICING
-          </Badge>
+        <div className="text-center space-y-3 max-w-3xl mx-auto">
+          <p className="text-sm font-semibold tracking-wider text-primary uppercase">
+            Transparent Value-First Pricing
+          </p>
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground font-serif">
             Accessible Clean-Room Pricing &amp; Token Credits
           </h1>
@@ -68,9 +68,9 @@ export default function PricingPage() {
         {/* System 1: Pay-Per-Clone Direct Reconstruction */}
         <section className="space-y-6">
           <div className="text-center space-y-2 max-w-2xl mx-auto">
-            <Badge variant="outline" className="border-primary/40 text-primary text-sm font-semibold">
-              SYSTEM 1: PAY-PER-CLONE (DIRECT RECONSTRUCTION)
-            </Badge>
+            <p className="text-sm font-semibold tracking-wider text-primary uppercase">
+              System 1: Pay-Per-Clone (Direct Reconstruction)
+            </p>
             <h2 className="text-2xl sm:text-3xl font-bold text-foreground font-serif">
               Flat-Rate Direct Code Reconstruction
             </h2>
@@ -121,9 +121,9 @@ export default function PricingPage() {
         {/* System 2: Token Credit Bundles & Scope-Cap Resolution */}
         <section className="space-y-6 border-t border-border pt-12">
           <div className="text-center space-y-2 max-w-2xl mx-auto">
-            <Badge variant="outline" className="border-success/40 text-success text-sm font-semibold">
-              SYSTEM 2: TOKEN CREDIT BUNDLES (PREPAID BALANCES)
-            </Badge>
+            <p className="text-sm font-semibold tracking-wider text-success uppercase">
+              System 2: Token Credit Bundles (Prepaid Balances)
+            </p>
             <h2 className="text-2xl sm:text-3xl font-bold text-foreground font-serif">
               Flexible Credits Wallet &amp; Studio Edits
             </h2>
@@ -210,9 +210,9 @@ export default function PricingPage() {
           {/* Complimentary Analysis Box */}
           <Card className="border-border bg-card shadow-sm lg:col-span-1">
             <CardHeader className="pb-3 border-b border-border">
-              <Badge variant="outline" className="w-fit text-sm text-primary border-primary/40 font-semibold">
-                FIRST ANALYSIS FREE
-              </Badge>
+              <span className="font-mono text-sm font-semibold uppercase text-primary">
+                First Analysis Free
+              </span>
               <CardTitle className="text-xl font-bold font-serif">Architectural Analysis</CardTitle>
               <CardDescription className="text-sm">
                 Inspect and generate a formal specification for your target
@@ -358,9 +358,9 @@ export default function PricingPage() {
         {/* Studio Tokens & Post-Delivery Iteration Pricing */}
         <section className="space-y-6 border-t border-border pt-12">
           <div className="text-center space-y-2 max-w-2xl mx-auto">
-            <Badge variant="outline" className="border-primary/40 text-primary text-sm font-semibold">
-              POST-DELIVERY ITERATION
-            </Badge>
+            <p className="text-sm font-semibold tracking-wider text-primary uppercase">
+              Post-Delivery Iteration
+            </p>
             <h2 className="text-2xl font-bold text-foreground font-serif">
               {BRAND.name} Studio Tokens &amp; Transparent Pricing
             </h2>
@@ -371,8 +371,8 @@ export default function PricingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="border-border bg-card shadow-sm p-6 space-y-3">
-              <div className="h-10 w-10 rounded border border-primary/30 bg-primary/10 flex items-center justify-center text-primary">
-                <DollarSign className="h-5 w-5" />
+              <div className="text-primary">
+                <DollarSign className="h-6 w-6" />
               </div>
               <h3 className="font-bold text-base text-foreground font-serif">$0.25 Minimum Floor</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
@@ -381,8 +381,8 @@ export default function PricingPage() {
             </Card>
 
             <Card className="border-border bg-card shadow-sm p-6 space-y-3">
-              <div className="h-10 w-10 rounded border border-primary/30 bg-primary/10 flex items-center justify-center text-primary">
-                <Cpu className="h-5 w-5" />
+              <div className="text-primary">
+                <Cpu className="h-6 w-6" />
               </div>
               <h3 className="font-bold text-base text-foreground font-serif">1.5× Provider Markup</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
@@ -391,8 +391,8 @@ export default function PricingPage() {
             </Card>
 
             <Card className="border-border bg-card shadow-sm p-6 space-y-3">
-              <div className="h-10 w-10 rounded border border-primary/30 bg-primary/10 flex items-center justify-center text-primary">
-                <RefreshCw className="h-5 w-5" />
+              <div className="text-primary">
+                <RefreshCw className="h-6 w-6" />
               </div>
               <h3 className="font-bold text-base text-foreground font-serif">Hold &amp; Settle Model</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
@@ -405,9 +405,9 @@ export default function PricingPage() {
         {/* Empirical Benchmark Case Studies */}
         <section className="space-y-6 border-t border-border pt-12">
           <div className="text-center space-y-2 max-w-2xl mx-auto">
-            <Badge variant="outline" className="border-primary/40 text-primary text-sm font-semibold">
-              MEASURED BENCHMARK TARGETS
-            </Badge>
+            <p className="text-sm font-semibold tracking-wider text-primary uppercase">
+              Measured Benchmark Targets
+            </p>
             <h2 className="text-2xl font-bold text-foreground font-serif">
               Empirical Validation Case Studies
             </h2>

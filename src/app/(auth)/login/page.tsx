@@ -152,7 +152,7 @@ export default function LoginPage() {
         {/* Security notice */}
         <div className="text-center text-sm text-muted-foreground flex items-center justify-center space-x-1.5">
           <ShieldCheck className="h-4 w-4 text-primary" />
-          <span>Encrypted Session • Strict Access Controls</span>
+          <span>Encrypted Session | Strict Access Controls</span>
         </div>
       </div>
     </div>

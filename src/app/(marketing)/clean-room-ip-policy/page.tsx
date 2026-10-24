@@ -7,7 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Scale, ShieldCheck, CheckCircle2, Layers } from "lucide-react";
 
 export const metadata = {
-  title: `Clean-Room Reverse Engineering & IP Policy — ${BRAND.name}`,
+  title: `Clean-Room Reverse Engineering & IP Policy | ${BRAND.name}`,
   description: "Legal whitepaper and architectural doctrine explaining clean-room isolation, fair use, and copyright compliance.",
 };
 
@@ -18,14 +18,13 @@ export default function CleanRoomIpPolicyPage() {
 
       <main className="flex-1 py-16 px-6 max-w-4xl mx-auto w-full">
         <div className="space-y-4 mb-10 border-b border-border pb-6">
-          <Badge variant="outline" className="border-primary/40 text-primary font-mono text-sm">
-            LEGAL WHITEPAPER & DOCTRINE
-          </Badge>
+          <p className="text-sm font-semibold tracking-wider text-primary uppercase">LEGAL WHITEPAPER & DOCTRINE
+          </p>
           <h1 className="text-3xl md:text-5xl font-serif font-bold tracking-tight">
             Clean-Room Reverse Engineering Policy
           </h1>
           <div className="text-sm text-muted-foreground font-mono">
-            Published: October 2026 • {BRAND.name} Legal & Architectural Compliance Group
+            Published: October 2026 | {BRAND.name} Legal & Architectural Compliance Group
           </div>
         </div>
 
@@ -71,10 +70,10 @@ export default function CleanRoomIpPolicyPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="text-sm space-y-1.5 text-muted-foreground">
-                  <p>• Runs inside an isolated sandbox container with network isolation.</p>
-                  <p>• Analyzes binary headers, symbols, manifest files, and client-side web DOM structures.</p>
-                  <p>• Emits <em>only</em> high-level functional interface contracts, route structures, and data schemas.</p>
-                  <p>• <strong>Strict Rule:</strong> No proprietary decompiler code or binary strings are allowed to pass through the boundary.</p>
+                  <p className="flex items-start gap-2"><span className="text-primary font-bold">-</span><span>Runs inside an isolated sandbox container with network isolation.</span></p>
+                  <p className="flex items-start gap-2"><span className="text-primary font-bold">-</span><span>Analyzes binary headers, symbols, manifest files, and client-side web DOM structures.</span></p>
+                  <p className="flex items-start gap-2"><span className="text-primary font-bold">-</span><span>Emits <em>only</em> high-level functional interface contracts, route structures, and data schemas.</span></p>
+                  <p className="flex items-start gap-2"><span className="text-primary font-bold">-</span><span><strong>Strict Rule:</strong> No proprietary decompiler code or binary strings are allowed to pass through the boundary.</span></p>
                 </CardContent>
               </Card>
 
@@ -88,10 +87,10 @@ export default function CleanRoomIpPolicyPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="text-sm space-y-1.5 text-muted-foreground">
-                  <p>• Operates with zero access to the original uploaded binary or decompiled byte sequences.</p>
-                  <p>• Receives solely the abstract Evidence Ledger and typed Zod specifications.</p>
-                  <p>• Synthesizes original Next.js 15, React 19, and TypeScript source files from scratch.</p>
-                  <p>• Verifies clean-room source with automated compile and test suites.</p>
+                  <p className="flex items-start gap-2"><span className="text-primary font-bold">-</span><span>Operates with zero access to the original uploaded binary or decompiled byte sequences.</span></p>
+                  <p className="flex items-start gap-2"><span className="text-primary font-bold">-</span><span>Receives solely the abstract Evidence Ledger and typed Zod specifications.</span></p>
+                  <p className="flex items-start gap-2"><span className="text-primary font-bold">-</span><span>Synthesizes original Next.js 15, React 19, and TypeScript source files from scratch.</span></p>
+                  <p className="flex items-start gap-2"><span className="text-primary font-bold">-</span><span>Verifies clean-room source with automated compile and test suites.</span></p>
                 </CardContent>
               </Card>
             </div>

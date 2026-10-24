@@ -25,9 +25,7 @@ export default function ErrorBoundary({
         </div>
 
         <div className="space-y-2">
-          <Badge variant="outline" className="border-destructive/40 text-destructive text-sm">
-            ERR_500: APPLICATION_FAULT
-          </Badge>
+          <span className="font-mono text-sm uppercase text-destructive font-semibold">ERR_500: Application Fault</span>
           <h1 className="text-xl font-bold text-foreground">
             System Execution Interrupted
           </h1>

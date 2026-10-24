@@ -26,7 +26,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 const siteUrl = process.env.APP_URL || "http://localhost:3000";
-const defaultTitle = `${BRAND.name} — Architecture Reconstruction & Clean-Room Systems`;
+const defaultTitle = `${BRAND.name} | Architecture Reconstruction & Clean-Room Systems`;
 const defaultDescription =
   "Clean-Room Architecture Reconstruction, Technical Scoping, Dynamic Cost Estimation, and Production Code Generation.";
 
@@ -63,7 +63,7 @@ export const metadata: Metadata = {
         url: "/opengraph-image",
         width: 1200,
         height: 630,
-        alt: `${BRAND.name} — clean-room architecture reconstruction`,
+        alt: `${BRAND.name}: Clean-room architecture reconstruction`,
       },
     ],
   },

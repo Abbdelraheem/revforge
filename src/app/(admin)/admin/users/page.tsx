@@ -15,18 +15,25 @@ export default async function AdminUsersPage() {
     redirect("/login");
   }
 
-  const allUsers = await systemDb
-    .select()
-    .from(users)
-    .orderBy(desc(users.createdAt))
-    .limit(50);
+  let allUsers: any[] = [];
+  try {
+    allUsers = await systemDb
+      .select()
+      .from(users)
+      .orderBy(desc(users.createdAt))
+      .limit(50);
+  } catch (err: any) {
+    if (process.env.NODE_ENV !== "development") {
+      throw err;
+    }
+  }
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8 font-sans">
-      <div className="space-y-2 border-b border-border pb-4">
-        <Badge variant="outline" className="border-primary/40 text-primary text-sm">
-          ADMINISTRATION
-        </Badge>
+      <div className="space-y-1 border-b border-border pb-4">
+        <p className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+          Administration
+        </p>
         <h1 className="text-3xl font-serif font-bold text-foreground">
           Platform User Management
         </h1>

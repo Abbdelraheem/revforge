@@ -191,7 +191,7 @@ export default async function ProjectDetailPage({ params, searchParams }: Projec
                 </Badge>
               </div>
               <p className="text-sm text-muted-foreground">
-                Status: {latestBuildJob.status} &bull; Parity Score: {latestBuildJob.parityScore ? `${(latestBuildJob.parityScore * 100).toFixed(1)}%` : "Computing..."}
+                Status: {latestBuildJob.status} | Parity Score: {latestBuildJob.parityScore ? `${(latestBuildJob.parityScore * 100).toFixed(1)}%` : "Computing..."}
               </p>
             </Card>
           )}
@@ -289,7 +289,7 @@ export default async function ProjectDetailPage({ params, searchParams }: Projec
 
                 <div className="text-center text-sm text-muted-foreground flex items-center justify-center space-x-1 pt-1">
                   <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-                  <span>Verified Merchant &bull; Automated Verification</span>
+                  <span>Verified Merchant | Automated Verification</span>
                 </div>
               </CardContent>
             </Card>

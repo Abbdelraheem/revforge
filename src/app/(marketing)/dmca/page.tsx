@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 export const metadata = {
-  title: `DMCA & Copyright Takedown Notice — ${BRAND.name}`,
+  title: `DMCA & Copyright Takedown Notice | ${BRAND.name}`,
   description: "Digital Millennium Copyright Act compliance, designated agent notification procedures, and counter-notice provisions.",
 };
 
@@ -17,9 +17,8 @@ export default function DmcaPage() {
 
       <main className="flex-1 py-16 px-6 max-w-4xl mx-auto w-full">
         <div className="space-y-4 mb-10 border-b border-border pb-6">
-          <Badge variant="outline" className="border-primary/40 text-primary font-mono text-sm">
-            COPYRIGHT COMPLIANCE
-          </Badge>
+          <p className="text-sm font-semibold tracking-wider text-primary uppercase">COPYRIGHT COMPLIANCE
+          </p>
           <h1 className="text-3xl md:text-4xl font-serif font-bold tracking-tight">
             DMCA & Copyright Policy
           </h1>
@@ -56,7 +55,7 @@ export default function DmcaPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="font-mono text-sm space-y-1 text-muted-foreground">
-              <div>{BRAND.companyLegalName} — Legal Operations Group</div>
+              <div>{BRAND.companyLegalName} | Legal Operations Group</div>
               <div>Attn: Copyright Agent</div>
               <div>Email: <span className="text-foreground font-semibold">dmca@revforge.ai</span></div>
               <div>Location: Dover, Delaware, USA</div>

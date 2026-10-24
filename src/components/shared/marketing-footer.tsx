@@ -16,7 +16,7 @@ export function MarketingFooter() {
             Independent software architecture reconstruction, technical scoping, and clean-room source code generation platform.
           </p>
           <div className="text-sm text-muted-foreground">
-            Isolated Sandbox Workers • Complete IP Ownership
+            Isolated Sandbox Workers | Complete IP Ownership
           </div>
         </div>
 
@@ -111,7 +111,7 @@ export function MarketingFooter() {
         <div>© 2026 {BRAND.companyLegalName}. All rights reserved.</div>
         <div className="flex items-center space-x-4 mt-2 sm:mt-0">
           <span>Billing Gateway: Paddle Verified</span>
-          <span>•</span>
+          <span className="text-muted-foreground/40">|</span>
           <Link href="/status" className="hover:text-foreground transition">
             Platform Status
           </Link>

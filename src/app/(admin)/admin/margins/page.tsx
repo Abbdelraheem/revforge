@@ -18,7 +18,7 @@ function money(cents: number): string {
 }
 
 function pct(value: number | null): string {
-  return value === null ? "—" : `${value.toFixed(1)}%`;
+  return value === null ? "N/A" : `${value.toFixed(1)}%`;
 }
 
 function parseDate(value: string | undefined, endOfDay = false): Date | undefined {
@@ -52,9 +52,9 @@ export default async function AdminMarginsPage({
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 font-sans">
       <div className="space-y-2 border-b border-border pb-4">
-        <Badge variant="outline" className="border-primary/40 text-primary text-sm">
-          PROFIT ACCOUNTING
-        </Badge>
+        <p className="text-sm font-semibold tracking-wider text-primary uppercase">
+          Profit Accounting
+        </p>
         <h1 className="text-3xl font-serif font-bold text-foreground">Margins</h1>
         <p className="text-sm text-muted-foreground max-w-3xl">
           Revenue from recorded payments, processor fees, real provider cost events, and deferred
@@ -253,26 +253,26 @@ export default async function AdminMarginsPage({
               <p className="text-muted-foreground">Studio effective markup</p>
               <p className="text-lg font-mono font-bold">
                 {report.pricingHealth.studioEffectiveMarkup === null
-                  ? "—"
+                  ? "N/A"
                   : `${report.pricingHealth.studioEffectiveMarkup.toFixed(2)}×`}
               </p>
               <p className="text-muted-foreground">
-                Avg charge {report.pricingHealth.studioAverageChargeCents === null ? "—" : money(report.pricingHealth.studioAverageChargeCents)} · avg cost{" "}
-                {report.pricingHealth.studioAverageCostCents === null ? "—" : money(report.pricingHealth.studioAverageCostCents)}
+                Avg charge {report.pricingHealth.studioAverageChargeCents === null ? "N/A" : money(report.pricingHealth.studioAverageChargeCents)} · avg cost{" "}
+                {report.pricingHealth.studioAverageCostCents === null ? "N/A" : money(report.pricingHealth.studioAverageCostCents)}
               </p>
             </div>
             <div className="rounded-md border border-border p-3 space-y-1">
               <p className="text-muted-foreground">Build cost vs. price</p>
               <p className="text-lg font-mono font-bold">
                 {report.pricingHealth.averageBuildCostCents === null
-                  ? "—"
+                  ? "N/A"
                   : `${money(report.pricingHealth.averageBuildCostCents)} / ${money(
                       report.pricingHealth.averageBuildPriceCents || 0
                     )}`}
               </p>
               <p className="text-muted-foreground">
-                Suggested COST_CAP_RATIO: {report.pricingHealth.suggestedCostCapRatio ?? "—"} ·
-                suggested STUDIO_MARKUP: {report.pricingHealth.suggestedStudioMarkup ?? "—"}
+                Suggested COST_CAP_RATIO: {report.pricingHealth.suggestedCostCapRatio ?? "N/A"} ·
+                suggested STUDIO_MARKUP: {report.pricingHealth.suggestedStudioMarkup ?? "N/A"}
               </p>
             </div>
           </div>

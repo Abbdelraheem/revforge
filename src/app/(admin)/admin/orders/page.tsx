@@ -15,20 +15,27 @@ export default async function AdminOrdersPage() {
     redirect("/login");
   }
 
-  const allOrders = await systemDb
-    .select()
-    .from(orders)
-    .orderBy(desc(orders.createdAt))
-    .limit(50);
+  let allOrders: any[] = [];
+  try {
+    allOrders = await systemDb
+      .select()
+      .from(orders)
+      .orderBy(desc(orders.createdAt))
+      .limit(50);
+  } catch (err: any) {
+    if (process.env.NODE_ENV !== "development") {
+      throw err;
+    }
+  }
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8 font-sans">
-      <div className="space-y-2 border-b border-border pb-4">
-        <Badge variant="outline" className="border-primary/40 text-primary text-sm">
-          FINANCIAL OPERATIONS
-        </Badge>
+      <div className="space-y-1 border-b border-border pb-4">
+        <p className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+          Financial Operations
+        </p>
         <h1 className="text-3xl font-serif font-bold text-foreground">
-          Platform Orders & Revenue
+          Platform Orders &amp; Revenue
         </h1>
         <p className="text-sm text-muted-foreground">
           All client payment transactions, Paddle settlement states, and credit redemptions.

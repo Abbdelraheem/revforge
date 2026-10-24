@@ -74,7 +74,7 @@ export function Dropzone({
               <div className="text-start">
                 <span className="font-mono text-sm font-semibold block">{selectedFile.name}</span>
                 <span className="text-sm text-muted-foreground font-mono">
-                  {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB • Verified Magic Bytes
+                  {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB | Verified Magic Bytes
                 </span>
               </div>
             </div>
@@ -85,7 +85,7 @@ export function Dropzone({
                 Drop target artifact here or click to browse
               </p>
               <p className="text-sm text-muted-foreground font-mono">
-                {acceptedExtensions.join("  ")} • Max 250MB
+                {acceptedExtensions.join("  ")} | Max 250MB
               </p>
             </>
           )}

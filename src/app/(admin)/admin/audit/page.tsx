@@ -15,18 +15,27 @@ export default async function AdminAuditPage() {
     redirect("/login");
   }
 
-  const logs = await systemDb
-    .select()
-    .from(auditLog)
-    .orderBy(desc(auditLog.createdAt))
-    .limit(50);
+  let logs: any[] = [];
+  try {
+    logs = await systemDb
+      .select()
+      .from(auditLog)
+      .orderBy(desc(auditLog.createdAt))
+      .limit(50);
+  } catch (err) {
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[AdminAuditPage] Local database offline, returning empty logs.");
+    } else {
+      throw err;
+    }
+  }
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8 font-sans">
       <div className="space-y-2 border-b border-border pb-4">
-        <Badge variant="outline" className="border-primary/40 text-primary text-sm">
-          COMPLIANCE & SECURITY
-        </Badge>
+        <p className="text-sm font-semibold tracking-wider text-primary uppercase">
+          Compliance and Security
+        </p>
         <h1 className="text-3xl font-serif font-bold text-foreground">
           Platform Security Audit Log
         </h1>

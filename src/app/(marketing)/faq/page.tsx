@@ -8,7 +8,7 @@ import { HelpCircle, ShieldCheck, Scale, DollarSign, Terminal, RefreshCw, Cpu, L
 import Link from "next/link";
 
 export const metadata = {
-  title: `Frequently Asked Questions — ${BRAND.name}`,
+  title: `Frequently Asked Questions | ${BRAND.name}`,
   description: "Detailed legal, architectural, billing, and technical answers about clean-room reverse engineering and code generation.",
 };
 
@@ -91,9 +91,8 @@ export default function FaqPage() {
       <main className="flex-1 py-16 px-6 max-w-5xl mx-auto w-full">
         {/* Header */}
         <div className="space-y-4 mb-12 text-center max-w-3xl mx-auto">
-          <Badge variant="outline" className="border-primary/40 text-primary font-mono text-sm">
-            KNOWLEDGE BASE & FAQ
-          </Badge>
+          <p className="text-sm font-semibold tracking-wider text-primary uppercase">KNOWLEDGE BASE & FAQ
+          </p>
           <h1 className="text-3xl md:text-5xl font-serif font-bold tracking-tight">
             Frequently Asked Questions
           </h1>

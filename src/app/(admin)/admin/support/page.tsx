@@ -18,9 +18,9 @@ export default async function AdminSupportPage() {
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8 font-sans">
       <div className="space-y-2 border-b border-border pb-4">
-        <Badge variant="outline" className="border-primary/40 text-primary text-sm">
-          CUSTOMER OPERATIONS &amp; SUPPORT
-        </Badge>
+        <p className="text-sm font-semibold tracking-wider text-primary uppercase">
+          Customer Operations and Support
+        </p>
         <h1 className="text-3xl font-serif font-bold text-foreground">
           Support Inbox &amp; Tickets
         </h1>

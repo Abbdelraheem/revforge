@@ -9,7 +9,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export const metadata = {
-  title: `How It Works — ${BRAND.name} Clean-Room Pipeline`,
+  title: `How It Works | ${BRAND.name} Clean-Room Pipeline`,
   description: "End-to-end technical breakdown of the 8-stage reverse engineering and clean-room synthesis pipeline.",
 };
 
@@ -18,49 +18,49 @@ const pipelineStages = [
     step: "01",
     title: "Universal Target Ingestion",
     description: "Submit a live URL (web app, package, repo) or upload a binary (.apk, PE/ELF/Mach-O, .asar, .har). Files are verified via magic bytes and assigned cryptographic UUIDv4 vault keys.",
-    controls: "SSRF IP Guard • Magic-Byte Inspection • Zero Path Traversal",
+    controls: "SSRF IP Guard, Magic-Byte Inspection, Zero Path Traversal",
   },
   {
     step: "02",
     title: "Static Triage & Boundary Detection",
     description: "Automated analysis scans entrypoints, routes, external dependencies, and client-side assets to map exact architecture perimeters and tech-stack fingerprints.",
-    controls: "Zero-Shell Runtime • Static Extraction • Sandboxed AST Parser",
+    controls: "Zero-Shell Runtime, Static Extraction, Sandboxed AST Parser",
   },
   {
     step: "03",
     title: "Evidence Ledger Categorization",
     description: "Every component is placed in a verified ledger: 'Seen' (empirically extracted), 'Inferred' (strongly implied data flow), or 'Unknown' (requires clean-room backend synthesis).",
-    controls: "Structured Zod Typing • Delimited XML Wrapper • Prompt Injection Immunity",
+    controls: "Structured Zod Typing, Delimited XML Wrapper, Prompt Injection Immunity",
   },
   {
     step: "04",
     title: "Dynamic Cost Quoting",
     description: "Algorithmic computation calculates exact token budgets and container compute requirements, enforcing a transparent, clean price before any payment is collected.",
-    controls: "Server-Side Calculation • No Client-Side Trust • Paddle Billing Parity",
+    controls: "Server-Side Calculation, No Client-Side Trust, Paddle Billing Parity",
   },
   {
     step: "05",
     title: "Cryptographic Webhook Unlock",
     description: "Rebuild jobs are strictly gated. The backend only unlocks deep execution upon verifying signed HMAC-SHA256 webhook payloads from the payment provider.",
-    controls: "HMAC Verification • Replay Attack Prevention • Idempotent Processing",
+    controls: "HMAC Verification, Replay Attack Prevention, Idempotent Processing",
   },
   {
     step: "06",
     title: "Isolated Sandbox Rebuild",
     description: "A secure isolated container is spawned with strict quotas, read-only rootfs, and non-root execution to extract clean-room contracts.",
-    controls: "Hardened Sandbox • Network Isolation • Strict CPU/RAM Quotas",
+    controls: "Hardened Sandbox, Network Isolation, Strict CPU/RAM Quotas",
   },
   {
     step: "07",
     title: "Automated Verification Testing",
     description: "The synthesized codebase is compiled and verified against automated unit tests and vulnerability scanners to ensure 0 CVEs and complete functional parity.",
-    controls: "Automated Typecheck • Unit Test Suite • Dependency Scan",
+    controls: "Automated Typecheck, Unit Test Suite, Dependency Scan",
   },
   {
     step: "08",
     title: "Repository Packaging & Delivery",
     description: "Verified source code is bundled into an archive with setup instructions, Dockerfile, and architecture documentation, downloadable via signed short-lived URLs.",
-    controls: "SHA-256 Checksum • Short-Lived Signed URLs • Clean Room Legal Dossier",
+    controls: "SHA-256 Checksum, Short-Lived Signed URLs, Clean Room Legal Dossier",
   },
 ];
 
@@ -72,7 +72,9 @@ export default function HowItWorksPage() {
       <main className="flex-1 max-w-5xl w-full mx-auto px-6 py-16 space-y-16">
         {/* Header */}
         <div className="space-y-4 max-w-2xl">
-          <Badge variant="outline">Pipeline Architecture</Badge>
+          <p className="text-sm font-semibold tracking-wider text-primary uppercase">
+            Pipeline Architecture
+          </p>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
             How {BRAND.name} Executes Clean-Room Reverse Engineering
           </h1>

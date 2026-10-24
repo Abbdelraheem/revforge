@@ -8,7 +8,7 @@ import { ShieldCheck, Lock, Terminal, Cpu, CheckCircle2, Server, EyeOff, FileCod
 import { CodeViewer } from "@/components/shared/code-viewer";
 
 export const metadata = {
-  title: `Security Architecture — ${BRAND.name} Zero-Trust Controls`,
+  title: `Security Architecture | ${BRAND.name} Zero-Trust Controls`,
   description: "Defense-in-depth security specifications: gVisor sandboxing, SSRF guards, prompt injection delimiters, and zero-shell execution.",
 };
 
@@ -76,7 +76,7 @@ export default function SecurityPage() {
       <main className="flex-1 max-w-5xl w-full mx-auto px-6 py-16 space-y-16">
         {/* Header */}
         <div className="space-y-4 max-w-2xl">
-          <Badge variant="outline">Zero-Trust Threat Model</Badge>
+          <p className="text-sm font-semibold tracking-wider text-primary uppercase">Zero-Trust Threat Model</p>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
             Defense-in-Depth Security Architecture
           </h1>

@@ -134,7 +134,7 @@ export default function ResetPasswordPage() {
 
         <div className="text-center text-sm text-muted-foreground flex items-center justify-center space-x-1.5">
           <ShieldCheck className="h-4 w-4 text-primary" />
-          <span>Encrypted Session • Zero Data Retention</span>
+          <span>Encrypted Session | Zero Data Retention</span>
         </div>
       </div>
     </div>

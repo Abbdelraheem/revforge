@@ -99,7 +99,7 @@ function FakeCheckoutContent() {
       <div className="w-full max-w-md space-y-6">
         <div className="text-center space-y-2">
           <Badge variant="outline" className="border-amber-500/40 text-amber-600 font-mono text-sm">
-            DEV TEST DOUBLE &bull; NOT FOR PRODUCTION
+            DEV TEST DOUBLE | NOT FOR PRODUCTION
           </Badge>
           <h1 className="text-2xl font-bold font-serif">Simulated Merchant Checkout</h1>
           <p className="text-sm text-muted-foreground">

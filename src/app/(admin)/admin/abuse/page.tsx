@@ -16,18 +16,27 @@ export default async function AdminAbusePage() {
     redirect("/login");
   }
 
-  const reports = await systemDb
-    .select()
-    .from(abuseReports)
-    .orderBy(desc(abuseReports.createdAt))
-    .limit(50);
+  let reports: any[] = [];
+  try {
+    reports = await systemDb
+      .select()
+      .from(abuseReports)
+      .orderBy(desc(abuseReports.createdAt))
+      .limit(50);
+  } catch (err) {
+    if (process.env.NODE_ENV === "development") {
+      console.warn("[AdminAbusePage] Local database offline, returning empty reports.");
+    } else {
+      throw err;
+    }
+  }
 
   return (
     <div className="p-8 max-w-7xl mx-auto space-y-8 font-sans">
       <div className="space-y-2 border-b border-border pb-4">
-        <Badge variant="outline" className="border-primary/40 text-primary text-sm">
-          LEGAL & COMPLIANCE
-        </Badge>
+        <p className="text-sm font-semibold tracking-wider text-primary uppercase">
+          Legal and Compliance
+        </p>
         <h1 className="text-3xl font-serif font-bold text-foreground">
           Abuse & DMCA Takedown Notices
         </h1>

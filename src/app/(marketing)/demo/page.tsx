@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 
 export const metadata = {
-  title: `Live Benchmark Demo — Nova SaaS Landing Rebuild | ${BRAND.name}`,
+  title: `Live Benchmark Demo: Nova SaaS Landing Rebuild | ${BRAND.name}`,
   description:
     "Interactive read-only showcase of an end-to-end clean-room rebuild from reference Target 01 (Nova SaaS Landing Page) with measured parity.",
 };
@@ -51,13 +51,14 @@ export default function DemoShowcasePage() {
 
         {/* Header */}
         <div className="space-y-3 border-b border-border pb-6">
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="font-mono text-sm text-primary border-primary/40">
-              TARGET-01 &bull; LANDING TIER
-            </Badge>
-            <Badge variant="default" className="text-sm font-mono">
-              Status: Delivered
-            </Badge>
+          <div className="flex items-center gap-3">
+            <span className="font-mono text-sm font-semibold uppercase text-primary">
+              Target 01: Landing Tier
+            </span>
+            <span className="text-muted-foreground/40">/</span>
+            <span className="text-sm font-medium text-success">
+              Delivered
+            </span>
           </div>
           <h1 className="text-3xl md:text-4xl font-serif font-bold text-foreground">
             Nova SaaS Landing Page
@@ -136,7 +137,7 @@ export default function DemoShowcasePage() {
               />
             </div>
             <div className="p-4 bg-muted/10 text-sm text-muted-foreground flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-              <span>Target URL: <code>/</code> &bull; Responsive 1280px &amp; 375px viewports verified</span>
+              <span>Target URL: <code>/</code>, Responsive 1280px &amp; 375px viewports verified</span>
               <span className="font-mono text-success flex items-center gap-1">
                 <Check className="h-3.5 w-3.5" /> Sandboxed Execution
               </span>

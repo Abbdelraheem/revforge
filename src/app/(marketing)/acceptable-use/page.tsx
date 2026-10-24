@@ -7,7 +7,7 @@ import { AlertTriangle, ShieldCheck, Ban, CheckCircle2 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 export const metadata = {
-  title: `Acceptable Use Policy (AUP) — ${BRAND.name}`,
+  title: `Acceptable Use Policy (AUP) | ${BRAND.name}`,
   description: "Mandatory security standards, malware prohibitions, and ethical reverse engineering requirements.",
 };
 
@@ -18,14 +18,13 @@ export default function AcceptableUsePage() {
 
       <main className="flex-1 py-16 px-6 max-w-4xl mx-auto w-full">
         <div className="space-y-4 mb-10 border-b border-border pb-6">
-          <Badge variant="outline" className="border-primary/40 text-primary font-mono text-sm">
-            SECURITY & ETHICAL POLICY
-          </Badge>
+          <p className="text-sm font-semibold tracking-wider text-primary uppercase">SECURITY & ETHICAL POLICY
+          </p>
           <h1 className="text-3xl md:text-4xl font-serif font-bold tracking-tight">
             Acceptable Use Policy (AUP)
           </h1>
           <div className="text-sm text-muted-foreground font-mono">
-            Effective Date: October 17, 2026 • Version 2.4
+            Effective Date: October 17, 2026 | Version 2.4
           </div>
         </div>
 

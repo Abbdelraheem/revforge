@@ -9,7 +9,7 @@ import { ArrowRight, RefreshCw, Archive, Layers, ShieldCheck, FileCheck } from "
 import Link from "next/link";
 
 export const metadata = {
-  title: `Use Cases — ${BRAND.name} Clean-Room Applications`,
+  title: `Use Cases | ${BRAND.name} Clean-Room Applications`,
   description: "Enterprise scenarios: legacy software modernization, abandoned repository recovery, and agency technical scoping.",
 };
 
@@ -47,7 +47,7 @@ export default function UseCasesPage() {
 
       <main className="flex-1 max-w-5xl w-full mx-auto px-6 py-16 space-y-16">
         <div className="space-y-4 max-w-2xl">
-          <Badge variant="outline">Enterprise Scenarios</Badge>
+          <p className="text-sm font-semibold tracking-wider text-primary uppercase">Enterprise Scenarios</p>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
             Built for Engineers Modernizing Complex Software
           </h1>
@@ -71,7 +71,7 @@ export default function UseCasesPage() {
                 <ul className="space-y-1.5 pt-2 border-t border-border/40 text-sm text-muted-foreground font-mono">
                   {uc.benefits.map((b, bIdx) => (
                     <li key={bIdx} className="flex items-center space-x-2 ">
-                      <span className="text-primary">•</span>
+                      <span className="text-primary font-bold">-</span>
                       <span className="font-sans text-foreground/80">{b}</span>
                     </li>
                   ))}

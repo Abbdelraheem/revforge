@@ -94,7 +94,7 @@ export default function ForgotPasswordPage() {
 
         <div className="text-center text-sm text-muted-foreground flex items-center justify-center space-x-1.5">
           <ShieldCheck className="h-4 w-4 text-primary" />
-          <span>Encrypted Session • Strict Verification</span>
+          <span>Encrypted Session | Strict Verification</span>
         </div>
       </div>
     </div>

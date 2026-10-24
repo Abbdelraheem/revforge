@@ -8,7 +8,7 @@ import { Terminal, Shield, Cpu, Database, Code2, BookOpen, Layers, CheckCircle2,
 import Link from "next/link";
 
 export const metadata = {
-  title: `Documentation & Architecture Reference — ${BRAND.name}`,
+  title: `Documentation & Architecture Reference | ${BRAND.name}`,
   description: "Comprehensive technical manual, system architecture, API specifications, and clean-room synthesis protocols.",
 };
 
@@ -149,9 +149,8 @@ export default function DocsPage() {
         {/* Header */}
         <div className="space-y-4 mb-12 border-b border-border pb-8">
           <div className="flex items-center space-x-2 ">
-            <Badge variant="outline" className="border-primary/40 text-primary font-mono text-sm">
-              ENGINEERING MANUAL 
-            </Badge>
+            <p className="text-sm font-semibold tracking-wider text-primary uppercase">ENGINEERING MANUAL 
+            </p>
             <span className="text-sm text-muted-foreground font-mono">Last updated: Q4 2026</span>
           </div>
           <h1 className="text-3xl md:text-5xl font-serif font-bold tracking-tight">

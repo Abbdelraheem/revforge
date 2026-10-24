@@ -21,7 +21,7 @@ import {
   workspaceMembers,
   workspaces,
 } from "@/db/schema";
-import { loadMarginReport } from "@/lib/billing/margin-report";
+import { loadMarginReport, EMPTY_MARGIN_REPORT } from "@/lib/billing/margin-report";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,7 +36,7 @@ function money(cents: number): string {
 }
 
 function pct(value: number | null): string {
-  return value === null ? "—" : `${value.toFixed(1)}%`;
+  return value === null ? "N/A" : `${value.toFixed(1)}%`;
 }
 
 function statusVariant(status: string): "default" | "secondary" | "destructive" | "success" {
@@ -52,58 +52,75 @@ export default async function AdminOverviewPage() {
     redirect("/login");
   }
 
-  const [
-    projectCounts,
-    workspaceCounts,
-    userCounts,
-    memberCounts,
-    jobStatusRows,
-    recentJobs,
-    recentAudit,
-    margin,
-  ] = await Promise.all([
-    systemDb.select({ count: sql<number>`count(*)::int` }).from(projects),
-    systemDb.select({ count: sql<number>`count(*)::int` }).from(workspaces),
-    systemDb.select({ count: sql<number>`count(*)::int` }).from(users),
-    systemDb.select({ count: sql<number>`count(*)::int` }).from(workspaceMembers),
-    systemDb
-      .select({
-        status: buildJobs.status,
-        count: sql<number>`count(*)::int`,
-      })
-      .from(buildJobs)
-      .groupBy(buildJobs.status),
-    systemDb
-      .select({
-        id: buildJobs.id,
-        status: buildJobs.status,
-        stage: buildJobs.stage,
-        attempt: buildJobs.attempt,
-        parityScore: buildJobs.parityScore,
-        spentCents: buildJobs.spentCents,
-        costCapCents: buildJobs.costCapCents,
-        heartbeatAt: buildJobs.heartbeatAt,
-        createdAt: buildJobs.createdAt,
-        projectName: projects.name,
-      })
-      .from(buildJobs)
-      .leftJoin(projects, sql`${projects.id} = ${buildJobs.projectId}`)
-      .orderBy(desc(buildJobs.createdAt))
-      .limit(8),
-    systemDb
-      .select({
-        id: auditLog.id,
-        action: auditLog.action,
-        resourceType: auditLog.resourceType,
-        resourceId: auditLog.resourceId,
-        actorType: auditLog.actorType,
-        createdAt: auditLog.createdAt,
-      })
-      .from(auditLog)
-      .orderBy(desc(auditLog.createdAt))
-      .limit(8),
-    loadMarginReport(),
-  ]);
+  let projectCounts = [{ count: 0 }];
+  let workspaceCounts = [{ count: 0 }];
+  let userCounts = [{ count: 0 }];
+  let memberCounts = [{ count: 0 }];
+  let jobStatusRows: Array<{ status: string; count: number }> = [];
+  let recentJobs: any[] = [];
+  let recentAudit: any[] = [];
+  let margin = EMPTY_MARGIN_REPORT;
+
+  try {
+    const res = await Promise.all([
+      systemDb.select({ count: sql<number>`count(*)::int` }).from(projects),
+      systemDb.select({ count: sql<number>`count(*)::int` }).from(workspaces),
+      systemDb.select({ count: sql<number>`count(*)::int` }).from(users),
+      systemDb.select({ count: sql<number>`count(*)::int` }).from(workspaceMembers),
+      systemDb
+        .select({
+          status: buildJobs.status,
+          count: sql<number>`count(*)::int`,
+        })
+        .from(buildJobs)
+        .groupBy(buildJobs.status),
+      systemDb
+        .select({
+          id: buildJobs.id,
+          status: buildJobs.status,
+          stage: buildJobs.stage,
+          attempt: buildJobs.attempt,
+          parityScore: buildJobs.parityScore,
+          spentCents: buildJobs.spentCents,
+          costCapCents: buildJobs.costCapCents,
+          heartbeatAt: buildJobs.heartbeatAt,
+          createdAt: buildJobs.createdAt,
+          projectName: projects.name,
+        })
+        .from(buildJobs)
+        .leftJoin(projects, sql`${projects.id} = ${buildJobs.projectId}`)
+        .orderBy(desc(buildJobs.createdAt))
+        .limit(8),
+      systemDb
+        .select({
+          id: auditLog.id,
+          action: auditLog.action,
+          resourceType: auditLog.resourceType,
+          resourceId: auditLog.resourceId,
+          actorType: auditLog.actorType,
+          createdAt: auditLog.createdAt,
+        })
+        .from(auditLog)
+        .orderBy(desc(auditLog.createdAt))
+        .limit(8),
+      loadMarginReport(),
+    ]);
+
+    [
+      projectCounts,
+      workspaceCounts,
+      userCounts,
+      memberCounts,
+      jobStatusRows,
+      recentJobs,
+      recentAudit,
+      margin,
+    ] = res;
+  } catch (err: any) {
+    if (process.env.NODE_ENV !== "development") {
+      throw err;
+    }
+  }
 
   const statusCounts = new Map<string, number>(jobStatusRows.map((row) => [row.status, row.count]));
   const activeJobs = ["queued", "building", "verifying"].reduce(
@@ -118,13 +135,13 @@ export default async function AdminOverviewPage() {
     {
       label: "Projects",
       value: String(projectCounts[0]?.count ?? 0),
-      detail: `${workspaceCounts[0]?.count ?? 0} workspaces · ${memberCounts[0]?.count ?? 0} memberships`,
+      detail: `${workspaceCounts[0]?.count ?? 0} workspaces, ${memberCounts[0]?.count ?? 0} memberships`,
       icon: FolderGit2,
     },
     {
       label: "Active build jobs",
       value: String(activeJobs),
-      detail: `${deliveredJobs} delivered · ${failedJobs} failed`,
+      detail: `${deliveredJobs} delivered, ${failedJobs} failed`,
       icon: Activity,
     },
     {
@@ -136,7 +153,7 @@ export default async function AdminOverviewPage() {
     {
       label: "Contribution",
       value: money(margin.totals.grossProfitCents),
-      detail: `${money(margin.totals.revenueCents)} recorded revenue · ${pct(margin.totals.marginPct)}`,
+      detail: `${money(margin.totals.revenueCents)} recorded revenue (${pct(margin.totals.marginPct)})`,
       icon: Banknote,
     },
   ];
@@ -144,14 +161,13 @@ export default async function AdminOverviewPage() {
   return (
     <div className="mx-auto w-full max-w-[1200px] space-y-6 p-4 font-sans sm:p-6 lg:p-8">
       <div className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between">
-        <div className="space-y-2">
-          <Badge variant="outline" className="border-primary/40 text-sm text-primary">
-            PLATFORM ADMINISTRATION
-          </Badge>
+        <div className="space-y-1">
+          <p className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+            Platform Administration
+          </p>
           <h1 className="font-serif text-2xl font-bold text-foreground">Operating overview</h1>
           <p className="max-w-3xl text-sm text-muted-foreground">
-            Counts, build health, and contribution are read from persisted platform rows. No demo
-            fleet, sample audit events, or estimated spend is shown here.
+            Counts, build health, and contribution are read from persisted platform rows.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -247,10 +263,10 @@ export default async function AdminOverviewPage() {
                         </td>
                         <td className="p-3 font-mono text-sm text-muted-foreground">{job.stage}</td>
                         <td className="p-3 font-mono text-sm">
-                          {job.parityScore !== null ? pct(job.parityScore * 100) : "—"}
+                          {job.parityScore !== null ? pct(job.parityScore * 100) : "N/A"}
                         </td>
                         <td className="p-3 font-mono text-sm text-muted-foreground">
-                          {job.spentCents !== null ? money(job.spentCents) : "—"}
+                          {job.spentCents !== null ? money(job.spentCents) : "N/A"}
                         </td>
                         <td className="p-3 font-mono text-sm text-muted-foreground">
                           <time dateTime={job.createdAt.toISOString()}>
