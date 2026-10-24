@@ -1,0 +1,31 @@
+# Pinned Node base image with verifiable digest
+FROM node:22-bookworm-slim@sha256:d8c6b9075ae88a383d47bf1417fc7c13203f9055452d33457a44f514b7e80a09 AS base
+
+# Install Docker CLI and Playwright dependencies for headless execution
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    ca-certificates \
+    git \
+    docker.io \
+    && rm -rf /var/lib/apt/lists/*
+
+# Stage 1: Dependencies
+FROM base AS deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --ignore-scripts
+
+# Stage 2: Hardened Non-Root Production Worker Runner
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+# Non-root user with group access to docker socket if mounted
+USER node
+
+COPY --chown=node:node package.json ./
+COPY --chown=node:node --from=deps /app/node_modules ./node_modules
+COPY --chown=node:node . .
+
+CMD ["npx", "tsx", "workers/index.ts"]
