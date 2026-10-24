@@ -43,7 +43,7 @@ export class BuilderAgent {
     this.customRunCommand = options.runCommand;
     const apiKey = env.ANTHROPIC_API_KEY;
     if (!apiKey) {
-      if (env.LLM_PROVIDER !== "fixture" || process.env.NODE_ENV === "production") {
+      if (env.LLM_PROVIDER === "anthropic" && process.env.NODE_ENV === "production") {
         throw new Error("Missing ANTHROPIC_API_KEY configuration for live BuilderAgent execution.");
       }
     }
@@ -163,15 +163,108 @@ export class BuilderAgent {
       };
     }
 
-    // Real Anthropic tool_use loop with MAX_TOOL_STEPS >= 40
-    let keepGoing = true;
-    let iterations = 0;
-    const MAX_TOOL_STEPS = 45;
-
     const toolCtx = {
       root: this.workspaceDir,
       runCommand: this.runCommand.bind(this),
     };
+
+    if (env.LLM_PROVIDER === "nvidia") {
+      const apiKey = env.NVIDIA_API_KEY;
+      if (!apiKey) throw new Error("Missing NVIDIA_API_KEY in environment.");
+
+      const openAiTools = tools.map((t) => ({
+        type: "function" as const,
+        function: {
+          name: t.name,
+          description: t.description,
+          parameters: t.input_schema,
+        },
+      }));
+
+      const openAiMessages: any[] = [
+        { role: "system", content: this.systemPrompt },
+        { role: "user", content: `SPECIFICATION:\n${specification}\n\nTASK:\n${taskPrompt}` },
+      ];
+
+      let keepGoing = true;
+      let iterations = 0;
+      const MAX_STEPS = 45;
+
+      while (keepGoing && iterations < MAX_STEPS) {
+        iterations++;
+        const res = await fetch(`${env.NVIDIA_BASE_URL}/chat/completions`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: this.model,
+            messages: openAiMessages,
+            tools: openAiTools,
+            tool_choice: "auto",
+            max_tokens: 4096,
+            temperature: 0.1,
+          }),
+        });
+
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(`NVIDIA NIM API error: ${errText.slice(0, 300)}`);
+        }
+
+        const data = (await res.json()) as any;
+        tokensUsed.input += data.usage?.prompt_tokens || 0;
+        tokensUsed.output += data.usage?.completion_tokens || 0;
+
+        const choice = data.choices?.[0];
+        const toolCalls = choice?.message?.tool_calls || [];
+
+        if (toolCalls.length === 0) {
+          keepGoing = false;
+          break;
+        }
+
+        openAiMessages.push(choice.message);
+
+        for (const tc of toolCalls) {
+          toolCallsCount++;
+          let args: Record<string, unknown> = {};
+          try {
+            args = typeof tc.function.arguments === "string" ? JSON.parse(tc.function.arguments) : tc.function.arguments;
+          } catch {
+            args = {};
+          }
+
+          const invocation: ToolInvocation = {
+            name: tc.function.name,
+            input: args,
+          };
+
+          const execRes = await executeTool(invocation, toolCtx);
+          if (tc.function.name === "write_file" && !execRes.isError) {
+            modifiedFiles.push(String(args.path || ""));
+          }
+
+          openAiMessages.push({
+            role: "tool",
+            tool_call_id: tc.id,
+            content: execRes.content,
+          });
+        }
+      }
+
+      return {
+        modifiedFiles: Array.from(new Set(modifiedFiles.filter(Boolean))),
+        toolCallsCount,
+        tokensUsed,
+      };
+    }
+
+    // Real Anthropic tool_use loop with MAX_TOOL_STEPS >= 40
+    let keepGoing = true;
+    let iterations = 0;
+    const MAX_TOOL_STEPS = 45;
 
     while (keepGoing && iterations < MAX_TOOL_STEPS) {
       iterations++;

@@ -34,6 +34,10 @@ export const TOKEN_PRICING: Record<string, ModelTokenPricing> = {
   "claude-3-opus-20240229": { inputCentsPerMillion: 1500, outputCentsPerMillion: 7500 },
   "claude-3-opus-latest": { inputCentsPerMillion: 1500, outputCentsPerMillion: 7500 },
   "claude-opus-5-5": { inputCentsPerMillion: 1500, outputCentsPerMillion: 7500 },
+
+  // NVIDIA NIM Models
+  "minimaxai/minimax-m3.1-flash": { inputCentsPerMillion: 20, outputCentsPerMillion: 20 },
+  "nvidia/nemotron-3-ultra-550b-a55b": { inputCentsPerMillion: 50, outputCentsPerMillion: 150 },
 };
 
 /**

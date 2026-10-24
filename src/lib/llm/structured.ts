@@ -66,13 +66,103 @@ export async function callStructured<T>(
     throw new Error("Fixture mode is handled via fixture dispatcher.");
   }
 
-  const client = getClient();
   const model = modelForRole(params.role);
   const sanitized = sanitizeDelimited(params.untrusted);
   const wrappedEvidence = `<untrusted_artifact_evidence>\n${sanitized}\n</untrusted_artifact_evidence>`;
-
-  let lastValidationErr = "";
   const maxTokens = params.maxTokens || 4096;
+  let lastValidationErr = "";
+
+  if (env.LLM_PROVIDER === "nvidia") {
+    const apiKey = env.NVIDIA_API_KEY;
+    if (!apiKey) throw new Error("Missing NVIDIA_API_KEY in environment.");
+
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const jsonSchema = zodToJsonSchema(params.tool.schema as any) as any;
+      const response = await fetch(`${env.NVIDIA_BASE_URL}/chat/completions`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            { role: "system", content: `${params.system}\n\n${ZERO_TRUST_RULES}` },
+            {
+              role: "user",
+              content: `${params.task}\n\n${wrappedEvidence}${
+                lastValidationErr ? `\n\nYour previous response failed schema validation: ${lastValidationErr}` : ""
+              }`,
+            },
+          ],
+          tools: [
+            {
+              type: "function",
+              function: {
+                name: params.tool.name,
+                description: "Emit structured analysis result.",
+                parameters: jsonSchema,
+              },
+            },
+          ],
+          tool_choice: { type: "function", function: { name: params.tool.name } },
+          max_tokens: maxTokens,
+          temperature: 0.1,
+        }),
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`NVIDIA NIM API error (${response.status}): ${errText.slice(0, 300)}`);
+      }
+
+      const resJson = (await response.json()) as any;
+      const toolCall = resJson.choices?.[0]?.message?.tool_calls?.[0];
+      let toolInput = null;
+      if (toolCall?.function?.arguments) {
+        try {
+          toolInput = JSON.parse(toolCall.function.arguments);
+        } catch {
+          lastValidationErr = "Invalid JSON in tool call arguments";
+          continue;
+        }
+      } else {
+        try {
+          toolInput = JSON.parse(resJson.choices?.[0]?.message?.content || "{}");
+        } catch {
+          lastValidationErr = "No tool_calls and invalid JSON content returned";
+          continue;
+        }
+      }
+
+      const parsed = params.tool.schema.safeParse(toolInput);
+      if (parsed.success) {
+        const inTokens = resJson.usage?.prompt_tokens || 0;
+        const outTokens = resJson.usage?.completion_tokens || 0;
+        const totalCostCents = calculateUsageCostCents({
+          model,
+          inputTokens: inTokens,
+          outputTokens: outTokens,
+        });
+
+        return {
+          data: parsed.data,
+          usage: {
+            model,
+            inputTokens: inTokens,
+            outputTokens: outTokens,
+            totalCostCents,
+          },
+        };
+      }
+      lastValidationErr = parsed.error.message.slice(0, 800);
+    }
+
+    throw new Error(`llm_schema_failure (nvidia): ${lastValidationErr}`);
+  }
+
+  const client = getClient();
+  lastValidationErr = "";
 
   for (let attempt = 0; attempt < 3; attempt++) {
     const jsonSchema = zodToJsonSchema(params.tool.schema as any) as any;

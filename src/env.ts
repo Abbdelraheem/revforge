@@ -28,10 +28,12 @@ const envSchema = z
 
     // LLM Configuration
     ANTHROPIC_API_KEY: z.string().optional(),
+    NVIDIA_API_KEY: z.string().optional(),
+    NVIDIA_BASE_URL: z.string().default("https://integrate.api.nvidia.com/v1"),
     LLM_MODEL_FAST: z.string().default("claude-3-5-haiku-latest"),
     LLM_MODEL_STANDARD: z.string().default("claude-3-5-sonnet-latest"),
     LLM_MODEL_PREMIUM: z.string().default("claude-3-7-sonnet-latest"),
-    LLM_PROVIDER: z.enum(["anthropic", "fixture"]).default("fixture"),
+    LLM_PROVIDER: z.enum(["anthropic", "nvidia", "fixture"]).default("fixture"),
 
     // Payment Provider Configuration
     PAYMENT_PROVIDER: z.enum(["paddle", "fake"]).default("fake"),
