@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.0] - 2026-10-24
+
+### Added
+- **Validation Harness & Empirical Benchmarks**:
+  - 12 comprehensive reference targets under `benchmarks/targets/` spanning landing pages, SPAs, CMS blogs, e-commerce, and mobile APKs.
+  - Automated benchmark harness (`npm run bench`) verifying clean-room synthesis, parity evaluation, and Studio edit pass rates.
+- **Reliability & Data Safety**:
+  - Resumable jobs with `WorkspaceCheckpointManager` supporting rollback and mid-build crash recovery.
+  - LLM resilience layer with exponential backoff, full jitter, and circuit breaker for 429/5xx provider outages.
+  - Automated dead-letter queue (DLQ) operations and stuck-job reaper issuing automatic platform refunds.
+- **Observability & Operations**:
+  - Structured Pino JSON logging with credential/token redaction across web and worker pipelines.
+  - Prometheus metrics endpoint (`/api/metrics`) and production Grafana dashboard.
+  - On-call operational runbook (`docs/RUNBOOK.md`) covering 8 critical incident playbooks.
+- **Security Hardening**:
+  - STRIDE threat model mapping across 8 core system components (`docs/THREAT_MODEL.md`).
+  - Automated sandbox containment self-tests (`scripts/sandbox-selftest.ts`) verifying network egress blocking and read-only rootfs.
+  - Strict Content-Security-Policy (CSP) with nonces and HSTS preloading.
+- **Compliance & Trust**:
+  - Category deny-list blocking high-risk targets (financial, defense, malware, DRM, piracy) with explicit legal citations.
+  - Cryptographic ownership attestation engine requiring verified legal proof for enterprise orders.
+  - Self-service GDPR/CCPA data export (`/api/user/export`) and right-to-be-forgotten deletion (`/api/user/delete`).
+
 ## [1.0.0] - 2026-10-21
 
 ### Added

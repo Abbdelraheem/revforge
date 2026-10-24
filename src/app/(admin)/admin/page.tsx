@@ -164,6 +164,12 @@ export default async function AdminOverviewPage() {
           <Button asChild size="sm" className="text-sm">
             <Link href="/admin/jobs">Build jobs</Link>
           </Button>
+          <Button asChild size="sm" variant="outline" className="text-sm">
+            <Link href="/admin/funnel">Funnel</Link>
+          </Button>
+          <Button asChild size="sm" variant="outline" className="text-sm">
+            <Link href="/admin/support">Support</Link>
+          </Button>
         </div>
       </div>
 
@@ -209,43 +215,44 @@ export default async function AdminOverviewPage() {
           </CardHeader>
           <CardContent className="p-0">
             {recentJobs.length === 0 ? (
-              <p className="p-6 text-sm text-muted-foreground">No build jobs are recorded yet.</p>
+              <p className="p-6 text-sm text-muted-foreground">No build jobs have run yet.</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="border-b border-border bg-muted/40">
+                  <thead className="border-b border-border bg-muted/40 text-muted-foreground">
                     <tr>
-                      <th className="p-3 text-start font-semibold">Project / job</th>
-                      <th className="p-3 text-start font-semibold">Status</th>
-                      <th className="p-3 text-end font-semibold">Parity</th>
-                      <th className="p-3 text-end font-semibold">Spend</th>
-                      <th className="p-3 text-start font-semibold">Created</th>
+                      <th className="p-3 text-start font-medium">Project</th>
+                      <th className="p-3 text-start font-medium">Status</th>
+                      <th className="p-3 text-start font-medium">Stage</th>
+                      <th className="p-3 text-start font-medium">Parity</th>
+                      <th className="p-3 text-start font-medium">Spent</th>
+                      <th className="p-3 text-start font-medium">Created</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-border">
                     {recentJobs.map((job) => (
-                      <tr key={job.id} className="border-b border-border last:border-0">
+                      <tr key={job.id} className="hover:bg-muted/10">
                         <td className="p-3">
-                          <p className="font-semibold text-foreground">
-                            {job.projectName || "Unknown project"}
-                          </p>
-                          <p className="font-mono text-sm text-muted-foreground">
-                            {job.id.slice(0, 8)} · attempt {job.attempt} · {job.stage}
-                          </p>
+                          <Link
+                            href={`/admin/jobs?id=${job.id}`}
+                            className="font-medium text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                          >
+                            {job.projectName ?? job.id.slice(0, 8)}
+                          </Link>
                         </td>
                         <td className="p-3">
-                          <Badge variant={statusVariant(job.status)}>{job.status}</Badge>
+                          <Badge variant={statusVariant(job.status)} className="capitalize">
+                            {job.status.replace(/_/g, " ")}
+                          </Badge>
                         </td>
-                        <td className="p-3 text-end font-mono">
-                          {job.parityScore === null ? "—" : `${(job.parityScore * 100).toFixed(1)}%`}
+                        <td className="p-3 font-mono text-sm text-muted-foreground">{job.stage}</td>
+                        <td className="p-3 font-mono text-sm">
+                          {job.parityScore !== null ? pct(job.parityScore * 100) : "—"}
                         </td>
-                        <td className="p-3 text-end font-mono">
-                          {money(job.spentCents)}
-                          <span className="block text-sm text-muted-foreground">
-                            cap {money(job.costCapCents)}
-                          </span>
+                        <td className="p-3 font-mono text-sm text-muted-foreground">
+                          {job.spentCents !== null ? money(job.spentCents) : "—"}
                         </td>
-                        <td className="p-3 font-mono text-muted-foreground">
+                        <td className="p-3 font-mono text-sm text-muted-foreground">
                           <time dateTime={job.createdAt.toISOString()}>
                             {job.createdAt.toLocaleDateString()}
                           </time>

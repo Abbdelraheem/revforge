@@ -14,6 +14,8 @@ import {
   Layers,
   FileCode,
   ShieldCheck,
+  Eye,
+  Users,
 } from "lucide-react";
 import { withTenant } from "@/db/tenant";
 import { projects, buildJobs, creditsLedger } from "@/db/schema";
@@ -102,6 +104,12 @@ export default async function DashboardPage() {
           </p>
         </div>
         <div className="flex items-center space-x-3">
+          <Button asChild variant="outline" className="text-sm font-semibold h-10 shadow-sm">
+            <Link href="/demo">
+              <Eye className="me-2 h-4 w-4 text-primary" />
+              <span>Explore Demo</span>
+            </Link>
+          </Button>
           <Button asChild className="text-sm font-semibold h-10 shadow-sm">
             <Link href="/projects/new">
               <Plus className="me-2 h-4 w-4" />
@@ -214,12 +222,20 @@ export default async function DashboardPage() {
                     Start by submitting a web URL, binary, or archive to generate an architectural report and quote.
                   </p>
                 </div>
-                <Button asChild size="sm" className="font-semibold shadow-sm">
-                  <Link href="/projects/new">
-                    <Plus className="me-1.5 h-3.5 w-3.5" />
-                    <span>Create Your First Project</span>
-                  </Link>
-                </Button>
+                <div className="flex flex-wrap justify-center gap-3 pt-2">
+                  <Button asChild variant="outline" size="sm" className="font-semibold shadow-sm">
+                    <Link href="/demo">
+                      <Eye className="me-1.5 h-3.5 w-3.5 text-primary" />
+                      <span>Explore Live Demo</span>
+                    </Link>
+                  </Button>
+                  <Button asChild size="sm" className="font-semibold shadow-sm">
+                    <Link href="/projects/new">
+                      <Plus className="me-1.5 h-3.5 w-3.5" />
+                      <span>Create Your First Project</span>
+                    </Link>
+                  </Button>
+                </div>
               </div>
             ) : (
               <div className="divide-y divide-border">
@@ -263,49 +279,54 @@ export default async function DashboardPage() {
           <Card className="border-border bg-card shadow-sm p-5 space-y-4">
             <div className="space-y-3">
               <div className="flex items-start space-x-3 text-sm">
-                <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                <CheckCircle2 className="h-4 w-4 text-success shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-medium text-foreground">Organization Created</p>
-                  <p className="text-sm text-muted-foreground">{session.workspace.name} is configured.</p>
+                  <p className="font-medium text-foreground">Organization Configured</p>
+                  <p className="text-sm text-muted-foreground">{session.workspace.name} workspace active.</p>
                 </div>
               </div>
 
               <div className="flex items-start space-x-3 text-sm">
-                {user.emailVerified ? (
-                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                ) : (
-                  <Clock className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
-                )}
+                <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-medium text-foreground">Email Verification</p>
+                  <Link href="/demo" className="font-medium text-primary hover:underline flex items-center gap-1">
+                    <span>Explore Benchmark Demo</span>
+                    <ArrowRight className="h-3 w-3" />
+                  </Link>
                   <p className="text-sm text-muted-foreground">
-                    {user.emailVerified ? "Account email verified" : "Check inbox to verify your email address"}
+                    Inspect 100% parity verified rebuild of Target 01.
                   </p>
                 </div>
               </div>
 
               <div className="flex items-start space-x-3 text-sm">
                 {totalProjects > 0 ? (
-                  <CheckCircle2 className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <CheckCircle2 className="h-4 w-4 text-success shrink-0 mt-0.5" />
                 ) : (
                   <Clock className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                 )}
                 <div>
-                  <p className="font-medium text-foreground">Run First Analysis</p>
+                  <Link href="/projects/new" className="font-medium text-foreground hover:text-primary transition-colors flex items-center gap-1">
+                    <span>Run First Architectural Analysis</span>
+                    <ArrowRight className="h-3 w-3 text-primary" />
+                  </Link>
                   <p className="text-sm text-muted-foreground">Ingest an app or binary into the clean-room pipeline.</p>
                 </div>
               </div>
 
               <div className="flex items-start space-x-3 text-sm">
-                <Clock className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                <Users className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
                 <div>
-                  <p className="font-medium text-foreground">Review Parity Report</p>
-                  <p className="text-sm text-muted-foreground">Inspect evidence ledger and clean-room architecture.</p>
+                  <Link href="/team" className="font-medium text-foreground hover:text-primary transition-colors flex items-center gap-1">
+                    <span>Invite Team Members</span>
+                    <ArrowRight className="h-3 w-3 text-primary" />
+                  </Link>
+                  <p className="text-sm text-muted-foreground">Shared workspace credits and build access.</p>
                 </div>
               </div>
             </div>
 
-            <div className="pt-2 border-t border-border">
+            <div className="pt-3 border-t border-border">
               <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                 <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
                 <span>Clean-room isolation &bull; Multi-tenant row security</span>

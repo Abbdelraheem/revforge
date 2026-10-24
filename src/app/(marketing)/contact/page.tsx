@@ -7,27 +7,50 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Terminal, Shield, Mail, Key, Globe, CheckCircle2, ArrowRight } from "lucide-react";
+import { Terminal, Key, Globe, CheckCircle2, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 
 export default function ContactPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [ticketId, setTicketId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     organization: "",
     inquiryType: "clean-room-rebuild",
     message: "",
-    honeypot: "", // Bot trap
+    honeypot: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     if (formData.honeypot) {
-      // Bot detected, silently drop
+      setSubmitted(true);
       return;
     }
-    // Record inquiry state
-    setSubmitted(true);
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/support/tickets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to submit support inquiry");
+      }
+
+      setTicketId(data.ticket?.id || "TICK-RECEIVED");
+      setSubmitted(true);
+    } catch (err: any) {
+      setError(err?.message || "An error occurred while submitting inquiry");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -38,13 +61,13 @@ export default function ContactPage() {
         {/* Header */}
         <div className="space-y-4 mb-12 border-b border-border pb-8">
           <Badge variant="outline" className="border-primary/40 text-primary font-mono text-sm">
-            SECURE COMMUNICATIONS & ENTERPRISE
+            SECURE COMMUNICATIONS &amp; ENTERPRISE
           </Badge>
           <h1 className="text-3xl md:text-5xl font-serif font-bold tracking-tight">
-            Contact Engineering & Sales
+            Contact Engineering &amp; Support
           </h1>
           <p className="text-muted-foreground text-sm md:text-base max-w-2xl leading-relaxed">
-            Direct access to our application security architects and systems team. We respond within 4 business hours to enterprise inquiries.
+            Direct access to our application security architects and on-call systems team. Inquiries generate a tracked ticket ID and receive response within 4 business hours.
           </p>
         </div>
 
@@ -58,7 +81,7 @@ export default function ContactPage() {
                   <span>Transmit Inquiry</span>
                 </CardTitle>
                 <CardDescription className="text-sm">
-                  Fill in your project specifications for scoping assistance or custom enterprise agreements.
+                  Fill in your project specifications for scoping assistance, technical queries, or custom SLAs.
                 </CardDescription>
               </CardHeader>
 
@@ -69,11 +92,28 @@ export default function ContactPage() {
                       <CheckCircle2 className="h-6 w-6" />
                     </div>
                     <div className="text-lg font-bold text-foreground">Inquiry Logged Successfully</div>
+                    {ticketId && (
+                      <div className="inline-block px-3 py-1.5 rounded border border-primary/30 bg-primary/5 text-primary text-sm font-bold">
+                        Ticket Reference: {ticketId}
+                      </div>
+                    )}
                     <p className="text-sm text-muted-foreground max-w-md mx-auto leading-relaxed">
-                      Thank you. Your request has been queued in our triage routing system. An architectural lead will reach out to <strong className="text-foreground">{formData.email}</strong> shortly.
+                      Your ticket has been queued in our triage routing system. An architectural lead will reach out to <strong className="text-foreground">{formData.email}</strong> shortly.
                     </p>
                     <button
-                      onClick={() => setSubmitted(false)}
+                      type="button"
+                      onClick={() => {
+                        setSubmitted(false);
+                        setTicketId(null);
+                        setFormData({
+                          name: "",
+                          email: "",
+                          organization: "",
+                          inquiryType: "clean-room-rebuild",
+                          message: "",
+                          honeypot: "",
+                        });
+                      }}
                       className="text-sm text-primary underline underline-offset-4 mt-2"
                     >
                       Send another message
@@ -81,6 +121,13 @@ export default function ContactPage() {
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-5">
+                    {error && (
+                      <div className="p-3 rounded border border-destructive/40 bg-destructive/10 text-destructive text-sm flex items-center gap-2">
+                        <AlertCircle className="h-4 w-4 shrink-0" />
+                        <span>{error}</span>
+                      </div>
+                    )}
+
                     {/* Bot Trap */}
                     <div className="hidden" aria-hidden="true">
                       <input
@@ -100,7 +147,7 @@ export default function ContactPage() {
                           required
                           value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                          placeholder="Dr. Abdelraheem"
+                          placeholder="Engineering Lead"
                           className="font-mono text-sm"
                         />
                       </div>
@@ -136,17 +183,18 @@ export default function ContactPage() {
                           onChange={(e) => setFormData({ ...formData, inquiryType: e.target.value })}
                           className="w-full h-9 rounded border border-input bg-background px-3 py-1 text-sm font-mono shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
                         >
-                          <option value="clean-room-rebuild">Clean-Room Rebuild & Synthesis</option>
+                          <option value="clean-room-rebuild">Clean-Room Rebuild &amp; Synthesis</option>
                           <option value="legacy-modernization">Legacy Application Modernization</option>
-                          <option value="binary-audit">Binary & Firmware Reverse Engineering</option>
-                          <option value="enterprise-sla">Dedicated Sandbox Cluster & Custom SLA</option>
+                          <option value="binary-audit">Binary &amp; Firmware Reverse Engineering</option>
+                          <option value="enterprise-sla">Dedicated Sandbox Cluster &amp; Custom SLA</option>
                           <option value="security-disclosure">Security Vulnerability Disclosure</option>
+                          <option value="billing-support">Billing &amp; Platform Credits Support</option>
                         </select>
                       </div>
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-sm font-mono font-medium text-foreground">Project Scope & Technical Details *</label>
+                      <label className="text-sm font-mono font-medium text-foreground">Project Scope &amp; Technical Details *</label>
                       <textarea
                         required
                         rows={4}
@@ -157,9 +205,18 @@ export default function ContactPage() {
                       />
                     </div>
 
-                    <Button type="submit" className="w-full font-mono text-sm">
-                      <span>Submit Inquiry</span>
-                      <ArrowRight className="ms-1.5 h-3.5 w-3.5 rtl:rotate-180" />
+                    <Button type="submit" disabled={loading} className="w-full font-mono text-sm">
+                      {loading ? (
+                        <>
+                          <Loader2 className="me-2 h-4 w-4 animate-spin" />
+                          <span>Logging Ticket...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Submit Ticket</span>
+                          <ArrowRight className="ms-1.5 h-3.5 w-3.5 rtl:rotate-180" />
+                        </>
+                      )}
                     </Button>
                   </form>
                 )}
@@ -221,4 +278,3 @@ export default function ContactPage() {
     </div>
   );
 }
-

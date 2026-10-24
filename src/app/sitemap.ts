@@ -6,6 +6,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const routes = [
     "",
+    "/demo",
     "/how-it-works",
     "/pricing",
     "/security",
@@ -25,7 +26,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return routes.map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified,
-    changeFrequency: route === "" || route === "/changelog" ? "daily" : "weekly",
-    priority: route === "" ? 1.0 : route === "/pricing" || route === "/how-it-works" ? 0.9 : 0.7,
+    changeFrequency:
+      route === "" || route === "/changelog" || route === "/demo"
+        ? "daily"
+        : "weekly",
+    priority:
+      route === ""
+        ? 1.0
+        : route === "/pricing" || route === "/demo" || route === "/how-it-works"
+        ? 0.9
+        : 0.7,
   }));
 }
