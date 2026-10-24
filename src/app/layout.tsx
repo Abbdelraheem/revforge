@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Sans, IBM_Plex_Serif, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { BRAND } from "@/config/brand";
+import { Providers } from "@/components/providers";
 
 const ibmPlexSans = IBM_Plex_Sans({
   subsets: ["latin"],
@@ -27,7 +28,7 @@ const ibmPlexMono = IBM_Plex_Mono({
 const siteUrl = process.env.APP_URL || "http://localhost:3000";
 const defaultTitle = `${BRAND.name} — Architecture Reconstruction & Clean-Room Systems`;
 const defaultDescription =
-  "Autonomous Clean-Room Reverse Engineering, Technical Scoping, Dynamic Cost Estimation, and Production Code Generation.";
+  "Clean-Room Architecture Reconstruction, Technical Scoping, Dynamic Cost Estimation, and Production Code Generation.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -104,7 +105,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-background font-sans text-foreground antialiased selection:bg-primary/20 selection:text-primary">
-        {children}
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

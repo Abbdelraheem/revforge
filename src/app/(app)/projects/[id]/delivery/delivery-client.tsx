@@ -7,6 +7,8 @@ import {
   ArrowLeft,
   CheckCircle2,
   Clock,
+  Copy,
+  Check,
   Download,
   FileArchive,
   FileCode,
@@ -22,6 +24,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/components/ui/toast";
 
 interface DeliveryMeta {
   sha256: string;
@@ -115,6 +118,7 @@ export function DeliveryClient({
   recipientEmail,
   deployGuide,
 }: DeliveryClientProps) {
+  const { toast } = useToast();
   const [gitLoading, setGitLoading] = useState(false);
   const [gitError, setGitError] = useState<string | null>(null);
   const [gitMessage, setGitMessage] = useState<string | null>(null);
@@ -138,6 +142,16 @@ export function DeliveryClient({
         archive.sourceVersionId === currentSourceVersionId &&
         new Date(archive.expiresAt).getTime() > Date.now()
     ) || null;
+
+  const handleCopy = (text: string, label: string) => {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      void navigator.clipboard.writeText(text);
+      toast({
+        title: "Copied to clipboard",
+        description: `${label} copied to clipboard.`,
+      });
+    }
+  };
 
   const generateGit = async () => {
     if (gitLoading) return;
@@ -305,7 +319,19 @@ export function DeliveryClient({
               {(delivery || latestVersion) && (
                 <div className="grid gap-3 text-sm sm:grid-cols-2">
                   <div className="rounded border border-border bg-background p-3">
-                    <div className="font-mono text-sm text-muted-foreground">SHA-256</div>
+                    <div className="flex items-center justify-between font-mono text-sm text-muted-foreground">
+                      <span>SHA-256</span>
+                      {delivery?.sha256 && (
+                        <button
+                          type="button"
+                          onClick={() => handleCopy(delivery.sha256, "SHA-256 checksum")}
+                          className="inline-flex items-center gap-1 text-primary hover:underline"
+                        >
+                          <Copy className="h-3.5 w-3.5" />
+                          <span>Copy</span>
+                        </button>
+                      )}
+                    </div>
                     <div className="mt-1 break-all font-mono text-sm">
                       {delivery?.sha256 || "not stored for the Studio version row"}
                     </div>
@@ -340,12 +366,24 @@ export function DeliveryClient({
 
               <div className="flex flex-wrap gap-2">
                 {canDownload ? (
-                  <Button asChild size="sm" className="text-sm font-bold">
-                    <a href={downloadHref}>
-                      <Download className="me-1.5 h-4 w-4" />
-                      Download source ZIP
-                    </a>
-                  </Button>
+                  <>
+                    <Button asChild size="sm" className="text-sm font-bold">
+                      <a href={downloadHref}>
+                        <Download className="me-1.5 h-4 w-4" />
+                        Download source ZIP
+                      </a>
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      className="text-sm"
+                      onClick={() => handleCopy(downloadHref, "Direct download link")}
+                    >
+                      <Copy className="me-1.5 h-4 w-4" />
+                      Copy link
+                    </Button>
+                  </>
                 ) : (
                   <Button size="sm" disabled className="text-sm font-bold">
                     <Download className="me-1.5 h-4 w-4" />

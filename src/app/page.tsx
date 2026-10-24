@@ -33,7 +33,7 @@ export default function LandingPage() {
           </div>
 
           <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-foreground max-w-5xl mx-auto leading-tight font-serif">
-            Autonomous Clean-Room Reverse Engineering
+            Clean-Room Reverse Engineering &amp; Reconstruction
           </h1>
 
           <p className="text-muted-foreground text-base sm:text-lg max-w-3xl mx-auto leading-relaxed">

@@ -199,7 +199,7 @@ export default function DocsPage() {
               <CardHeader>
                 <CardTitle className="text-sm font-mono flex items-center space-x-2 ">
                   <Terminal className="h-4 w-4 text-primary" />
-                  <span>Ready to run an autonomous triage pass?</span>
+                  <span>Ready to run an automated triage pass?</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col sm:flex-row items-center justify-between gap-4">

@@ -4,11 +4,17 @@ import * as React from "react";
 import { cn } from "./button";
 import { X } from "lucide-react";
 
+export interface ToastAction {
+  label: string;
+  onClick: () => void;
+}
+
 export interface ToastProps {
   id: string;
   title?: string;
   description?: string;
-  variant?: "default" | "destructive";
+  variant?: "default" | "destructive" | "success";
+  action?: ToastAction;
 }
 
 interface ToastContextValue {
@@ -42,19 +48,36 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           <div
             key={t.id}
             className={cn(
-              "pointer-events-auto relative mb-2 flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-4 shadow-lg transition-all",
+              "pointer-events-auto relative mb-2 flex w-full items-start justify-between space-x-3 overflow-hidden rounded-md border p-4 shadow-lg transition-all",
               t.variant === "destructive"
                 ? "border-destructive bg-destructive text-destructive-foreground"
+                : t.variant === "success"
+                ? "border-emerald-600/40 bg-background text-foreground"
                 : "border-border bg-background text-foreground"
             )}
           >
-            <div className="grid gap-1">
+            <div className="grid gap-1 flex-1">
               {t.title && <div className="text-sm font-semibold">{t.title}</div>}
-              {t.description && <div className="text-sm opacity-90">{t.description}</div>}
+              {t.description && <div className="text-sm text-muted-foreground">{t.description}</div>}
+              {t.action && (
+                <div className="mt-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      t.action?.onClick();
+                      dismiss(t.id);
+                    }}
+                    className="inline-flex items-center rounded border border-primary/40 bg-primary/10 px-2.5 py-1 text-sm font-semibold text-primary hover:bg-primary/20 transition-colors"
+                  >
+                    {t.action.label}
+                  </button>
+                </div>
+              )}
             </div>
             <button
               onClick={() => dismiss(t.id)}
-              className="rounded-md p-1 opacity-70 hover:opacity-100"
+              className="rounded-md p-1 opacity-70 hover:opacity-100 transition-opacity"
+              aria-label="Dismiss notification"
             >
               <X className="h-4 w-4" />
             </button>

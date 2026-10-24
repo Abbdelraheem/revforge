@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 800" width="1280" height="800">
+    <rect width="1280" height="800" fill="#fbf9f4"/>
+    <!-- Top Navigation Bar -->
+    <rect width="1280" height="70" fill="#ffffff" stroke="#e5e7eb" stroke-width="1"/>
+    <text x="40" y="44" font-family="serif" font-size="22" font-weight="bold" fill="#111827">RevForge</text>
+    <text x="160" y="44" font-family="monospace" font-size="13" fill="#6b7280">/ system-preview</text>
+    
+    <!-- Title Section -->
+    <text x="60" y="125" font-family="serif" font-size="28" font-weight="bold" fill="#111827">BEFORE: V2 Facade & Hardcoded Simulation</text>
+    <text x="340" y="162" font-family="sans-serif" font-size="15" fill="#4b5563">Synthetic 0.94 scores, fake setTimeout worker, unverified claims, hardcoded prices</text>
+    
+    <!-- Cards Grid -->
+    <g transform="translate(60, 140)">
+          <rect width="260" height="32" rx="4" fill="#e11d48" opacity="0.1" stroke="#e11d48" stroke-width="1.5"/>
+          <text x="130" y="21" font-family="monospace" font-size="13" font-weight="bold" fill="#e11d48" text-anchor="middle">UNVERIFIED SIMULATION</text>
+        </g>
+<g transform="translate(640, 200)">
+        <rect width="540" height="180" rx="8" fill="#ffffff" stroke="#e5e7eb" stroke-width="1.5"/>
+        <text x="24" y="44" font-family="serif" font-size="20" font-weight="bold" fill="#111827">Synthesized Output Status</text>
+        <text x="24" y="80" font-family="sans-serif" font-size="14" fill="#4b5563">Clean-room verified 100% identical (FABRICATED)</text>
+        <line x1="24" y1="110" x2="516" y2="110" stroke="#f3f4f6" stroke-width="1"/>
+        <text x="24" y="145" font-family="monospace" font-size="12" fill="#9ca3af">STATUS: AUDITED &amp; ENFORCED</text>
+      </g>
+<g transform="translate(60, 420)">
+        <rect width="540" height="180" rx="8" fill="#ffffff" stroke="#e5e7eb" stroke-width="1.5"/>
+        <text x="24" y="44" font-family="serif" font-size="20" font-weight="bold" fill="#111827">Worker Job Runner</text>
+        <text x="24" y="80" font-family="sans-serif" font-size="14" fill="#4b5563">setTimeout(() => resolve(0.94), 2500) (SIMULATION)</text>
+        <line x1="24" y1="110" x2="516" y2="110" stroke="#f3f4f6" stroke-width="1"/>
+        <text x="24" y="145" font-family="monospace" font-size="12" fill="#9ca3af">STATUS: AUDITED &amp; ENFORCED</text>
+      </g>
+<g transform="translate(640, 420)">
+        <rect width="540" height="180" rx="8" fill="#ffffff" stroke="#e5e7eb" stroke-width="1.5"/>
+        <text x="24" y="44" font-family="serif" font-size="20" font-weight="bold" fill="#111827">Cost & Margin Engine</text>
+        <text x="24" y="80" font-family="sans-serif" font-size="14" fill="#4b5563">Fixed $49.00 / constant 0.94 parity (STUB)</text>
+        <line x1="24" y1="110" x2="516" y2="110" stroke="#f3f4f6" stroke-width="1"/>
+        <text x="24" y="145" font-family="monospace" font-size="12" fill="#9ca3af">STATUS: AUDITED &amp; ENFORCED</text>
+      </g>
+  </svg>

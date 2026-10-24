@@ -36,6 +36,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { STUDIO_TOKEN_PACKS } from "@/config/studio-tokens";
+import { useToast } from "@/components/ui/toast";
 
 export interface VersionItem {
   id: string;
@@ -161,6 +162,9 @@ export function StudioClient({
   const [selectedVersionId, setSelectedVersionId] = useState<string>(
     initialVersions[0]?.id || ""
   );
+
+  const { toast } = useToast();
+  const promptInputRef = useRef<HTMLTextAreaElement>(null);
 
   const [prompt, setPrompt] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -289,6 +293,28 @@ export function StudioClient({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Cmd/Ctrl + K: focus prompt input
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        promptInputRef.current?.focus();
+        promptInputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      // Escape: blur or cancel edit
+      if (e.key === "Escape") {
+        if (document.activeElement === promptInputRef.current) {
+          promptInputRef.current?.blur();
+        } else if (activeEditId && !terminalRef.current) {
+          void handleCancel();
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeEditId]);
+
   const refreshWorkspace = async (preferredVersionId?: string | null) => {
     const [vRes, eRes] = await Promise.all([
       fetch(`/api/studio/versions?projectId=${projectId}`),
@@ -332,14 +358,24 @@ export function StudioClient({
         setPrompt("");
         setIframeKey((key) => key + 1);
         void refreshWorkspace(payload.resultingVersionId);
+        toast({
+          variant: "success",
+          title: "Version committed",
+          description: "Studio verified and committed the requested changes into a new version.",
+        });
       } else {
-        setErrorMessage(
+        const failure =
           payload.failureReason ||
-            (payload.status === "refunded"
-              ? "The edit stopped and the held tokens were released."
-              : "The edit failed before a new version was committed.")
-        );
+          (payload.status === "refunded"
+            ? "The edit stopped and the held tokens were released."
+            : "The edit failed before a new version was committed.");
+        setErrorMessage(failure);
         void refreshWorkspace();
+        toast({
+          variant: payload.status === "refunded" ? "default" : "destructive",
+          title: payload.status === "refunded" ? "Hold released" : "Edit stopped",
+          description: failure,
+        });
       }
     }
   };
@@ -430,10 +466,27 @@ export function StudioClient({
   const handleApplyEdit = async () => {
     if (!prompt.trim() || isSubmitting) return;
 
+    const draftPrompt = prompt.trim();
+    const optimisticId = `optimistic-${Date.now()}`;
+    const optimisticEdit: EditItem = {
+      id: optimisticId,
+      promptRaw: draftPrompt,
+      promptEnhanced: null,
+      status: "pending",
+      tokensHeldCents: 200,
+      tokensSettledCents: 0,
+      diffStat: null,
+      failureReason: null,
+      resultingVersionId: null,
+      cancelRequested: false,
+      createdAt: new Date().toISOString(),
+    };
+
     setIsSubmitting(true);
     setErrorMessage(null);
     setStreamEdit(null);
     setStatusHistory([]);
+    setEdits((prev) => [optimisticEdit, ...prev]);
 
     try {
       const res = await fetch("/api/studio/edits", {
@@ -441,7 +494,7 @@ export function StudioClient({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           projectId,
-          prompt: prompt.trim(),
+          prompt: draftPrompt,
           maxCents: 200,
           parentVersionId: activeVersion?.id,
         }),
@@ -450,43 +503,52 @@ export function StudioClient({
       const data = await res.json();
 
       if (!res.ok) {
+        setEdits((prev) => prev.filter((e) => e.id !== optimisticId));
         if (res.status === 402) {
-          setErrorMessage(
+          const err =
             data.error ||
-              "Not enough tokens for this hold. Buy a pack, then retry the edit."
-          );
+            "Not enough tokens for this hold. Buy a pack, then retry the edit.";
+          setErrorMessage(err);
           setShowTokenPacks(true);
           setIsSubmitting(false);
+          toast({ variant: "destructive", title: "Insufficient tokens", description: err });
           return;
         }
         if (res.status === 409) {
-          setErrorMessage(data.error || "Another edit is already running.");
+          const err = data.error || "Another edit is already running.";
+          setErrorMessage(err);
           if (data.activeEditId) {
             connectToEdit(data.activeEditId);
             setIsSubmitting(true);
             return;
           }
           setIsSubmitting(false);
+          toast({ variant: "destructive", title: "Concurrency limit", description: err });
           return;
         }
         throw new Error(data.error || "Edit execution failed");
       }
 
       if (res.status === 202 && data.editId) {
+        setEdits((prev) =>
+          prev.map((e) => (e.id === optimisticId ? { ...e, id: data.editId } : e))
+        );
         setPrompt("");
         connectToEdit(data.editId);
         return;
       }
 
-      // Compatibility for an older synchronous response. The version and
-      // balance are still read from the server, never guessed.
+      // Compatibility for an older synchronous response.
       setPrompt("");
       await refreshWorkspace(data.versionId);
       setIframeKey((key) => key + 1);
       setIsSubmitting(false);
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : "Failed to execute edit");
+      setEdits((prev) => prev.filter((e) => e.id !== optimisticId));
+      const failure = err instanceof Error ? err.message : "Failed to execute edit";
+      setErrorMessage(failure);
       setIsSubmitting(false);
+      toast({ variant: "destructive", title: "Edit could not start", description: failure });
     }
   };
 
@@ -500,11 +562,15 @@ export function StudioClient({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Cancellation failed.");
-      setErrorMessage(
+      const msg =
         data.releasedCents > 0
           ? `Edit canceled. ${formatCents(data.releasedCents)} of held tokens was released.`
-          : "Edit canceled. No held tokens remained to release."
-      );
+          : "Edit canceled. No held tokens remained to release.";
+      setErrorMessage(msg);
+      toast({
+        title: "Edit canceled",
+        description: msg,
+      });
       terminalRef.current = true;
       closeStream();
       setStreamMode("closed");
@@ -527,7 +593,9 @@ export function StudioClient({
       );
       await refreshWorkspace();
     } catch (err) {
-      setErrorMessage(err instanceof Error ? err.message : "Cancellation failed.");
+      const errStr = err instanceof Error ? err.message : "Cancellation failed.";
+      setErrorMessage(errStr);
+      toast({ variant: "destructive", title: "Cancellation failed", description: errStr });
     } finally {
       setCanceling(false);
     }
@@ -549,16 +617,44 @@ export function StudioClient({
       }
       window.location.href = data.checkoutUrl;
     } catch (err) {
-      setErrorMessage(
-        err instanceof Error ? err.message : "Could not start the token checkout."
-      );
+      const errStr = err instanceof Error ? err.message : "Could not start the token checkout.";
+      setErrorMessage(errStr);
+      toast({ variant: "destructive", title: "Checkout error", description: errStr });
       setBuyingPack(null);
     }
   };
 
   const handleRollback = (version: VersionItem) => {
-    if (!confirm(`Revert workspace to ${version.label}?`)) return;
-    setPrompt(`Revert codebase back to snapshot of version ${version.versionNumber}`);
+    const previous = prompt;
+    const revertPrompt = `Revert codebase back to snapshot of version ${version.versionNumber}`;
+    setPrompt(revertPrompt);
+    promptInputRef.current?.focus();
+    if (previous.trim() && previous !== revertPrompt) {
+      toast({
+        title: "Revert draft inserted",
+        description: `Drafted rollback prompt for version ${version.versionNumber}.`,
+        action: {
+          label: "Undo",
+          onClick: () => setPrompt(previous),
+        },
+      });
+    }
+  };
+
+  const handleChipSelect = (chip: string) => {
+    const previous = prompt;
+    setPrompt(chip);
+    promptInputRef.current?.focus();
+    if (previous.trim() && previous !== chip) {
+      toast({
+        title: "Template applied",
+        description: "Replaced draft with quick template chip.",
+        action: {
+          label: "Undo",
+          onClick: () => setPrompt(previous),
+        },
+      });
+    }
   };
 
   const activeStreamOrEdit = streamEdit
@@ -901,7 +997,7 @@ export function StudioClient({
                 <button
                   key={chip}
                   type="button"
-                  onClick={() => setPrompt(chip)}
+                  onClick={() => handleChipSelect(chip)}
                   disabled={isSubmitting}
                   className="rounded-full border border-border bg-background px-2.5 py-1 text-sm text-muted-foreground transition-colors hover:border-primary/40 hover:text-foreground disabled:opacity-50"
                 >
@@ -911,6 +1007,7 @@ export function StudioClient({
             </div>
 
             <Textarea
+              ref={promptInputRef}
               placeholder="Describe one change. Studio builds, verifies, and commits it as a new version."
               value={prompt}
               onChange={(event) => setPrompt(event.target.value)}
@@ -926,8 +1023,14 @@ export function StudioClient({
               aria-label="Studio edit request"
             />
 
-            <div className="flex items-center justify-between gap-2 text-sm text-muted-foreground">
-              <span className="font-mono">Maximum hold {formatCents(200)}</span>
+            <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <span className="font-mono">Hold {formatCents(200)}</span>
+                <span className="text-muted-foreground/40">•</span>
+                <span className="font-mono text-sm opacity-80">⌘⏎ Run</span>
+                <span className="font-mono text-sm opacity-80">⌘K Focus</span>
+                <span className="font-mono text-sm opacity-80">Esc Cancel</span>
+              </div>
               <button
                 type="button"
                 onClick={() => setShowTokenPacks((value) => !value)}

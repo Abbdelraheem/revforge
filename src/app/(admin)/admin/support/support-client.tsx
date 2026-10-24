@@ -5,7 +5,7 @@ import { SupportTicket } from "@/lib/support/tickets";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Mail, CheckCircle, Clock, Copy, Check, MessageSquare } from "lucide-react";
+import { Mail, CheckCircle, Clock, Copy, Check, MessageSquare, Inbox } from "lucide-react";
 
 interface Props {
   initialTickets: SupportTicket[];
@@ -67,8 +67,16 @@ export function AdminSupportClient({ initialTickets, cannedReplies }: Props) {
         </CardHeader>
         <CardContent className="p-0 max-h-[600px] overflow-y-auto divide-y divide-border">
           {tickets.length === 0 ? (
-            <div className="p-6 text-center text-sm text-muted-foreground">
-              No support tickets found.
+            <div className="p-12 text-center space-y-3">
+              <div className="mx-auto h-10 w-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
+                <Inbox className="h-5 w-5" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-foreground">No support tickets found</p>
+                <p className="text-sm text-muted-foreground">
+                  The inbox is clear. Incoming customer support tickets will appear here.
+                </p>
+              </div>
             </div>
           ) : (
             tickets.map((t) => {
