@@ -38,6 +38,14 @@ export async function POST(req: NextRequest) {
 
     const hours = tier === "enterprise_saas" ? 80 : tier === "mobile_app" ? 40 : 24;
 
+    const clonePriceUsd =
+      tier === "enterprise_saas"
+        ? 79
+        : tier === "mobile_app" || tier === "desktop_binary"
+        ? 149
+        : 39;
+    const requiredCredits = clonePriceUsd * 1000;
+
     const quote = priceQuote(
       [
         {
@@ -60,6 +68,16 @@ export async function POST(req: NextRequest) {
         totalCents: quote.totalCents,
         subtotalCents: quote.subtotalCents,
         lines: quote.lines,
+        clonePriceUsd,
+        requiredCredits,
+        options: {
+          directCloneUsd: clonePriceUsd,
+          directCloneCredits: requiredCredits,
+          scopeCapOptions: {
+            optionA: "Pay difference for 100% completion",
+            optionB: "Partial delivery up to available credit limit",
+          },
+        },
       },
       confidenceScore: 0.88,
       message: "Triage completed successfully via empirical observation.",

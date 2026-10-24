@@ -159,6 +159,43 @@ export function MiniTriageDemo() {
                 </div>
               </div>
 
+              {/* Pricing & Execution Options */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                <div className="p-3.5 rounded border border-border bg-background space-y-1.5">
+                  <div className="text-sm uppercase font-bold text-primary font-mono">
+                    System 1: Direct Clone (Pay-Per-Clone)
+                  </div>
+                  <div className="flex items-baseline space-x-2">
+                    <span className="text-2xl font-extrabold text-foreground font-mono">
+                      ${demoResult.quote?.clonePriceUsd || 39}
+                    </span>
+                    <span className="text-sm text-muted-foreground font-mono">
+                      ({(demoResult.quote?.requiredCredits || 39000).toLocaleString()} Credits)
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Pay only for reconstruction. Full Next.js 15 source code delivered. Studio edits locked unless unlocked per edit.
+                  </p>
+                </div>
+
+                <div className="p-3.5 rounded border border-border bg-background space-y-1.5">
+                  <div className="text-sm uppercase font-bold text-success font-mono">
+                    System 2: Token Credit Bundles
+                  </div>
+                  <div className="flex items-baseline space-x-2">
+                    <span className="text-2xl font-extrabold text-foreground font-mono">
+                      50,000
+                    </span>
+                    <span className="text-sm text-muted-foreground font-mono">
+                      Credits ($45 Bundle)
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Covers full clone plus AI Studio edits (1.5x API spend). If credits fall short: pay difference or receive build up to limit.
+                  </p>
+                </div>
+              </div>
+
               <div className="text-center pt-2">
                 <Button asChild size="sm" className="font-semibold text-sm">
                   <Link href="/projects/new">

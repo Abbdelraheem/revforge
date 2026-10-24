@@ -22,6 +22,7 @@ import {
   Scale,
 } from "lucide-react";
 import { priceQuote, DEFAULT_PRICING_CONFIG_V1, TierKey } from "@/lib/pricing/engine";
+import { DIRECT_CLONE_TIERS, CREDIT_BUNDLES } from "@/config/pricing";
 
 export default function PricingPage() {
   const [estimatedHours, setEstimatedHours] = useState(24);
@@ -54,18 +55,158 @@ export default function PricingPage() {
         {/* Header */}
         <div className="text-center space-y-4 max-w-3xl mx-auto">
           <Badge variant="outline" className="border-primary/40 text-primary text-sm font-semibold">
-            TRANSPARENT BENCHMARKED PRICING
+            TRANSPARENT VALUE-FIRST PRICING
           </Badge>
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-foreground font-serif">
-            Honest, Scope-Based Pricing Per Project
+            Accessible Clean-Room Pricing &amp; Token Credits
           </h1>
           <p className="text-muted-foreground text-sm md:text-base leading-relaxed">
-            Every target is unique. Quotes are calculated directly as <code>hours × market rate × 0.5</code>—benchmarked at 50% of traditional human agency costs, with a complimentary first analysis.
+            Choose between flat-rate direct cloning or flexible token credit bundles. Every project includes verified clean-room Next.js 15 source code with 100% intellectual property ownership.
           </p>
         </div>
 
+        {/* System 1: Pay-Per-Clone Direct Reconstruction */}
+        <section className="space-y-6">
+          <div className="text-center space-y-2 max-w-2xl mx-auto">
+            <Badge variant="outline" className="border-primary/40 text-primary text-sm font-semibold">
+              SYSTEM 1: PAY-PER-CLONE (DIRECT RECONSTRUCTION)
+            </Badge>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground font-serif">
+              Flat-Rate Direct Code Reconstruction
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Pay solely for the clean-room reconstruction. Deliver complete production code. Studio modifications are locked unless unlocked per edit or with credits.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {DIRECT_CLONE_TIERS.map((tier) => (
+              <Card key={tier.id} className="border-border bg-card shadow-sm flex flex-col justify-between p-5 space-y-4">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-start">
+                    <Badge variant="outline" className="text-sm text-primary border-primary/40 font-mono">
+                      {tier.maxRoutes} Routes Max
+                    </Badge>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-lg text-foreground font-serif">{tier.name}</h3>
+                    <p className="text-sm text-primary font-medium">{tier.subtitle}</p>
+                    <p className="text-sm text-muted-foreground mt-1 leading-relaxed">{tier.description}</p>
+                  </div>
+                  <div className="flex items-baseline gap-2 pt-2 border-t border-border">
+                    <span className="text-3xl font-extrabold text-foreground font-mono">${tier.priceUsd}</span>
+                    <span className="text-sm text-muted-foreground font-mono">({tier.creditsRequired.toLocaleString()} Credits)</span>
+                  </div>
+                  <ul className="space-y-2 text-sm text-muted-foreground pt-2">
+                    {tier.includedFeatures.map((feat, i) => (
+                      <li key={i} className="flex items-center gap-2">
+                        <Check className="h-4 w-4 text-primary shrink-0" />
+                        <span>{feat}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div className="pt-4 border-t border-border">
+                  <Link href="/projects/new" className="w-full">
+                    <Button className="w-full text-sm font-semibold shadow-sm">
+                      <span>Reconstruct Target (${tier.priceUsd})</span>
+                    </Button>
+                  </Link>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        {/* System 2: Token Credit Bundles & Scope-Cap Resolution */}
+        <section className="space-y-6 border-t border-border pt-12">
+          <div className="text-center space-y-2 max-w-2xl mx-auto">
+            <Badge variant="outline" className="border-success/40 text-success text-sm font-semibold">
+              SYSTEM 2: TOKEN CREDIT BUNDLES (PREPAID BALANCES)
+            </Badge>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground font-serif">
+              Flexible Credits Wallet &amp; Studio Edits
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Credits denominated in thousands like AI tokens (1,000 Credits = $1.00 USD). Studio edits charged at exactly 1.5× API cost ($1.00 API = 1,500 Credits).
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {CREDIT_BUNDLES.map((bundle) => (
+              <Card
+                key={bundle.id}
+                className={`border bg-card shadow-sm flex flex-col justify-between p-6 space-y-4 ${
+                  bundle.badge ? "border-primary ring-1 ring-primary/30" : "border-border"
+                }`}
+              >
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-primary font-bold">{bundle.tierLabel}</span>
+                    {bundle.badge && (
+                      <Badge variant="default" className="text-sm font-semibold">
+                        {bundle.badge}
+                      </Badge>
+                    )}
+                  </div>
+                  <h3 className="font-bold text-xl text-foreground font-serif">{bundle.name}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{bundle.description}</p>
+                  <div className="flex items-baseline gap-2 pt-2 border-t border-border">
+                    <span className="text-4xl font-extrabold text-foreground font-mono">
+                      {bundle.credits.toLocaleString()}
+                    </span>
+                    <span className="text-sm text-muted-foreground font-semibold">Credits</span>
+                  </div>
+                  <div className="text-lg font-bold font-mono text-primary">
+                    ${bundle.priceUsd} USD
+                    {bundle.discountPct > 0 && (
+                      <span className="ms-2 text-sm text-success font-medium">({bundle.discountPct}% OFF)</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-border">
+                  <Link href="/projects/new" className="w-full">
+                    <Button variant={bundle.badge ? "default" : "outline"} className="w-full text-sm font-semibold">
+                      <span>Purchase {bundle.name}</span>
+                    </Button>
+                  </Link>
+                </div>
+              </Card>
+            ))}
+          </div>
+
+          {/* Scope-Cap Resolution Explainer */}
+          <div className="p-6 rounded-lg border border-border bg-muted/20 space-y-4">
+            <h4 className="font-serif font-bold text-lg text-foreground">
+              Scope-Cap Resolution Protocol (Deterministic Triage Options)
+            </h4>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              When inspecting an external target that requires more credits than your package balance, {BRAND.name} presents you with two clear and honest options:
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <div className="p-4 rounded border border-border bg-card space-y-2">
+                <span className="text-sm font-bold text-primary font-mono uppercase">
+                  Option A: Pay Difference for 100% Final Build
+                </span>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Pay only the exact remaining credit difference to produce the full, uncompromised reconstruction across all routes.
+                </p>
+              </div>
+              <div className="p-4 rounded border border-border bg-card space-y-2">
+                <span className="text-sm font-bold text-success font-mono uppercase">
+                  Option B: Delivery Up to Credit Limit
+                </span>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  Automatically prioritize core observable features and deliver a fully functional version built up to your exact available credit limit.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Dynamic Pricing Showcase */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start border-t border-border pt-12">
           {/* Complimentary Analysis Box */}
           <Card className="border-border bg-card shadow-sm lg:col-span-1">
             <CardHeader className="pb-3 border-b border-border">

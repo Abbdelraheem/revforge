@@ -100,3 +100,124 @@ export function calculateUsageCostMicros(usage: {
     (usage.outputTokens / 1_000_000) * pricing.outputCentsPerMillion;
   return Math.round((inputCostCents + outputCostCents) * 1000);
 }
+
+/**
+ * Platform Token & Credit System:
+ * 1,000 Credits = $1.00 USD (i.e. 1 Credit = 0.1 cent = 10 millicents).
+ * Balances are denominated in thousands (like LLM tokens).
+ */
+export const CREDITS_PER_USD = 1_000;
+
+export function centsToCredits(cents: number): number {
+  return Math.round((cents / 100) * CREDITS_PER_USD);
+}
+
+export function creditsToCents(credits: number): number {
+  return Math.round((credits / CREDITS_PER_USD) * 100);
+}
+
+/**
+ * System 1: Direct Clone (Pay-Per-Clone) Pricing
+ * Flat, affordable rates for clean-room reconstruction without Studio editing access.
+ */
+export interface CloneTierPricing {
+  id: string;
+  name: string;
+  subtitle: string;
+  description: string;
+  priceUsd: number;
+  creditsRequired: number;
+  maxRoutes: number;
+  includedFeatures: string[];
+}
+
+export const DIRECT_CLONE_TIERS: CloneTierPricing[] = [
+  {
+    id: "portfolio",
+    name: "Static / Landing Page",
+    subtitle: "Landing & Portfolio",
+    description: "Single-page landing, marketing site, or personal portfolio with responsive layout.",
+    priceUsd: 19,
+    creditsRequired: 19_000,
+    maxRoutes: 3,
+    includedFeatures: ["Clean Next.js 15 source", "Tailwind CSS styling", "Responsive viewports", "Full IP ownership"],
+  },
+  {
+    id: "web_app",
+    name: "Standard Web Application",
+    subtitle: "Web App & Portal",
+    description: "Multi-page website, dynamic blog, documentation, or lightweight dashboard.",
+    priceUsd: 39,
+    creditsRequired: 39_000,
+    maxRoutes: 8,
+    includedFeatures: ["App Router architecture", "State management", "Server Actions", "Full test suites"],
+  },
+  {
+    id: "interactive_saas",
+    name: "Interactive SaaS Application",
+    subtitle: "Full SaaS Architecture",
+    description: "Full-featured SaaS dashboard, auth flows, CRUD resources, and relational models.",
+    priceUsd: 79,
+    creditsRequired: 79_000,
+    maxRoutes: 20,
+    includedFeatures: ["PostgreSQL & Drizzle schema", "Protected route guards", "Mock API synthesis", "Pixelmatch verification"],
+  },
+  {
+    id: "enterprise_binary",
+    name: "Enterprise & Binary Target",
+    subtitle: "Enterprise Systems",
+    description: "Complex enterprise workflows, mobile APK extraction, or native desktop binaries.",
+    priceUsd: 149,
+    creditsRequired: 149_000,
+    maxRoutes: 50,
+    includedFeatures: ["Deep boundary deconstruction", "High-concurrency testing", "Custom domain routing", "Priority synthesis"],
+  },
+];
+
+/**
+ * System 2: Credit Token Bundles (Prepaid Balances)
+ * Credits can be used for cloning, studio edits, and iterative enhancements.
+ * Studio edits markup is 1.5x of provider API costs ($1.00 API = 1,500 credits deducted).
+ */
+export interface CreditBundle {
+  id: string;
+  name: string;
+  tierLabel: string;
+  credits: number;
+  priceUsd: number;
+  discountPct: number;
+  badge?: string;
+  description: string;
+}
+
+export const CREDIT_BUNDLES: CreditBundle[] = [
+  {
+    id: "bundle_starter",
+    name: "Starter Bundle",
+    tierLabel: "Entry Level",
+    credits: 25_000,
+    priceUsd: 25,
+    discountPct: 0,
+    description: "Ideal for 1 landing page clone plus initial studio customizations.",
+  },
+  {
+    id: "bundle_pro",
+    name: "Pro Builder Bundle",
+    tierLabel: "Professional",
+    credits: 50_000,
+    priceUsd: 45,
+    discountPct: 10,
+    badge: "Most Popular",
+    description: "Covers a complete web app clone plus extensive studio AI refinements.",
+  },
+  {
+    id: "bundle_agency",
+    name: "Agency Pack",
+    tierLabel: "Scale & Teams",
+    credits: 120_000,
+    priceUsd: 99,
+    discountPct: 17.5,
+    badge: "Best Value",
+    description: "Sufficient for multiple complex SaaS applications and ongoing iterative edits.",
+  },
+];

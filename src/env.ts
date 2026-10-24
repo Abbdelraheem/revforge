@@ -22,7 +22,7 @@ const envSchema = z
     // Studio Configuration
     STUDIO_TOKEN_CENTS: z.coerce.number().default(1),
     STUDIO_INCLUDED_RATIO: z.coerce.number().default(0.15),
-    STUDIO_MARKUP: z.coerce.number().default(3.0),
+    STUDIO_MARKUP: z.coerce.number().default(1.5),
     STUDIO_MIN_CHARGE_CENTS: z.coerce.number().default(50),
     STUDIO_DAILY_EDIT_LIMIT: z.coerce.number().default(20),
 

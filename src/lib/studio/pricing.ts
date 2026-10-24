@@ -7,7 +7,7 @@
  */
 
 export const STUDIO_MIN_FLOOR_CENTS = 50; // $0.50 minimum charge
-export const STUDIO_DEFAULT_MARKUP = 3.0;
+export const STUDIO_DEFAULT_MARKUP = 1.5; // 1.5x multiplier: $1.00 API spend = $1.50 (1,500 credits) deducted
 export const STUDIO_DEFAULT_CAP_CENTS = 200;
 
 /** Retained for callers that still express markup as a margin multiplier. */
