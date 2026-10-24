@@ -40,7 +40,7 @@ export function PricingCalculator() {
             <span className="font-mono text-primary font-bold">{tier.replace(/_/g, " ").toUpperCase()}</span>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
             {[
               { id: "portfolio", label: "Portfolio / Landing", hrs: 12 },
               { id: "web_app", label: "Web App", hrs: 24 },

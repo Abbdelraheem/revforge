@@ -184,7 +184,7 @@ export default function PricingPage() {
                   <div className="text-sm text-muted-foreground">{estimatedHours} hrs @ ${rateDollars}/hr</div>
                 </div>
 
-                <div className="space-y-1 border-x border-border/60 px-2">
+                <div className="space-y-1 border-y sm:border-y-0 sm:border-x border-border/60 py-3 sm:py-0 px-2">
                   <div className="text-sm text-primary font-bold uppercase tracking-wider">Clean-Room Price</div>
                   <div className="text-3xl font-extrabold text-foreground font-mono">
                     ${platformPrice}

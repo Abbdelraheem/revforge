@@ -14,22 +14,29 @@ export default async function TeamPage() {
   const session = await getSession();
   if (!session) redirect("/login");
 
-  const members = await withTenant(
-    { userId: session.user.id, workspaceId: session.workspace.id },
-    (tx) =>
-      tx
-        .select({
-          id: users.id,
-          name: users.name,
-          email: users.email,
-          role: workspaceMembers.role,
-          joinedAt: workspaceMembers.createdAt,
-        })
-        .from(workspaceMembers)
-        .innerJoin(users, eq(workspaceMembers.userId, users.id))
-        .where(eq(workspaceMembers.workspaceId, session.workspace.id))
-        .orderBy(workspaceMembers.createdAt)
-  );
+  let members: any[] = [];
+  try {
+    members = await withTenant(
+      { userId: session.user.id, workspaceId: session.workspace.id },
+      (tx) =>
+        tx
+          .select({
+            id: users.id,
+            name: users.name,
+            email: users.email,
+            role: workspaceMembers.role,
+            joinedAt: workspaceMembers.createdAt,
+          })
+          .from(workspaceMembers)
+          .innerJoin(users, eq(workspaceMembers.userId, users.id))
+          .where(eq(workspaceMembers.workspaceId, session.workspace.id))
+          .orderBy(workspaceMembers.createdAt)
+    );
+  } catch (err: any) {
+    if (process.env.NODE_ENV !== "development") {
+      throw err;
+    }
+  }
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 font-sans">

@@ -55,17 +55,17 @@ export default function LandingPage() {
           </div>
 
           {/* Telemetry Strip */}
-          <div className="pt-8 flex flex-wrap items-center justify-center gap-6 text-sm font-mono text-muted-foreground">
+          <div className="pt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm font-mono text-muted-foreground">
             <div className="flex items-center space-x-2">
               <span className="h-2 w-2 rounded-full bg-primary" />
               <span>Runtime: Sandboxed Container Runner</span>
             </div>
-            <span>&bull;</span>
+            <span className="hidden sm:inline">&bull;</span>
             <div className="flex items-center space-x-2">
               <ShieldCheck className="h-3.5 w-3.5 text-primary" />
               <span>Security: Pinned Safe Fetch</span>
             </div>
-            <span>&bull;</span>
+            <span className="hidden sm:inline">&bull;</span>
             <div className="flex items-center space-x-2">
               <DollarSign className="h-3.5 w-3.5 text-primary" />
               <span>Billing: Verified Webhooks</span>

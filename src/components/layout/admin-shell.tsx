@@ -49,12 +49,9 @@ export function AdminShell({
           <div className="flex items-center justify-between gap-3">
             <Link
               href="/admin"
-              className="flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+              className="flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               aria-label={`${BRAND.name} admin home`}
             >
-              <span className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-muted/40">
-                <BrandLogo className="h-5 w-5" />
-              </span>
               <span className="font-serif text-lg font-bold tracking-tight">{BRAND.name}</span>
             </Link>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 font-mono text-sm font-semibold uppercase text-primary">

@@ -55,11 +55,8 @@ export default function RegisterPage() {
       <div className="w-full max-w-md space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-2">
-          <Link href="/" className="inline-flex items-center space-x-2.5 group">
-            <div className="h-9 w-9 rounded border border-border bg-muted/40 flex items-center justify-center">
-              <BrandLogo className="h-5 w-5" />
-            </div>
-            <span className="font-bold text-lg tracking-tight text-foreground font-serif">
+          <Link href="/" className="inline-flex items-center group">
+            <span className="font-bold text-2xl tracking-tight text-foreground font-serif group-hover:text-primary transition-colors">
               {BRAND.name}
             </span>
           </Link>

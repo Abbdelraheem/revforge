@@ -68,7 +68,7 @@ export default function DemoShowcasePage() {
         </div>
 
         {/* Telemetry Metrics Bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           <Card className="border-border bg-card shadow-sm p-4 space-y-1">
             <div className="text-sm text-muted-foreground font-mono">Composite Parity</div>
             <div className="text-2xl font-bold font-mono text-success">100.0%</div>
@@ -135,7 +135,7 @@ export default function DemoShowcasePage() {
                 sandbox="allow-scripts allow-same-origin"
               />
             </div>
-            <div className="p-4 bg-muted/10 text-sm text-muted-foreground flex items-center justify-between">
+            <div className="p-4 bg-muted/10 text-sm text-muted-foreground flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
               <span>Target URL: <code>/</code> &bull; Responsive 1280px &amp; 375px viewports verified</span>
               <span className="font-mono text-success flex items-center gap-1">
                 <Check className="h-3.5 w-3.5" /> Sandboxed Execution

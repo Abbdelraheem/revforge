@@ -14,37 +14,50 @@ export default async function BillingPage() {
   const session = await getSession();
   if (!session) redirect("/login");
 
-  const { workspaceOrders, transactions, balanceCents } = await withTenant(
-    { userId: session.user.id, workspaceId: session.workspace.id },
-    async (tx) => {
-      const ords = await tx
-        .select()
-        .from(orders)
-        .where(eq(orders.workspaceId, session.workspace.id))
-        .orderBy(desc(orders.createdAt))
-        .limit(20);
+  let workspaceOrders: any[] = [];
+  let transactions: any[] = [];
+  let balanceCents = 0;
 
-      const txns = await tx
-        .select()
-        .from(creditsLedger)
-        .where(eq(creditsLedger.workspaceId, session.workspace.id))
-        .orderBy(desc(creditsLedger.createdAt))
-        .limit(20);
+  try {
+    const res = await withTenant(
+      { userId: session.user.id, workspaceId: session.workspace.id },
+      async (tx) => {
+        const ords = await tx
+          .select()
+          .from(orders)
+          .where(eq(orders.workspaceId, session.workspace.id))
+          .orderBy(desc(orders.createdAt))
+          .limit(20);
 
-      const [balanceRow] = await tx
-        .select({
-          total: sql<number>`coalesce(sum(${creditsLedger.deltaCents}), 0)::int`,
-        })
-        .from(creditsLedger)
-        .where(eq(creditsLedger.workspaceId, session.workspace.id));
+        const txns = await tx
+          .select()
+          .from(creditsLedger)
+          .where(eq(creditsLedger.workspaceId, session.workspace.id))
+          .orderBy(desc(creditsLedger.createdAt))
+          .limit(20);
 
-      return {
-        workspaceOrders: ords,
-        transactions: txns,
-        balanceCents: Math.max(0, Number(balanceRow?.total ?? 0)),
-      };
+        const [balanceRow] = await tx
+          .select({
+            total: sql<number>`coalesce(sum(${creditsLedger.deltaCents}), 0)::int`,
+          })
+          .from(creditsLedger)
+          .where(eq(creditsLedger.workspaceId, session.workspace.id));
+
+        return {
+          workspaceOrders: ords,
+          transactions: txns,
+          balanceCents: Math.max(0, Number(balanceRow?.total ?? 0)),
+        };
+      }
+    );
+    workspaceOrders = res.workspaceOrders;
+    transactions = res.transactions;
+    balanceCents = res.balanceCents;
+  } catch (err: any) {
+    if (process.env.NODE_ENV !== "development") {
+      throw err;
     }
-  );
+  }
 
   return (
     <div className="mx-auto max-w-6xl space-y-8 font-sans">

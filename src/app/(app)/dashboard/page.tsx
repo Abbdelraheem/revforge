@@ -36,57 +36,72 @@ export default async function DashboardPage() {
   const workspaceId = session.workspace.id;
   const user = session.user;
 
-  const { workspaceProjects, projectCount, activeBuildCount, balanceCents } = await withTenant(
-    { userId: user.id, workspaceId },
-    async (tx) => {
-      const projs = await tx
-        .select({
-          id: projects.id,
-          name: projects.name,
-          description: projects.description,
-          status: projects.status,
-          createdAt: projects.createdAt,
-          updatedAt: projects.updatedAt,
-        })
-        .from(projects)
-        .where(eq(projects.workspaceId, workspaceId))
-        .orderBy(desc(projects.createdAt))
-        .limit(10);
+  let workspaceProjects: any[] = [];
+  let projectCount = 0;
+  let activeBuildCount = 0;
+  let balanceCents = 0;
 
-      const [projectCountRow] = await tx
-        .select({ count: sql<number>`count(*)::int` })
-        .from(projects)
-        .where(eq(projects.workspaceId, workspaceId));
+  try {
+    const res = await withTenant(
+      { userId: user.id, workspaceId },
+      async (tx) => {
+        const projs = await tx
+          .select({
+            id: projects.id,
+            name: projects.name,
+            description: projects.description,
+            status: projects.status,
+            createdAt: projects.createdAt,
+            updatedAt: projects.updatedAt,
+          })
+          .from(projects)
+          .where(eq(projects.workspaceId, workspaceId))
+          .orderBy(desc(projects.createdAt))
+          .limit(10);
 
-      const [activeJobCountRow] = await tx
-        .select({ count: sql<number>`count(*)::int` })
-        .from(buildJobs)
-        .where(
-          and(
-            eq(buildJobs.workspaceId, workspaceId),
-            or(
-              eq(buildJobs.status, "queued"),
-              eq(buildJobs.status, "building"),
-              eq(buildJobs.status, "verifying")
+        const [projectCountRow] = await tx
+          .select({ count: sql<number>`count(*)::int` })
+          .from(projects)
+          .where(eq(projects.workspaceId, workspaceId));
+
+        const [activeJobCountRow] = await tx
+          .select({ count: sql<number>`count(*)::int` })
+          .from(buildJobs)
+          .where(
+            and(
+              eq(buildJobs.workspaceId, workspaceId),
+              or(
+                eq(buildJobs.status, "queued"),
+                eq(buildJobs.status, "building"),
+                eq(buildJobs.status, "verifying")
+              )
             )
-          )
-        );
+          );
 
-      const [balanceRow] = await tx
-        .select({
-          total: sql<number>`coalesce(sum(${creditsLedger.deltaCents}), 0)::int`,
-        })
-        .from(creditsLedger)
-        .where(eq(creditsLedger.workspaceId, workspaceId));
+        const [balanceRow] = await tx
+          .select({
+            total: sql<number>`coalesce(sum(${creditsLedger.deltaCents}), 0)::int`,
+          })
+          .from(creditsLedger)
+          .where(eq(creditsLedger.workspaceId, workspaceId));
 
-      return {
-        workspaceProjects: projs,
-        projectCount: Number(projectCountRow?.count ?? 0),
-        activeBuildCount: Number(activeJobCountRow?.count ?? 0),
-        balanceCents: Math.max(0, Number(balanceRow?.total ?? 0)),
-      };
+        return {
+          workspaceProjects: projs,
+          projectCount: Number(projectCountRow?.count ?? 0),
+          activeBuildCount: Number(activeJobCountRow?.count ?? 0),
+          balanceCents: Math.max(0, Number(balanceRow?.total ?? 0)),
+        };
+      }
+    );
+    workspaceProjects = res.workspaceProjects;
+    projectCount = res.projectCount;
+    activeBuildCount = res.activeBuildCount;
+    balanceCents = res.balanceCents;
+  } catch (err: any) {
+    if (process.env.NODE_ENV !== "development") {
+      throw err;
     }
-  );
+  }
 
   const totalProjects = projectCount;
   const freeAnalysisRemaining = Math.max(0, 1 - (user.analysisCreditsUsed || 0));

@@ -17,22 +17,29 @@ export default async function ProjectsListPage() {
     redirect("/login");
   }
 
-  const workspaceProjects = await withTenant(
-    { userId: session.user.id, workspaceId: session.workspace.id },
-    (tx) =>
-      tx
-        .select({
-          id: projects.id,
-          name: projects.name,
-          description: projects.description,
-          status: projects.status,
-          createdAt: projects.createdAt,
-          updatedAt: projects.updatedAt,
-        })
-        .from(projects)
-        .where(eq(projects.workspaceId, session.workspace.id))
-        .orderBy(desc(projects.createdAt))
-  );
+  let workspaceProjects: any[] = [];
+  try {
+    workspaceProjects = await withTenant(
+      { userId: session.user.id, workspaceId: session.workspace.id },
+      (tx) =>
+        tx
+          .select({
+            id: projects.id,
+            name: projects.name,
+            description: projects.description,
+            status: projects.status,
+            createdAt: projects.createdAt,
+            updatedAt: projects.updatedAt,
+          })
+          .from(projects)
+          .where(eq(projects.workspaceId, session.workspace.id))
+          .orderBy(desc(projects.createdAt))
+    );
+  } catch (err: any) {
+    if (process.env.NODE_ENV !== "development") {
+      throw err;
+    }
+  }
 
   return (
     <div className="space-y-8 font-sans text-foreground">

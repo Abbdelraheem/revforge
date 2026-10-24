@@ -150,12 +150,9 @@ function Brand({ compact = false }: { compact?: boolean }) {
   return (
     <Link
       href="/dashboard"
-      className="flex items-center gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      className="flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       aria-label={`${BRAND.name} workspace home`}
     >
-      <span className="flex h-9 w-9 items-center justify-center rounded-md border border-border bg-muted/40 text-foreground">
-        <BrandLogo className="h-5 w-5" />
-      </span>
       <span className={cn("font-serif text-lg font-bold tracking-tight", compact && "text-base")}>
         {BRAND.name}
       </span>

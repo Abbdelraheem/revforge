@@ -9,11 +9,8 @@ export function MarketingFooter() {
       <div className="max-w-7xl mx-auto px-6 py-12 grid grid-cols-2 md:grid-cols-5 gap-8">
         {/* Brand Col */}
         <div className="col-span-2 space-y-3">
-          <div className="flex items-center space-x-2.5">
-            <div className="h-7 w-7 rounded border border-border bg-background flex items-center justify-center">
-              <BrandLogo className="h-4 w-4" />
-            </div>
-            <span className="font-bold text-foreground text-sm font-serif">{BRAND.name}</span>
+          <div className="flex items-center">
+            <span className="font-bold text-foreground text-base font-serif">{BRAND.name}</span>
           </div>
           <p className="text-muted-foreground text-sm leading-relaxed max-w-sm">
             Independent software architecture reconstruction, technical scoping, and clean-room source code generation platform.
