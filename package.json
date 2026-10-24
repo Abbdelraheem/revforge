@@ -14,7 +14,8 @@
     "preview:worker": "tsx scripts/preview-worker.ts",
     "prompts:eval": "tsx scripts/prompts-eval.ts",
     "prompts:live": "tsx scripts/prompts-live.ts",
-    "bench": "tsx scripts/bench.ts"
+    "bench": "tsx scripts/bench.ts",
+    "launch-gate": "tsx scripts/launch-gate.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.135.0",
