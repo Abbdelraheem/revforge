@@ -57,7 +57,7 @@ export default function ContactPage() {
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       <MarketingHeader />
 
-      <main className="flex-1 py-16 px-6 max-w-6xl mx-auto w-full">
+      <main id="main-content" className="flex-1 py-16 px-6 max-w-6xl mx-auto w-full">
         {/* Header */}
         <div className="space-y-4 mb-12 border-b border-border pb-8">
           <p className="text-sm font-semibold tracking-wider text-primary uppercase">SECURE COMMUNICATIONS &amp; ENTERPRISE
@@ -141,8 +141,9 @@ export default function ContactPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
-                        <label className="text-sm font-mono font-medium text-foreground">Full Name *</label>
+                        <label htmlFor="contact-name" className="text-sm font-mono font-medium text-foreground">Full Name *</label>
                         <Input
+                          id="contact-name"
                           required
                           value={formData.name}
                           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -152,8 +153,9 @@ export default function ContactPage() {
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-sm font-mono font-medium text-foreground">Work Email *</label>
+                        <label htmlFor="contact-email" className="text-sm font-mono font-medium text-foreground">Work Email *</label>
                         <Input
+                          id="contact-email"
                           required
                           type="email"
                           value={formData.email}
@@ -166,8 +168,9 @@ export default function ContactPage() {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
-                        <label className="text-sm font-mono font-medium text-foreground">Organization / Company</label>
+                        <label htmlFor="contact-organization" className="text-sm font-mono font-medium text-foreground">Organization / Company</label>
                         <Input
+                          id="contact-organization"
                           value={formData.organization}
                           onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
                           placeholder="Acme Systems Corp."
@@ -176,8 +179,9 @@ export default function ContactPage() {
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="text-sm font-mono font-medium text-foreground">Inquiry Category</label>
+                        <label htmlFor="contact-inquiry-type" className="text-sm font-mono font-medium text-foreground">Inquiry Category</label>
                         <select
+                          id="contact-inquiry-type"
                           value={formData.inquiryType}
                           onChange={(e) => setFormData({ ...formData, inquiryType: e.target.value })}
                           className="w-full h-9 rounded border border-input bg-background px-3 py-1 text-sm font-mono shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
@@ -193,8 +197,9 @@ export default function ContactPage() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="text-sm font-mono font-medium text-foreground">Project Scope &amp; Technical Details *</label>
+                      <label htmlFor="contact-scope" className="text-sm font-mono font-medium text-foreground">Project Scope &amp; Technical Details *</label>
                       <textarea
+                        id="contact-scope"
                         required
                         rows={4}
                         value={formData.message}

@@ -11,8 +11,15 @@ export function MarketingHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="border-b border-border bg-background sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+    <>
+      <a
+        href="#main-content"
+        className="skip-link rounded-md border border-border bg-card px-4 py-2 text-sm font-semibold text-foreground shadow-sm"
+      >
+        Skip to main content
+      </a>
+      <header className="sticky top-0 z-50 border-b border-border bg-background">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         {/* Brand Name (Typographic Only, No Logo Icon) */}
         <Link href="/" className="flex flex-col group focus-visible:outline-none">
           <span className="font-bold text-lg sm:text-xl tracking-tight text-foreground font-serif group-hover:text-primary transition-colors">
@@ -24,7 +31,10 @@ export function MarketingHeader() {
         </Link>
 
         {/* Desktop Navigation Links */}
-        <nav className="hidden lg:flex items-center space-x-6 xl:space-x-7 text-sm font-semibold text-muted-foreground">
+        <nav
+          aria-label="Primary navigation"
+          className="hidden items-center space-x-6 text-sm font-semibold text-muted-foreground lg:flex xl:space-x-7"
+        >
           <Link href="/how-it-works" className="hover:text-foreground transition">
             How It Works
           </Link>
@@ -61,9 +71,12 @@ export function MarketingHeader() {
         {/* Mobile Hamburger Button */}
         <div className="flex lg:hidden">
           <button
+            type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 text-muted-foreground hover:text-foreground focus-visible:outline-none"
-            aria-label="Toggle navigation menu"
+            className="rounded-md p-2 text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+            aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="marketing-mobile-navigation"
           >
             {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
@@ -72,7 +85,11 @@ export function MarketingHeader() {
 
       {/* Mobile Dropdown Menu */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-b border-border bg-card px-6 py-4 space-y-3">
+        <nav
+          id="marketing-mobile-navigation"
+          aria-label="Mobile navigation"
+          className="space-y-3 border-b border-border bg-card px-6 py-4 lg:hidden"
+        >
           <Link
             href="/how-it-works"
             className="block text-sm font-semibold text-muted-foreground hover:text-foreground"
@@ -120,8 +137,9 @@ export function MarketingHeader() {
               </Button>
             </Link>
           </div>
-        </div>
+        </nav>
       )}
-    </header>
+      </header>
+    </>
   );
 }

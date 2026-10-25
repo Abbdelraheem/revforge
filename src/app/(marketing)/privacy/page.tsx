@@ -14,7 +14,7 @@ export default function PrivacyPage() {
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       <MarketingHeader />
 
-      <main className="flex-1 py-16 px-6 max-w-4xl mx-auto w-full">
+      <main id="main-content" className="flex-1 py-16 px-6 max-w-4xl mx-auto w-full">
         <div className="space-y-4 mb-10 border-b border-border pb-6">
           <p className="text-sm font-semibold tracking-wider text-primary uppercase">DATA PRIVACY & PROTECTION
           </p>

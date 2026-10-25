@@ -5,7 +5,13 @@ export function middleware(req: NextRequest) {
   const path = req.nextUrl.pathname;
 
   // Protected route checking: (app) routes and (admin) routes
-  const isAppRoute = path.startsWith("/dashboard") || path.startsWith("/projects") || path.startsWith("/settings");
+  const isAppRoute =
+    path.startsWith("/dashboard") ||
+    path.startsWith("/projects") ||
+    path.startsWith("/settings") ||
+    path.startsWith("/billing") ||
+    path.startsWith("/team") ||
+    path.startsWith("/notifications");
   const isAdminRoute = path.startsWith("/admin");
 
   const sessionToken = req.cookies.get("revforge_session_token")?.value;

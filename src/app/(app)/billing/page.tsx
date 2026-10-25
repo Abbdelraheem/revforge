@@ -109,10 +109,12 @@ export default async function BillingPage() {
           <CardContent className="space-y-1">
             <div className="text-xl font-bold text-foreground flex items-center space-x-2">
               <ShieldCheck className="h-5 w-5 text-primary" />
-              <span>1 Free Analysis</span>
+              <span>
+                {Math.max(0, 1 - (session.user.analysisCreditsUsed || 0))} Free Analysis
+              </span>
             </div>
             <p className="text-sm text-muted-foreground">
-              Subsequent analyses: $5 (credited to build)
+              Additional analyses use the analysis fee recorded at checkout.
             </p>
           </CardContent>
         </Card>

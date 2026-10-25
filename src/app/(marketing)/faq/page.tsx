@@ -88,7 +88,7 @@ export default function FaqPage() {
     <div className="min-h-screen flex flex-col bg-background text-foreground font-sans">
       <MarketingHeader />
 
-      <main className="flex-1 py-16 px-6 max-w-5xl mx-auto w-full">
+      <main id="main-content" className="flex-1 py-16 px-6 max-w-5xl mx-auto w-full">
         {/* Header */}
         <div className="space-y-4 mb-12 text-center max-w-3xl mx-auto">
           <p className="text-sm font-semibold tracking-wider text-primary uppercase">KNOWLEDGE BASE & FAQ

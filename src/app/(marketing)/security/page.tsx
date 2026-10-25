@@ -73,7 +73,7 @@ export default function SecurityPage() {
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
       <MarketingHeader />
 
-      <main className="flex-1 max-w-5xl w-full mx-auto px-6 py-16 space-y-16">
+      <main id="main-content" className="flex-1 max-w-5xl w-full mx-auto px-6 py-16 space-y-16">
         {/* Header */}
         <div className="space-y-4 max-w-2xl">
           <p className="text-sm font-semibold tracking-wider text-primary uppercase">Zero-Trust Threat Model</p>

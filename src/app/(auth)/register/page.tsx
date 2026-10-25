@@ -51,7 +51,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center px-4 py-12 bg-background text-foreground font-sans">
+    <main id="main-content" className="min-h-screen flex flex-col justify-center items-center px-4 py-12 bg-background text-foreground font-sans">
       <div className="w-full max-w-md space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-2">
@@ -105,10 +105,12 @@ export default function RegisterPage() {
             <form onSubmit={handleRegister} className="space-y-3.5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-foreground">Full Name</label>
+                  <label htmlFor="register-name" className="text-sm font-semibold text-foreground">Full Name</label>
                   <div className="relative">
                     <User className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
+                      id="register-name"
+                      autoComplete="name"
                       required
                       value={name}
                       onChange={(e) => setName(e.target.value)}
@@ -119,10 +121,12 @@ export default function RegisterPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-foreground">Organization</label>
+                  <label htmlFor="register-organization" className="text-sm font-semibold text-foreground">Organization</label>
                   <div className="relative">
                     <Building className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input
+                      id="register-organization"
+                      autoComplete="organization"
                       value={organization}
                       onChange={(e) => setOrganization(e.target.value)}
                       placeholder="Acme Engineering"
@@ -133,10 +137,12 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-foreground">Work Email</label>
+                <label htmlFor="register-email" className="text-sm font-semibold text-foreground">Work Email</label>
                 <div className="relative">
                   <Mail className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
+                    id="register-email"
+                    autoComplete="email"
                     required
                     type="email"
                     value={email}
@@ -148,10 +154,12 @@ export default function RegisterPage() {
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-foreground">Password</label>
+                <label htmlFor="register-password" className="text-sm font-semibold text-foreground">Password</label>
                 <div className="relative">
                   <Lock className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
+                    id="register-password"
+                    autoComplete="new-password"
                     required
                     type="password"
                     value={password}
@@ -210,6 +218,6 @@ export default function RegisterPage() {
           <span>Non-Root Sandbox | Clean-Room Separation</span>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

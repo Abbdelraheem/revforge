@@ -30,7 +30,10 @@ export function DiffViewer({
 
       <div
         dir="ltr"
-        className="p-2 overflow-x-auto code-island select-text"
+        tabIndex={0}
+        role="region"
+        aria-label="Code diff, scrollable"
+        className="p-2 overflow-x-auto code-island select-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
         style={{ maxHeight }}
       >
         <table className="w-full border-collapse">

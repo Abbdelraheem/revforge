@@ -51,7 +51,7 @@ export default function PricingPage() {
     <div className="min-h-screen flex flex-col bg-background text-foreground font-sans">
       <MarketingHeader />
 
-      <main className="flex-1 py-16 px-6 max-w-7xl mx-auto w-full space-y-16">
+      <main id="main-content" className="flex-1 py-16 px-6 max-w-7xl mx-auto w-full space-y-16">
         {/* Header */}
         <div className="text-center space-y-3 max-w-3xl mx-auto">
           <p className="text-sm font-semibold tracking-wider text-primary uppercase">
@@ -296,10 +296,11 @@ export default function PricingPage() {
               {/* Sliders */}
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="font-semibold text-foreground">Estimated Engineering Hours:</span>
+                  <label htmlFor="pricing-hours" className="font-semibold text-foreground">Estimated Engineering Hours:</label>
                   <span className="font-mono font-bold text-primary">{estimatedHours} hrs</span>
                 </div>
                 <input
+                  id="pricing-hours"
                   type="range"
                   min="4"
                   max="160"

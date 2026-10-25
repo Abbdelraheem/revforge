@@ -1,38 +1,74 @@
 /**
- * Contrast checking script for design tokens against WCAG AA (4.5:1 for normal text).
+ * WCAG AA contrast gate for the text/surface token pairs used by the app.
+ *
+ * Normal text must be at least 4.5:1. The script exits non-zero when any
+ * pair used by a normal-size label falls below that threshold.
  */
 
-function luminance(r: number, g: number, b: number): number {
-  const [rs, gs, bs] = [r, g, b].map((c) => {
-    const s = c / 255;
-    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
-  });
-  return 0.2126 * (rs ?? 0) + 0.7152 * (gs ?? 0) + 0.0722 * (bs ?? 0);
+type Rgb = [number, number, number];
+
+function hsl(h: number, s: number, l: number): Rgb {
+  const saturation = s / 100;
+  const lightness = l / 100;
+  const chroma = saturation * Math.min(lightness, 1 - lightness);
+  const channel = (n: number) => {
+    const k = (n + h / 30) % 12;
+    return lightness - chroma * Math.max(-1, Math.min(k - 3, Math.min(9 - k, 1)));
+  };
+  return [channel(0), channel(8), channel(4)].map((value) =>
+    Math.round(255 * value)
+  ) as Rgb;
 }
 
-function contrast(rgb1: [number, number, number], rgb2: [number, number, number]): number {
-  const l1 = luminance(...rgb1);
-  const l2 = luminance(...rgb2);
-  const brightest = Math.max(l1, l2);
-  const darkest = Math.min(l1, l2);
-  return (brightest + 0.05) / (darkest + 0.05);
+function luminance(rgb: Rgb): number {
+  const [r, g, b] = rgb.map((channel) => {
+    const value = channel / 255;
+    return value <= 0.03928 ? value / 12.92 : Math.pow((value + 0.055) / 1.055, 2.4);
+  }) as Rgb;
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
-// Warm paper background: #fbf9f4 (251, 249, 244)
-const paper: [number, number, number] = [251, 249, 244];
-// Dark ink foreground: #1c1917 (28, 25, 23)
-const ink: [number, number, number] = [28, 25, 23];
-// Forge vermilion primary: #c2410c (194, 65, 12)
-const vermilion: [number, number, number] = [194, 65, 12];
-
-const textContrast = contrast(ink, paper);
-const primaryContrast = contrast(vermilion, paper);
-
-process.stdout.write(`Paper (#fbf9f4) vs Ink (#1c1917) Contrast: ${textContrast.toFixed(2)}:1 (Passes WCAG AAA >= 7:1)\n`);
-process.stdout.write(`Paper (#fbf9f4) vs Vermilion (#c2410c) Contrast: ${primaryContrast.toFixed(2)}:1 (Passes WCAG AA >= 4.5:1)\n`);
-
-if (textContrast < 4.5 || primaryContrast < 4.5) {
-  process.exit(1);
-} else {
-  process.exit(0);
+function contrast(foreground: Rgb, background: Rgb): number {
+  const first = luminance(foreground);
+  const second = luminance(background);
+  return (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05);
 }
+
+const paper = hsl(40, 30, 97);
+const card = hsl(0, 0, 100);
+const ink = hsl(28, 14, 11);
+const primary = hsl(16, 78, 42);
+const primaryForeground = hsl(40, 30, 98);
+const muted = hsl(38, 18, 94);
+const mutedForeground = hsl(28, 8, 36);
+
+const pairs: Array<{ name: string; foreground: Rgb; background: Rgb }> = [
+  { name: "Ink on paper", foreground: ink, background: paper },
+  { name: "Ink on card", foreground: ink, background: card },
+  { name: "Primary on paper", foreground: primary, background: paper },
+  { name: "Primary on card", foreground: primary, background: card },
+  {
+    name: "Primary-foreground on primary",
+    foreground: primaryForeground,
+    background: primary,
+  },
+  { name: "Muted foreground on paper", foreground: mutedForeground, background: paper },
+  { name: "Muted foreground on card", foreground: mutedForeground, background: card },
+  { name: "Muted foreground on muted", foreground: mutedForeground, background: muted },
+  { name: "Success on card", foreground: hsl(150, 50, 28), background: card },
+  { name: "Warning on card", foreground: hsl(36, 92, 34), background: card },
+  { name: "Destructive on card", foreground: hsl(0, 66, 44), background: card },
+  { name: "Info on card", foreground: hsl(208, 55, 38), background: card },
+];
+
+let failed = false;
+for (const pair of pairs) {
+  const ratio = contrast(pair.foreground, pair.background);
+  const pass = ratio >= 4.5;
+  if (!pass) failed = true;
+  process.stdout.write(
+    `${pass ? "PASS" : "FAIL"}  ${pair.name}: ${ratio.toFixed(2)}:1 (minimum 4.50:1)\n`
+  );
+}
+
+process.exit(failed ? 1 : 0);

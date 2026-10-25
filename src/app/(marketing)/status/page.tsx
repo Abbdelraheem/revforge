@@ -1,11 +1,10 @@
 import React from "react";
-import { checkSystemHealth, HealthReport } from "@/lib/health/probe";
+import type { HealthReport } from "@/lib/health/probe";
 import { MarketingHeader } from "@/components/shared/marketing-header";
 import { MarketingFooter } from "@/components/shared/marketing-footer";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BRAND } from "@/config/brand";
-import { systemDb } from "@/db";
 import { workerHeartbeats, auditLog } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
 
@@ -26,14 +25,18 @@ export default async function StatusPage() {
   };
 
   try {
+    // Load the probe lazily so a rejected runtime configuration renders the
+    // public status page as down instead of failing the whole route import.
+    const { checkSystemHealth } = await import("@/lib/health/probe");
     health = await checkSystemHealth();
   } catch {
-    // Graceful fallback if probe throws
+    // The fallback above intentionally reports every dependency as unavailable.
   }
 
   let activeWorkers: Array<{ id: string; lastSeen: Date; capacity: number; version: string }> = [];
   let incidentLogs: Array<{ id: string; action: string; createdAt: Date; metadata: any }> = [];
   try {
+    const { systemDb } = await import("@/db");
     activeWorkers = await systemDb
       .select()
       .from(workerHeartbeats)
@@ -69,7 +72,7 @@ export default async function StatusPage() {
     <div className="min-h-screen flex flex-col bg-background text-foreground font-sans">
       <MarketingHeader />
 
-      <main className="flex-1 py-16 px-6 max-w-5xl mx-auto w-full space-y-10">
+      <main id="main-content" className="flex-1 py-16 px-6 max-w-5xl mx-auto w-full space-y-10">
         <div className="space-y-4 border-b border-border pb-6">
           <p className="text-sm font-semibold tracking-wider text-primary uppercase">REAL-TIME TELEMETRY
           </p>
@@ -181,7 +184,9 @@ export default async function StatusPage() {
                 <div className="text-center py-6 space-y-2 text-muted-foreground">
                   <span className="h-2 w-2 rounded-full bg-emerald-500 inline-block mr-2" />
                   <span className="font-semibold text-sm text-foreground">No incidents reported in the past 90 days.</span>
-                  <p className="text-sm">All core APIs, webhooks, and sandboxed compilation workers maintained 99.9% uptime.</p>
+                  <p className="text-sm">
+                    No incident rows are stored for this window. This is not an uptime commitment.
+                  </p>
                 </div>
               ) : (
                 incidentLogs.map((inc) => (

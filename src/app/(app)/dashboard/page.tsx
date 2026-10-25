@@ -197,12 +197,14 @@ export default async function DashboardPage() {
               <Activity className="h-4 w-4 text-primary" />
             </CardDescription>
             <CardTitle className="text-2xl font-bold font-mono">
-              {freeAnalysisRemaining > 0 ? "1 Available" : "Standard ($5)"}
+              {freeAnalysisRemaining > 0 ? "1 Available" : "Standard"}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              {freeAnalysisRemaining > 0 ? "First architectural analysis is complimentary" : "Credited towards rebuild checkout"}
+              {freeAnalysisRemaining > 0
+                ? "First architectural analysis is complimentary"
+                : "Additional analyses use the analysis fee recorded at checkout"}
             </p>
           </CardContent>
         </Card>

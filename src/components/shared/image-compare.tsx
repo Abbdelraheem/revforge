@@ -60,6 +60,7 @@ export function ImageCompare({
         max={100}
         value={sliderPos}
         onChange={(e) => setSliderPos(Number(e.target.value))}
+        aria-label="Comparison slider position"
         className="absolute inset-0 opacity-0 cursor-ew-resize w-full h-full z-10"
       />
     </div>

@@ -60,7 +60,10 @@ export function CodeViewer({
       {/* Code Content Island (Strict LTR) */}
       <div
         dir="ltr"
-        className="p-4 overflow-x-auto text-start code-island select-text"
+        tabIndex={0}
+        role="region"
+        aria-label="Source code, scrollable"
+        className="p-4 overflow-x-auto text-start code-island select-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
         style={{ maxHeight }}
       >
         <table className="w-full border-collapse">

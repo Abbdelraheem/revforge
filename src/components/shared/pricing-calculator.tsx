@@ -79,10 +79,11 @@ export function PricingCalculator() {
 
           <div className="space-y-2 pt-2">
             <div className="flex justify-between items-center">
-              <label className="font-semibold text-foreground">Estimated Engineering Hours:</label>
+              <label htmlFor="pricing-calculator-hours" className="font-semibold text-foreground">Estimated Engineering Hours:</label>
               <span className="font-mono font-bold text-primary">{estimatedHours} hrs</span>
             </div>
             <input
+              id="pricing-calculator-hours"
               type="range"
               min={4}
               max={160}

@@ -53,7 +53,7 @@ export default async function AdminMarginsPage({
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 font-sans">
       <div className="space-y-2 border-b border-border pb-4">
         <p className="text-sm font-semibold tracking-wider text-primary uppercase">
-          Profit Accounting
+          Margin Accounting
         </p>
         <h1 className="text-3xl font-serif font-bold text-foreground">Margins</h1>
         <p className="text-sm text-muted-foreground max-w-3xl">
@@ -149,7 +149,7 @@ export default async function AdminMarginsPage({
                   <th className="p-3 text-end font-semibold">Revenue</th>
                   <th className="p-3 text-end font-semibold">Fees</th>
                   <th className="p-3 text-end font-semibold">Provider</th>
-                  <th className="p-3 text-end font-semibold">Profit</th>
+                  <th className="p-3 text-end font-semibold">Contribution</th>
                   <th className="p-3 text-end font-semibold">Margin</th>
                   <th className="p-3 text-end font-semibold">Liability</th>
                 </tr>
@@ -215,7 +215,7 @@ export default async function AdminMarginsPage({
                   <th className="p-3 text-end font-semibold">Revenue</th>
                   <th className="p-3 text-end font-semibold">Fees</th>
                   <th className="p-3 text-end font-semibold">Provider</th>
-                  <th className="p-3 text-end font-semibold">Profit</th>
+                  <th className="p-3 text-end font-semibold">Contribution</th>
                   <th className="p-3 text-end font-semibold">Margin</th>
                 </tr>
               </thead>

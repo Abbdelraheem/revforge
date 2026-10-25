@@ -41,7 +41,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center px-4 py-12 bg-background text-foreground font-sans">
+    <main id="main-content" className="min-h-screen flex flex-col justify-center items-center px-4 py-12 bg-background text-foreground font-sans">
       <div className="w-full max-w-sm space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-2">
@@ -94,10 +94,12 @@ export default function LoginPage() {
 
             <form onSubmit={handleLogin} className="space-y-3.5">
               <div className="space-y-1.5">
-                <label className="text-sm font-semibold text-foreground">Work Email</label>
+                <label htmlFor="login-email" className="text-sm font-semibold text-foreground">Work Email</label>
                 <div className="relative">
                   <Mail className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
+                    id="login-email"
+                    autoComplete="email"
                     required
                     type="email"
                     value={email}
@@ -110,14 +112,16 @@ export default function LoginPage() {
 
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-sm font-semibold text-foreground">Password</label>
-                  <Link href="/forgot-password" className="text-sm text-primary hover:underline">
+                  <label htmlFor="login-password" className="text-sm font-semibold text-foreground">Password</label>
+                  <Link href="/forgot-password" className="text-sm text-primary underline underline-offset-2 hover:no-underline">
                     Forgot password?
                   </Link>
                 </div>
                 <div className="relative">
                   <Lock className="absolute start-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
+                    id="login-password"
+                    autoComplete="current-password"
                     required
                     type="password"
                     value={password}
@@ -155,6 +159,6 @@ export default function LoginPage() {
           <span>Encrypted Session | Strict Access Controls</span>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

@@ -29,7 +29,7 @@ export default function DemoShowcasePage() {
     <div className="min-h-screen flex flex-col bg-background text-foreground font-sans">
       <MarketingHeader />
 
-      <main className="flex-1 py-12 px-6 max-w-7xl mx-auto w-full space-y-10">
+      <main id="main-content" className="flex-1 py-12 px-6 max-w-7xl mx-auto w-full space-y-10">
         {/* Banner */}
         <div className="p-4 rounded-lg border border-primary/30 bg-primary/5 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">

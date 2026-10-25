@@ -1,23 +1,31 @@
-import { MetadataRoute } from "next";
+import type { MetadataRoute } from "next";
+
+function baseUrl(): string {
+  const configured = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL;
+  return (configured || "http://localhost:3000").replace(/\/$/, "");
+}
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://revforge.ai";
-
   return {
     rules: [
       {
         userAgent: "*",
-        allow: "/",
+        allow: ["/", "/pricing", "/how-it-works", "/use-cases", "/security", "/faq"],
         disallow: [
-          "/api/",
-          "/dashboard/",
-          "/admin/",
-          "/projects/",
-          "/share/",
-          "/dev/",
+          "/dashboard",
+          "/projects",
+          "/billing",
+          "/team",
+          "/settings",
+          "/notifications",
+          "/admin",
+          "/api",
+          "/dev",
+          "/design-system",
         ],
       },
     ],
-    sitemap: `${baseUrl}/sitemap.xml`,
+    sitemap: `${baseUrl()}/sitemap.xml`,
+    host: baseUrl(),
   };
 }

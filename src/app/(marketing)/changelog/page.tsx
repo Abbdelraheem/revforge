@@ -19,7 +19,7 @@ export default function ChangelogPage() {
     <div className="min-h-screen flex flex-col bg-background text-foreground font-sans">
       <MarketingHeader />
 
-      <main className="flex-1 py-16 px-6 max-w-4xl mx-auto w-full space-y-12">
+      <main id="main-content" className="flex-1 py-16 px-6 max-w-4xl mx-auto w-full space-y-12">
         {/* Header */}
         <div className="space-y-4 border-b border-border pb-8">
           <p className="text-sm font-semibold tracking-wider text-primary uppercase">ENGINEERING RELEASES

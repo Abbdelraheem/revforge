@@ -113,7 +113,7 @@ export default async function SharedReportPage({ params }: Props) {
     <div className="min-h-screen flex flex-col bg-background text-foreground font-sans">
       <MarketingHeader />
 
-      <main className="flex-1 py-12 px-6 max-w-5xl mx-auto w-full space-y-10">
+      <main id="main-content" className="flex-1 py-12 px-6 max-w-5xl mx-auto w-full space-y-10">
         {/* Unlisted Notice */}
         <div className="p-4 rounded-lg border border-border bg-muted/20 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">

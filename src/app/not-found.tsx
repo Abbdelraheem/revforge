@@ -1,49 +1,55 @@
 import React from "react";
 import Link from "next/link";
-import { Terminal, ArrowLeft, ArrowRight, ShieldAlert } from "lucide-react";
+import { Terminal, ArrowLeft, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { BRAND } from "@/config/brand";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-background text-foreground font-mono">
-      <div className="max-w-md w-full p-8 rounded border border-border bg-card space-y-6 text-center">
-        <div className="h-12 w-12 rounded border border-border bg-muted flex items-center justify-center mx-auto text-muted-foreground">
+    <main
+      id="main-content"
+      className="flex min-h-screen flex-col items-center justify-center bg-background p-6 font-mono text-foreground"
+    >
+      <div className="w-full max-w-md space-y-6 rounded-lg border border-border bg-card p-8 text-center shadow-sm">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-border bg-muted text-muted-foreground">
           <Terminal className="h-6 w-6 text-primary" />
         </div>
 
         <div className="space-y-2">
-          <span className="font-mono text-sm uppercase text-muted-foreground font-semibold">ERR_404: Resource Not Found</span>
-          <h1 className="text-xl font-bold text-foreground">
-            Specified Endpoint Does Not Exist
+          <Badge variant="outline" className="text-sm">
+            404 — Resource not found
+          </Badge>
+          <h1 className="font-serif text-2xl font-bold text-foreground">
+            This route does not exist
           </h1>
-          <p className="text-sm text-muted-foreground font-sans leading-relaxed">
-            The requested route or target archive was not found within the {BRAND.name} registry or has been purged per zero-retention policies.
+          <p className="font-sans text-sm leading-relaxed text-muted-foreground">
+            The requested page is not present in {BRAND.name}. It may have moved, or the link may
+            be incomplete. No substitute record is shown.
           </p>
         </div>
 
-        <div className="p-3 rounded border border-border bg-background text-left text-sm text-muted-foreground space-y-1">
-          <div>$ status: 404 Not Found</div>
-          <div>$ perimeter: public_gateway</div>
-          <div>$ action: reroute_to_origin</div>
+        <div className="space-y-1 rounded-md border border-border bg-background p-3 text-start text-sm text-muted-foreground">
+          <div>status: 404 Not Found</div>
+          <div>perimeter: public gateway</div>
+          <div>action: reroute to a known page</div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-          <Link href="/" className="w-full sm:w-auto">
-            <Button size="sm" variant="outline" className="w-full text-sm">
+        <div className="flex flex-col items-center justify-center gap-3 pt-2 sm:flex-row">
+          <Button asChild size="sm" variant="outline" className="w-full text-sm sm:w-auto">
+            <Link href="/">
               <ArrowLeft className="me-1.5 h-3.5 w-3.5" />
-              <span>Return Home</span>
-            </Button>
-          </Link>
-          <Link href="/docs" className="w-full sm:w-auto">
-            <Button size="sm" className="w-full text-sm">
-              <span>View Docs</span>
+              <span>Return home</span>
+            </Link>
+          </Button>
+          <Button asChild size="sm" className="w-full text-sm sm:w-auto">
+            <Link href="/docs">
+              <span>View docs</span>
               <ArrowRight className="ms-1.5 h-3.5 w-3.5" />
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

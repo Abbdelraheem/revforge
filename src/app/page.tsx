@@ -25,7 +25,7 @@ export default function LandingPage() {
     <div className="min-h-screen flex flex-col bg-background text-foreground font-sans">
       <MarketingHeader />
 
-      <main className="flex-1 space-y-24 pb-20">
+      <main id="main-content" className="flex-1 space-y-24 pb-20">
         {/* Hero Section */}
         <section className="pt-20 pb-12 px-6 max-w-7xl mx-auto text-center space-y-8">
           <p className="text-sm font-semibold tracking-wider text-primary uppercase">

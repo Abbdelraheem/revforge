@@ -14,7 +14,7 @@ export default function RefundPolicyPage() {
     <div className="min-h-screen flex flex-col bg-background text-foreground font-sans">
       <MarketingHeader />
 
-      <main className="flex-1 py-16 px-6 max-w-4xl mx-auto w-full space-y-10">
+      <main id="main-content" className="flex-1 py-16 px-6 max-w-4xl mx-auto w-full space-y-10">
         <div className="space-y-4 border-b border-border pb-6">
           <p className="text-sm font-semibold tracking-wider text-primary uppercase">BILLING & CREDITS POLICY
           </p>
@@ -54,7 +54,7 @@ export default function RefundPolicyPage() {
           <section className="space-y-3">
             <h2 className="text-lg font-serif font-bold text-foreground">4. Analysis Fees</h2>
             <p>
-              Each verified workspace receives 1 complimentary deep static analysis. Subsequent analyses carry a standard $5 assessment fee, which is automatically credited towards the project build quote if you decide to proceed with source synthesis.
+              Each verified workspace receives 1 complimentary deep static analysis. Subsequent analyses use the analysis fee recorded at checkout, which is credited towards the project build quote if you decide to proceed with source synthesis.
             </p>
           </section>
 
@@ -68,7 +68,7 @@ export default function RefundPolicyPage() {
           <section className="space-y-3">
             <h2 className="text-lg font-serif font-bold text-foreground">6. Billing Disputes & Inquiries</h2>
             <p>
-              If you believe an order was processed in error or experience technical discrepancies, contact our engineering billing desk at <a href={`mailto:${BRAND.supportEmail}`} className="text-primary hover:underline">{BRAND.supportEmail}</a>.
+              If you believe an order was processed in error or experience technical discrepancies, contact our engineering billing desk at <a href={`mailto:${BRAND.supportEmail}`} className="text-primary underline underline-offset-2 hover:no-underline">{BRAND.supportEmail}</a>.
             </p>
           </section>
         </div>

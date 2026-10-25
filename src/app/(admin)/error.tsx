@@ -12,23 +12,29 @@ export default function AdminError({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log error to monitoring if needed
+    // Error details stay in the browser; no customer content is sent to a third party.
   }, [error]);
 
   return (
-    <div className="min-h-[50vh] flex flex-col items-center justify-center p-6 text-center space-y-4">
-      <div className="h-12 w-12 rounded-full bg-destructive/10 text-destructive flex items-center justify-center mx-auto">
+    <div
+      role="alert"
+      className="flex min-h-[50vh] flex-col items-center justify-center space-y-4 p-6 text-center"
+    >
+      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
         <AlertCircle className="h-6 w-6" />
       </div>
       <div className="space-y-1">
-        <h2 className="text-xl font-bold font-serif text-foreground">Fleet Operations Error</h2>
-        <p className="text-sm text-muted-foreground max-w-md">
-          {error.message || "An error occurred while loading administrative fleet resources."}
+        <h1 className="font-serif text-xl font-bold text-foreground">Admin page error</h1>
+        <p className="max-w-md text-sm text-muted-foreground">
+          This administrative view could not complete. No metric is replaced with a fallback value.
         </p>
+        {error.digest && (
+          <p className="font-mono text-sm text-muted-foreground">Reference: {error.digest}</p>
+        )}
       </div>
       <Button onClick={() => reset()} className="text-sm font-semibold">
         <RefreshCw className="me-2 h-4 w-4" />
-        <span>Reload View</span>
+        <span>Reload view</span>
       </Button>
     </div>
   );

@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { BRAND } from "@/config/brand";
-import { BrandLogo } from "@/components/shared/brand-logo";
 import { cn } from "@/components/ui/button";
 
 const ADMIN_NAV = [
@@ -14,6 +13,8 @@ const ADMIN_NAV = [
   { href: "/admin/jobs", label: "Build jobs" },
   { href: "/admin/orders", label: "Orders" },
   { href: "/admin/users", label: "Users" },
+  { href: "/admin/funnel", label: "Funnel" },
+  { href: "/admin/support", label: "Support" },
   { href: "/admin/audit", label: "Audit log" },
   { href: "/admin/abuse", label: "Abuse" },
   { href: "/admin/pricing", label: "Pricing" },

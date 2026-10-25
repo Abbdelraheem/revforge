@@ -145,7 +145,7 @@ export default function DocsPage() {
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       <MarketingHeader />
 
-      <main className="flex-1 py-16 px-6 max-w-7xl mx-auto w-full">
+      <main id="main-content" className="flex-1 py-16 px-6 max-w-7xl mx-auto w-full">
         {/* Header */}
         <div className="space-y-4 mb-12 border-b border-border pb-8">
           <div className="flex items-center space-x-2 ">

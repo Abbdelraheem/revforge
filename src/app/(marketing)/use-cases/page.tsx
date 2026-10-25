@@ -45,7 +45,7 @@ export default function UseCasesPage() {
     <div className="min-h-screen bg-background text-foreground flex flex-col font-sans">
       <MarketingHeader />
 
-      <main className="flex-1 max-w-5xl w-full mx-auto px-6 py-16 space-y-16">
+      <main id="main-content" className="flex-1 max-w-5xl w-full mx-auto px-6 py-16 space-y-16">
         <div className="space-y-4 max-w-2xl">
           <p className="text-sm font-semibold tracking-wider text-primary uppercase">Enterprise Scenarios</p>
           <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">

@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
+    "contrast": "tsx scripts/check-contrast.ts",
     "test": "vitest run && tsx scripts/check-schema-drift.ts",
     "test:drift": "tsx scripts/check-schema-drift.ts --require-db",
     "smoke": "tsx scripts/smoke.ts",

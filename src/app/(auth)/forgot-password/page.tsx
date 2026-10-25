@@ -23,7 +23,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center px-4 py-12 bg-background text-foreground font-sans">
+    <main id="main-content" className="min-h-screen flex flex-col justify-center items-center px-4 py-12 bg-background text-foreground font-sans">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center space-y-2">
           <Link href="/" className="inline-flex items-center group">
@@ -97,6 +97,6 @@ export default function ForgotPasswordPage() {
           <span>Encrypted Session | Strict Verification</span>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

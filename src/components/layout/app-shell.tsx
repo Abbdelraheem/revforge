@@ -18,7 +18,6 @@ import {
 } from "lucide-react";
 import type { AuthSession } from "@/lib/auth";
 import { BRAND } from "@/config/brand";
-import { BrandLogo } from "@/components/shared/brand-logo";
 import { logoutAction } from "@/server/actions/auth";
 import { cn } from "@/components/ui/button";
 
