@@ -132,7 +132,7 @@ export default async function AdminJobsPage() {
                 {dlqJobs.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="p-4 text-center text-sm text-muted-foreground">
-                      No poison or dead-letter jobs. System reliability is 100%.
+                      No poison or dead-letter jobs. System operational.
                     </td>
                   </tr>
                 ) : (

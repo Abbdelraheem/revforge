@@ -311,7 +311,7 @@ export default async function DashboardPage() {
                     <ArrowRight className="h-3 w-3" />
                   </Link>
                   <p className="text-sm text-muted-foreground">
-                    Inspect 100% parity verified rebuild of Target 01.
+                    Inspect verified parity rebuild of Target 01.
                   </p>
                 </div>
               </div>

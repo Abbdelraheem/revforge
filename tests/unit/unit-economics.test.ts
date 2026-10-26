@@ -31,13 +31,13 @@ describe("Unit Economics & Margin Control", () => {
     expect(result.formulaInputs).toBeDefined();
     expect(result.formulaInputs.hours).toBe(4);
     expect(result.formulaInputs.marketHourlyRateCents).toBe(4000);
-    expect(result.formulaInputs.minOrderCents).toBe(2900);
+    expect(result.formulaInputs.minOrderCents).toBe(DEFAULT_PRICING_CONFIG_V1.tiers.portfolio.minOrderCents);
     expect(result.projectedMarginPct).toBeGreaterThanOrEqual(MIN_BUILD_MARGIN_PCT);
     expect(result.marginApproved).toBe(true);
   });
 
-  it("flags margin rejection if projected provider cost exceeds 50% of quote", () => {
-    // Artificial high cost override to trigger margin rejection
+  it("applies hard floor when projected provider cost requires higher price to maintain 65% margin", () => {
+    // Artificial high cost override triggers hard floor calculation: cost / (1 - 0.65)
     const result = priceQuote(
       [
         {
@@ -50,12 +50,12 @@ describe("Unit Economics & Margin Control", () => {
       ],
       DEFAULT_PRICING_CONFIG_V1,
       0,
-      { portfolio: 2500 } // $25 cost against a $29 price = 13.8% margin
+      { portfolio: 2500 } // $25 cost requires floor of ceil(2500 / 0.35) = 7143 cents ($71.43)
     );
 
-    expect(result.marginApproved).toBe(false);
-    expect(result.needsReview).toBe(true);
-    expect(result.rejectionReason).toContain("falls below required 50% threshold");
+    expect(result.subtotalCents).toBeGreaterThanOrEqual(7143);
+    expect(result.projectedMarginPct).toBeGreaterThanOrEqual(MIN_BUILD_MARGIN_PCT);
+    expect(result.marginApproved).toBe(true);
   });
 
   it("enforces per-IP free trial limits", () => {

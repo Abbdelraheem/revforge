@@ -79,7 +79,7 @@ export default function HowItWorksPage() {
             How {BRAND.name} Executes Clean-Room Reverse Engineering
           </h1>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Our 8-stage zero-trust pipeline maps observable software boundaries, eliminates prompt and command injections, and synthesizes 100% original, copyright-clean source code in isolated containers.
+            Our 8-stage zero-trust pipeline maps observable software boundaries, eliminates prompt and command injections, and synthesizes independently written, copyright-clean source code in isolated containers.
           </p>
         </div>
 

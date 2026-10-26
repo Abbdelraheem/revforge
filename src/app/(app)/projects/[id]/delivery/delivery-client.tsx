@@ -55,6 +55,12 @@ interface GitArchiveMeta {
   sourceVersionId: string | null;
 }
 
+interface ReviewMeta {
+  verdict: "pass" | "pass-with-gaps" | "fail";
+  customerSummary: string;
+  topFixes?: string[];
+}
+
 interface DeliveryClientProps {
   projectId: string;
   projectName: string;
@@ -72,6 +78,7 @@ interface DeliveryClientProps {
   githubTokenConfigured: boolean;
   recipientEmail: string | null;
   deployGuide: string;
+  review?: ReviewMeta | null;
 }
 
 function formatBytes(bytes: number): string {
@@ -117,6 +124,7 @@ export function DeliveryClient({
   githubTokenConfigured,
   recipientEmail,
   deployGuide,
+  review,
 }: DeliveryClientProps) {
   const { toast } = useToast();
   const [gitLoading, setGitLoading] = useState(false);
@@ -286,6 +294,51 @@ export function DeliveryClient({
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
+          {review && (
+            <Card className="border-border bg-card shadow-sm">
+              <CardHeader className="border-b border-border pb-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="h-5 w-5 text-primary" />
+                    <CardTitle className="font-serif text-base font-bold">
+                      Independent Code Review
+                    </CardTitle>
+                  </div>
+                  <Badge
+                    variant={
+                      review.verdict === "pass"
+                        ? "default"
+                        : review.verdict === "pass-with-gaps"
+                        ? "outline"
+                        : "destructive"
+                    }
+                    className="font-mono text-sm uppercase"
+                  >
+                    Verdict: {review.verdict}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-3 pt-4 text-sm">
+                <p className="leading-relaxed text-foreground">
+                  {review.customerSummary}
+                </p>
+                {review.topFixes && review.topFixes.length > 0 && (
+                  <div className="rounded border border-border bg-muted/20 p-3">
+                    <span className="font-bold text-foreground">Top Fixes:</span>
+                    <ul className="mt-1 list-disc ps-5 space-y-1 text-muted-foreground text-sm">
+                      {review.topFixes.map((fix, idx) => (
+                        <li key={idx}>{fix}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                <p className="text-sm text-muted-foreground">
+                  Detailed inspection stored as <code className="font-mono">REVIEW.md</code> in the delivered ZIP archive.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
           <Card className="border-border bg-card shadow-sm">
             <CardHeader className="border-b border-border pb-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
@@ -404,7 +457,7 @@ export function DeliveryClient({
                   Inside the archive
                 </div>
                 <p>
-                  Source files, `PARITY_REPORT.md`, `EVIDENCE_LEDGER.md`,
+                  Source files, `REVIEW.md`, `PARITY_REPORT.md`, `EVIDENCE_LEDGER.md`,
                   `LICENSE-NOTICE.md`, `DEPLOY.md`, `DELIVERY_METADATA.json`, and
                   `CHECKSUMS.txt`. The checksum file covers every archived file
                   except itself.

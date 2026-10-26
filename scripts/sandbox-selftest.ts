@@ -186,6 +186,30 @@ async function main() {
   }
 
   console.log("===========================================");
+  // Write machine-readable artifact for launch-gate verification
+  try {
+    const fs = await import("node:fs");
+    const path = await import("node:path");
+    const artifactDir = path.resolve(process.cwd(), "artifacts");
+    if (!fs.existsSync(artifactDir)) {
+      fs.mkdirSync(artifactDir, { recursive: true });
+    }
+    fs.writeFileSync(
+      path.join(artifactDir, "sandbox-selftest.json"),
+      JSON.stringify(
+        {
+          timestamp: new Date().toISOString(),
+          dockerAvailable: dockerLive,
+          passed: allPassed,
+          results,
+        },
+        null,
+        2
+      ),
+      "utf8"
+    );
+  } catch {}
+
   if (!allPassed) {
     console.error("FAIL: One or more sandbox containment checks failed!");
     process.exit(1);

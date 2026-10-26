@@ -35,15 +35,15 @@ export default function TermsPage() {
           </section>
 
           <section className="space-y-2">
-            <h2 className="text-base font-serif font-bold text-foreground">2. Clean-Room Methodology & IP Ownership</h2>
+            <h2 className="text-base font-serif font-bold text-foreground">2. Clean-Room Methodology & Client Rights</h2>
             <p>
               {BRAND.name} operates as an automated clean-room reverse engineering and technical synthesis platform. The Service analyses target binaries, web endpoints, and metadata to generate functional specifications (the &quot;Evidence Ledger&quot;), which are subsequently used to synthesize original, clean-room source code.
             </p>
             <p>
-              <strong>Client Ownership:</strong> You retain full, exclusive intellectual property rights and copyright to all clean-room source code, repositories, and documentation generated through paid and completed reconstruction jobs on the platform.
+              <strong>Client Rights:</strong> You receive full commercial rights and license to all clean-room source code, repositories, and documentation generated through paid and completed reconstruction jobs on the platform.
             </p>
             <p>
-              <strong>Client Attestation:</strong> You expressly warrant and represent that you possess lawful authority, ownership, licensing rights, or legitimate interoperability interests under applicable law to submit target artifacts for analysis.
+              <strong>Client Attestation:</strong> You expressly warrant and represent that you possess lawful authority, licensing rights, or legitimate interoperability interests under applicable law to submit target artifacts for analysis.
             </p>
           </section>
 
@@ -63,7 +63,7 @@ export default function TermsPage() {
           <section className="space-y-2">
             <h2 className="text-base font-serif font-bold text-foreground">4. Strict Zero-Trust & Sandboxing Rules</h2>
             <p>
-              All binary submissions are isolated in ephemeral containers with network isolation (<code className="font-mono">--network=none</code>) and strict compute quotas. Any attempt to exploit, bypass sandboxing, probe internal networks, perform SSRF, or submit malicious payloads intended to compromise infrastructure will result in immediate termination, IP banning, and reporting to relevant cyber authorities.
+              All binary submissions are isolated in ephemeral containers with network isolation (<code className="font-mono">--network=none</code>) and strict compute quotas. Any attempt to exploit, circumvent sandbox isolation, probe internal networks, perform SSRF, or submit malicious payloads intended to compromise infrastructure will result in immediate termination, IP banning, and reporting to relevant cyber authorities.
             </p>
           </section>
 

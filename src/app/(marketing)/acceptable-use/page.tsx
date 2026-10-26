@@ -53,7 +53,7 @@ export default function AcceptableUsePage() {
           </section>
 
           <section className="space-y-3">
-            <h2 className="text-base font-serif font-bold text-foreground">2. Authorized Interoperability & Ownership</h2>
+            <h2 className="text-base font-serif font-bold text-foreground">2. Authorized Interoperability & Authority</h2>
             <p>Before submitting any target URL or binary executable, you represent and warrant that:</p>
             <ul className="list-disc ps-5 space-y-1.5">
               <li>You are the rightful owner, licensee, or designated security evaluator of the submitted software.</li>

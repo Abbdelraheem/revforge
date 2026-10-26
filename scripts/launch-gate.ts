@@ -55,38 +55,66 @@ const vitestRes = runCmd("npx", ["vitest", "run"]);
 check("CI: Test Suite (vitest run)", vitestRes.ok, vitestRes.ok ? "All unit and integration tests passed" : "Vitest suite failed", vitestRes.output.split("\n").slice(-4).join(" "));
 
 // 2. Benchmarks & Quality Thresholds
-console.log("[2/11] Verifying Benchmark Targets & Quality Thresholds...");
-const benchTargetsDir = path.join(ROOT, "benchmarks", "targets");
-let targetCount = 0;
-let manifestsValid = true;
+console.log("[2/11] Verifying Benchmark Results & Live Execution...");
+const latestJsonPath = path.join(ROOT, "bench", "results", "latest.json");
+let benchPassed = false;
+let benchDetails = "";
 
-if (fs.existsSync(benchTargetsDir)) {
-  const dirs = fs.readdirSync(benchTargetsDir, { withFileTypes: true }).filter((d) => d.isDirectory());
-  targetCount = dirs.length;
-  for (const dir of dirs) {
-    const manifestPath = path.join(benchTargetsDir, dir.name, "manifest.json");
-    if (!fs.existsSync(manifestPath)) {
-      manifestsValid = false;
-      break;
-    }
-    try {
-      const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-      if (!manifest.id || (!manifest.expectedRoutes && !manifest.routes) || (!manifest.difficultyTier && !manifest.tier)) {
-        manifestsValid = false;
-        break;
+if (!fs.existsSync(latestJsonPath)) {
+  benchDetails = "No live benchmark results file found at bench/results/latest.json. Gate requires a completed live run.";
+} else {
+  try {
+    const benchData = JSON.parse(fs.readFileSync(latestJsonPath, "utf8"));
+    const targets = benchData.targets || [];
+    const isLive = benchData.mode === "live";
+    const isLaunchProfile = benchData.modelProfile === "launch";
+    const has12Targets = targets.length >= 12;
+    const medianParityOk = (benchData.medianParity ?? 0) >= QUALITY_THRESHOLDS.minMedianParity;
+    const medianCoverageOk = (benchData.medianCoverage ?? 0) >= 0.8;
+    const zeroFailed = targets.every((t: any) => t.status !== "build_failed");
+    const deliveredCount = targets.filter((t: any) => t.status === "delivered").length;
+    const halfDelivered = targets.length > 0 && deliveredCount >= Math.ceil(targets.length / 2);
+    const webVisualOk = targets.every((t: any) => {
+      const tier = t.tier || "";
+      if (tier === "portfolio" || tier === "content" || tier === "web_app") {
+        return t.parity?.visual !== null && t.parity?.visual !== undefined;
       }
-    } catch {
-      manifestsValid = false;
-      break;
-    }
+      return true;
+    });
+
+    benchPassed =
+      isLive &&
+      isLaunchProfile &&
+      has12Targets &&
+      medianParityOk &&
+      medianCoverageOk &&
+      zeroFailed &&
+      halfDelivered &&
+      webVisualOk;
+
+    const reasons: string[] = [];
+    if (!isLive) reasons.push(`mode is '${benchData.mode || "unknown"}' (must be 'live')`);
+    if (!isLaunchProfile) reasons.push(`modelProfile is '${benchData.modelProfile || "unknown"}' (must be 'launch')`);
+    if (!has12Targets) reasons.push(`target count ${targets.length} < 12`);
+    if (!medianParityOk) reasons.push(`median parity ${(benchData.medianParity * 100).toFixed(1)}% < ${(QUALITY_THRESHOLDS.minMedianParity * 100).toFixed(1)}%`);
+    if (!medianCoverageOk) reasons.push(`median coverage ${(benchData.medianCoverage * 100).toFixed(1)}% < 80.0%`);
+    if (!zeroFailed) reasons.push("contains build_failed targets");
+    if (!halfDelivered) reasons.push(`delivered count (${deliveredCount}/${targets.length}) < 50%`);
+    if (!webVisualOk) reasons.push("web targets missing visual parity score (null)");
+
+    benchDetails = benchPassed
+      ? `Live benchmark verified: ${targets.length} targets, median parity ${(benchData.medianParity * 100).toFixed(1)}%, coverage ${(benchData.medianCoverage * 100).toFixed(1)}%, 0 failed, ${deliveredCount} delivered.`
+      : `Benchmark evaluation failed: ${reasons.join("; ")}`;
+  } catch (err: any) {
+    benchDetails = `Failed to parse latest.json: ${err?.message}`;
   }
 }
-const benchQualityOk = QUALITY_THRESHOLDS.minMedianParity >= 0.85 && QUALITY_THRESHOLDS.minCoverage >= 0.80;
+
 check(
-  "Benchmark Harness & Targets",
-  targetCount >= 12 && manifestsValid && benchQualityOk,
-  `12 permissive benchmark targets verified (minMedianParity: ${QUALITY_THRESHOLDS.minMedianParity}, minCoverage: ${QUALITY_THRESHOLDS.minCoverage})`,
-  `Found ${targetCount} targets; Manifests valid: ${manifestsValid}`
+  "Live Benchmark Execution & Quality Thresholds",
+  benchPassed,
+  benchPassed ? benchDetails : `Benchmark gate failed: ${benchDetails}`,
+  benchDetails
 );
 
 // 3. Sandbox Self-Test
@@ -124,50 +152,79 @@ const ssrfPrivateBlocked = isBlockedIp("10.0.0.1") && isBlockedIp("192.168.1.1")
 const ssrfPublicAllowed = !isBlockedIp("8.8.8.8") && !isBlockedIp("1.1.1.1");
 const ssrfOk = ssrfLoopbackBlocked && ssrfMetadataBlocked && ssrfPrivateBlocked && ssrfPublicAllowed;
 
+const sandboxArtifactPath = path.join(ROOT, "artifacts", "sandbox-selftest.json");
+let sandboxArtifactOk = false;
+let sandboxArtifactMsg = "";
+if (fs.existsSync(sandboxArtifactPath)) {
+  try {
+    const sbData = JSON.parse(fs.readFileSync(sandboxArtifactPath, "utf8"));
+    sandboxArtifactOk = sbData.passed === true;
+    sandboxArtifactMsg = `artifact verified (${sbData.timestamp})`;
+  } catch {
+    sandboxArtifactMsg = "artifact corrupted";
+  }
+} else {
+  sandboxArtifactMsg = "artifacts/sandbox-selftest.json missing";
+}
+
 check(
   "Sandbox Containment & SSRF Guard",
-  sandboxArgGuardOk && ssrfOk,
-  "Argument injection refused; SSRF IP filters strictly blocking loopback/metadata/private ranges"
+  sandboxArgGuardOk && ssrfOk && sandboxArtifactOk,
+  `Argument injection refused; SSRF blocked; Machine artifact: ${sandboxArtifactMsg}`,
+  `sandboxArgGuard: ${sandboxArgGuardOk}, ssrfOk: ${ssrfOk}, artifact: ${sandboxArtifactMsg}`
 );
 
 // 4. Disaster Recovery & Restore Drill < 30 Days
-console.log("[4/11] Verifying Disaster Recovery & Restore Drill Freshness...");
-const runbookPath = path.join(ROOT, "docs", "RUNBOOK.md");
-const runbookContent = fs.existsSync(runbookPath) ? fs.readFileSync(runbookPath, "utf8") : "";
+console.log("[4/11] Verifying Disaster Recovery & Restore Drill Machine Artifact...");
+const restoreDrillArtifactPath = path.join(ROOT, "artifacts", "restore-drill.json");
 let restoreDrillValid = false;
 let drillDetails = "";
 
-if (runbookContent) {
-  const match = runbookContent.match(/Latest Restore Drill Date:\s*([0-9]{4}-[0-9]{2}-[0-9]{2})/i);
-  if (match && match[1]) {
-    const drillDate = new Date(match[1]);
+if (fs.existsSync(restoreDrillArtifactPath)) {
+  try {
+    const drill = JSON.parse(fs.readFileSync(restoreDrillArtifactPath, "utf8"));
+    const drillDate = new Date(drill.timestamp);
     const daysSince = Math.floor((Date.now() - drillDate.getTime()) / (1000 * 60 * 60 * 24));
-    restoreDrillValid = daysSince >= 0 && daysSince <= 30;
-    drillDetails = `Last drill executed on ${match[1]} (${daysSince} days ago)`;
+    const passed = drill.passed === true;
+    const match = drill.rowCountComparison?.match === true;
+    const fresh = daysSince >= 0 && daysSince <= 30;
+
+    restoreDrillValid = passed && match && fresh && Boolean(drill.backupId);
+    drillDetails = `Machine artifact verified: drill executed on ${drill.timestamp} (${daysSince}d ago), duration ${drill.durationSeconds}s, backupId ${drill.backupId}, row counts match: ${match}, pass: ${passed}`;
+  } catch (err: any) {
+    drillDetails = `Invalid machine artifact: ${err?.message}`;
   }
+} else {
+  drillDetails = "Machine artifact artifacts/restore-drill.json missing. Must be produced by scripts/restore-drill.sh.";
 }
+
 check(
   "Disaster Recovery & Restore Drill (< 30 days)",
   restoreDrillValid,
-  restoreDrillValid ? drillDetails : "No restore drill recorded within the past 30 days in docs/RUNBOOK.md",
+  restoreDrillValid ? drillDetails : `Restore drill gate failed: ${drillDetails}`,
   drillDetails
 );
 
-// 5. Production Environment Safety (No Fake Payments / Fixtures)
-console.log("[5/11] Checking Production Environment Security Guards...");
+// 5. Production Environment Safety (No Fake Payments / Fixtures / Test Profiles)
+console.log("[5/12] Checking Production Environment Security Guards...");
 const envFile = path.join(ROOT, "src", "env.ts");
 const envContent = fs.existsSync(envFile) ? fs.readFileSync(envFile, "utf8") : "";
 const envRefusesFakePayment = /PAYMENT_PROVIDER[^\n]*refuse|production[^\n]*fake|superRefine/.test(envContent);
 const envRefusesFixtureLlm = /LLM_PROVIDER[^\n]*refuse|production[^\n]*fixture|superRefine/.test(envContent);
+const envEnforcesLaunchProfile = /MODEL_PROFILE.*launch|superRefine/.test(envContent);
 
 const currentSafe =
   process.env.NODE_ENV !== "production" ||
-  (process.env.PAYMENT_PROVIDER !== "fake" && process.env.LLM_PROVIDER !== "fixture");
+  (process.env.PAYMENT_PROVIDER !== "fake" &&
+    process.env.LLM_PROVIDER !== "fixture" &&
+    process.env.MODEL_PROFILE === "launch" &&
+    !process.env.MODEL_STANDARD?.includes("minimax") &&
+    !process.env.MODEL_PREMIUM?.includes("nemotron"));
 
 check(
-  "Production Safety Guard (No fake payments / fixture LLM)",
-  envRefusesFakePayment && envRefusesFixtureLlm && currentSafe,
-  "src/env.ts strictly refuses PAYMENT_PROVIDER=fake and LLM_PROVIDER=fixture in production"
+  "Production Safety Guard (No fake payments / fixture LLM / test profiles)",
+  envRefusesFakePayment && envRefusesFixtureLlm && envEnforcesLaunchProfile && currentSafe,
+  "src/env.ts strictly refuses PAYMENT_PROVIDER=fake, LLM_PROVIDER=fixture, and MODEL_PROFILE!=launch in production"
 );
 
 // 6. Statutory Legal Pages & Legal Review Needed
@@ -197,8 +254,8 @@ check(
     : `Missing pages: ${missingPages.join(", ")}`
 );
 
-// 7. Paddle Webhook Cryptographic Verification
-console.log("[7/11] Testing Paddle Webhook HMAC Verification...");
+// 7. Paddle Webhook Cryptographic Verification & Sandbox Event
+console.log("[7/11] Testing Paddle Webhook HMAC Verification & Sandbox Event...");
 const testSecret = "pdl_ntfset_01hk0a8c4f2v7x3w8g6b5y9z12";
 const testPayload = JSON.stringify({
   event_id: "evt_sandbox_test_1001",
@@ -215,10 +272,27 @@ const testHeader = `ts=${testTs};h1=${testSig}`;
 const paddleVerified = verifyPaddleSignature(testPayload, testHeader, testSecret);
 const paddleTamperRejected = !verifyPaddleSignature(testPayload, `ts=${testTs};h1=tampered_hex_digest`, testSecret);
 
+const paddleArtifactPath = path.join(ROOT, "artifacts", "paddle-sandbox-event.json");
+let paddleArtifactOk = false;
+let paddleArtifactMsg = "";
+
+if (fs.existsSync(paddleArtifactPath)) {
+  try {
+    const evtData = JSON.parse(fs.readFileSync(paddleArtifactPath, "utf8"));
+    paddleArtifactOk = Boolean(evtData.eventId) && evtData.verified === true;
+    paddleArtifactMsg = `artifact verified: event ${evtData.eventId}`;
+  } catch {
+    paddleArtifactMsg = "artifact corrupted";
+  }
+} else {
+  paddleArtifactMsg = "artifacts/paddle-sandbox-event.json missing. Real sandbox webhook event required.";
+}
+
 check(
-  "Paddle Webhook HMAC Signature Verification",
-  paddleVerified && paddleTamperRejected,
-  "Real HMAC-SHA256 verification and timing-safe tamper rejection operational"
+  "Paddle Webhook HMAC Signature & Sandbox Event Artifact",
+  paddleVerified && paddleTamperRejected && paddleArtifactOk,
+  `HMAC verified: ${paddleVerified}; Tamper rejected: ${paddleTamperRejected}; ${paddleArtifactMsg}`,
+  `HMAC: ${paddleVerified}, Tamper: ${paddleTamperRejected}, Artifact: ${paddleArtifactMsg}`
 );
 
 // 8. Observability & Alert Endpoints
@@ -233,6 +307,8 @@ check(
 
 // 9. Automated Backups & S3 Encryption Configuration
 console.log("[9/11] Verifying Automated Backups Configuration...");
+const runbookPath = path.join(ROOT, "docs", "RUNBOOK.md");
+const runbookContent = fs.existsSync(runbookPath) ? fs.readFileSync(runbookPath, "utf8") : "";
 const workerUpScript = fs.existsSync(path.join(ROOT, "scripts", "worker-up.sh"))
   ? fs.readFileSync(path.join(ROOT, "scripts", "worker-up.sh"), "utf8")
   : "";
@@ -274,6 +350,56 @@ check(
   "Operational Dashboards (Funnel, Margins, Support, Metrics)",
   dashboardsOk,
   "/admin/funnel, /admin/margins, /admin/support, and /api/metrics endpoints operational"
+);
+
+// 12. V11 Economics: Claims Guard, Subscriptions, Pricing Agreement & Tier Floors
+console.log("[12/12] Verifying V11 Pricing, Claims Guard & Subscriptions Suite...");
+const claimsTest = runCmd("npx", ["vitest", "run", "tests/unit/claims.test.ts"]);
+check(
+  "Claims Guard Validation (Zero unapproved marketing/legal claims)",
+  claimsTest.ok,
+  claimsTest.ok
+    ? "All marketing copy and app strings conform strictly to approved claims allowlist"
+    : "Unapproved marketing claims detected in codebase",
+  claimsTest.output
+);
+
+const subsTest = runCmd("npx", ["vitest", "run", "tests/unit/subscriptions.test.ts"]);
+check(
+  "Subscriptions Engine (Deterministic grants & state transitions)",
+  subsTest.ok,
+  subsTest.ok ? "Subscription grants and state machine passed" : "Subscription tests failed",
+  subsTest.output
+);
+
+const pricingAgreement = runCmd("npx", ["vitest", "run", "tests/unit/pricing-agreement.test.ts", "tests/unit/pricing-tiers.test.ts"]);
+check(
+  "Pricing Agreement & Tier Caps Guard",
+  pricingAgreement.ok,
+  pricingAgreement.ok
+    ? "Pricing tiers, checkout, quote engine, and tier cap auto-reclassification agree"
+    : "Pricing tier inconsistency detected",
+  pricingAgreement.output
+);
+
+// Tier cost stats freshness check (< 30 days) if stats file exists
+let tierStatsFresh = true;
+let tierStatsMsg = "Tier cost stats freshness check: no stale stats (> 30 days)";
+const tierStatsPath = path.join(ROOT, "bench", "results", "tier_cost_stats.json");
+if (fs.existsSync(tierStatsPath)) {
+  const stat = fs.statSync(tierStatsPath);
+  const ageDays = (Date.now() - stat.mtimeMs) / (1000 * 60 * 60 * 24);
+  if (ageDays >= 30) {
+    tierStatsFresh = false;
+    tierStatsMsg = `tier_cost_stats.json is ${ageDays.toFixed(1)} days old (must be < 30 days)`;
+  } else {
+    tierStatsMsg = `tier_cost_stats.json is fresh (${ageDays.toFixed(1)} days old)`;
+  }
+}
+check(
+  "Tier Cost Stats Freshness (< 30 days)",
+  tierStatsFresh,
+  tierStatsMsg
 );
 
 // Print summary report

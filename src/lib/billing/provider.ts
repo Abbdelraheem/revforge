@@ -53,11 +53,18 @@ export class FakePaymentProvider implements PaymentProvider {
     return {
       id: payload.event_id || `evt_${crypto.randomUUID()}`,
       type: payload.event_type || "transaction.completed",
-      orderId: payload.data.custom_data.orderId,
-      providerTxnId: payload.data.id,
-      subtotalCents: payload.data.details.totals.subtotal,
-      currency: payload.data.currency_code || "USD",
+      orderId: payload.data?.custom_data?.orderId || "",
+      providerTxnId: payload.data?.id || "",
+      subtotalCents: payload.data?.details?.totals?.subtotal ?? 0,
+      currency: payload.data?.currency_code || "USD",
       raw: rawBody,
+      subscriptionId: payload.data?.subscription_id || payload.data?.id,
+      workspaceId: payload.data?.custom_data?.workspaceId,
+      customerId: payload.data?.customer_id,
+      planId: payload.data?.custom_data?.planId || payload.data?.items?.[0]?.price?.id,
+      periodStart: payload.data?.current_billing_period?.starts_at,
+      periodEnd: payload.data?.current_billing_period?.ends_at,
+      data: payload.data,
     };
   }
 }
@@ -224,6 +231,13 @@ export class PaddleProvider implements PaymentProvider {
       subtotalCents: parseInt(payload.data?.details?.totals?.subtotal || "0", 10),
       currency: payload.data?.currency_code || "USD",
       raw: rawBody,
+      subscriptionId: payload.data?.subscription_id || payload.data?.id,
+      workspaceId: payload.data?.custom_data?.workspaceId,
+      customerId: payload.data?.customer_id,
+      planId: payload.data?.custom_data?.planId || payload.data?.items?.[0]?.price?.id,
+      periodStart: payload.data?.current_billing_period?.starts_at,
+      periodEnd: payload.data?.current_billing_period?.ends_at,
+      data: payload.data,
     };
   }
 }

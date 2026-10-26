@@ -9,12 +9,20 @@ import {
   outbox,
   auditLog,
   creditsLedger,
+  subscriptions,
+  subscriptionEvents,
 } from "@/db/schema";
 import { transitionProject } from "@/db/state-machine";
 import { dispatchOutbox } from "@/lib/queue/outbox";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, and } from "drizzle-orm";
 import { env } from "@/env";
 import { getPrompt } from "@/lib/prompts";
+import {
+  SUBSCRIPTION_PLANS,
+  SubscriptionPlanId,
+  planGrantForPeriod,
+  nextSubscriptionState,
+} from "@/lib/billing/subscriptions";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -207,11 +215,178 @@ export async function POST(req: NextRequest) {
             payload: { projectId: order.projectId },
           });
         }
+
+        if (event.subscriptionId) {
+          const [sub] = await tx
+            .select()
+            .from(subscriptions)
+            .where(eq(subscriptions.paddleSubscriptionId, event.subscriptionId))
+            .for("update");
+          if (sub) {
+            const now = new Date();
+            const pStart = event.periodStart ? new Date(event.periodStart) : now;
+            const periodKey = `subscription_grant:${sub.id}:${pStart.toISOString()}`;
+            const existingGrants = await tx
+              .select({ reason: creditsLedger.reason })
+              .from(creditsLedger)
+              .where(
+                and(
+                  eq(creditsLedger.workspaceId, sub.workspaceId),
+                  eq(creditsLedger.reason, periodKey)
+                )
+              );
+            if (existingGrants.length === 0) {
+              const [balRow] = await tx
+                .select({
+                  total: sql<number>`coalesce(sum(${creditsLedger.deltaCents}), 0)::int`,
+                })
+                .from(creditsLedger)
+                .where(eq(creditsLedger.workspaceId, sub.workspaceId));
+              const currentBal = Math.max(0, balRow?.total ?? 0);
+              const { grantCents } = planGrantForPeriod({
+                plan: {
+                  id: sub.planId,
+                  monthlyCreditsCents: sub.monthlyCreditsCents,
+                  rolloverCapCents: sub.rolloverCapCents,
+                },
+                periodStart: pStart,
+                grants: [],
+                balanceCents: currentBal,
+              });
+              if (grantCents > 0) {
+                await tx.insert(creditsLedger).values({
+                  workspaceId: sub.workspaceId,
+                  deltaCents: grantCents,
+                  reason: periodKey,
+                  kind: "grant",
+                });
+              }
+            }
+          }
+        }
       } else if (event.type.startsWith("adjustment.")) {
         await tx
           .update(orders)
           .set({ status: "refunded", updatedAt: new Date() })
           .where(eq(orders.id, event.orderId));
+      } else if (event.type.startsWith("subscription.")) {
+        const subId = event.subscriptionId || event.orderId;
+        const wsId = event.workspaceId;
+        const planKey = (event.planId || "starter").toLowerCase() as SubscriptionPlanId;
+        const planDef = SUBSCRIPTION_PLANS[planKey] || SUBSCRIPTION_PLANS.starter;
+
+        if (subId && wsId) {
+          const [existingSub] = await tx
+            .select()
+            .from(subscriptions)
+            .where(eq(subscriptions.paddleSubscriptionId, subId))
+            .for("update");
+
+          const now = new Date();
+          const pStart = event.periodStart ? new Date(event.periodStart) : now;
+          const pEnd = event.periodEnd
+            ? new Date(event.periodEnd)
+            : new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+          let subRecord = existingSub;
+          if (!subRecord) {
+            const [created] = await tx
+              .insert(subscriptions)
+              .values({
+                workspaceId: wsId,
+                paddleSubscriptionId: subId,
+                paddleCustomerId: event.customerId ?? null,
+                planId: planKey,
+                status:
+                  event.type === "subscription.activated" || event.type === "subscription.created"
+                    ? "active"
+                    : "past_due",
+                currentPeriodStart: pStart,
+                currentPeriodEnd: pEnd,
+                monthlyCreditsCents: planDef.monthlyCreditsCents,
+                rolloverCapCents: planDef.rolloverCapCents,
+              })
+              .returning();
+            subRecord = created;
+          } else {
+            const mappedEvent =
+              event.type === "subscription.activated"
+                ? "activated"
+                : event.type === "subscription.canceled"
+                ? "canceled"
+                : event.type === "subscription.past_due"
+                ? "payment_failed"
+                : "resumed";
+            const newStatus = nextSubscriptionState(subRecord.status as any, mappedEvent as any);
+            const [updated] = await tx
+              .update(subscriptions)
+              .set({
+                status: newStatus,
+                currentPeriodStart: pStart,
+                currentPeriodEnd: pEnd,
+                updatedAt: new Date(),
+              })
+              .where(eq(subscriptions.id, subRecord.id))
+              .returning();
+            subRecord = updated;
+          }
+
+          if (
+            subRecord &&
+            (event.type === "subscription.created" || event.type === "subscription.activated")
+          ) {
+            const periodKey = `subscription_grant:${subRecord.id}:${pStart.toISOString()}`;
+            const existingGrants = await tx
+              .select({ reason: creditsLedger.reason })
+              .from(creditsLedger)
+              .where(
+                and(
+                  eq(creditsLedger.workspaceId, wsId),
+                  eq(creditsLedger.reason, periodKey)
+                )
+              );
+
+            if (existingGrants.length === 0) {
+              const [balRow] = await tx
+                .select({
+                  total: sql<number>`coalesce(sum(${creditsLedger.deltaCents}), 0)::int`,
+                })
+                .from(creditsLedger)
+                .where(eq(creditsLedger.workspaceId, wsId));
+              const currentBal = Math.max(0, balRow?.total ?? 0);
+
+              const { grantCents } = planGrantForPeriod({
+                plan: {
+                  id: planDef.id,
+                  monthlyCreditsCents: planDef.monthlyCreditsCents,
+                  rolloverCapCents: planDef.rolloverCapCents,
+                },
+                periodStart: pStart,
+                grants: [],
+                balanceCents: currentBal,
+              });
+
+              if (grantCents > 0) {
+                await tx.insert(creditsLedger).values({
+                  workspaceId: wsId,
+                  deltaCents: grantCents,
+                  reason: periodKey,
+                  kind: "grant",
+                });
+              }
+            }
+          }
+
+          if (subRecord) {
+            await tx.insert(subscriptionEvents).values({
+              subscriptionId: subRecord.id,
+              workspaceId: wsId,
+              eventType: event.type,
+              paddleEventId: event.id,
+              payload: event.data ?? { raw: event.raw },
+            });
+          }
+        }
       }
 
       // 8. Mark event processed

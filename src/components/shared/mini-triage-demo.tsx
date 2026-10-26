@@ -167,11 +167,13 @@ export function MiniTriageDemo() {
                   </div>
                   <div className="flex items-baseline space-x-2">
                     <span className="text-2xl font-extrabold text-foreground font-mono">
-                      ${demoResult.quote?.clonePriceUsd || 39}
+                      {demoResult.quote?.clonePriceUsd ? `$${demoResult.quote.clonePriceUsd}` : "Unavailable"}
                     </span>
-                    <span className="text-sm text-muted-foreground font-mono">
-                      ({(demoResult.quote?.requiredCredits || 39000).toLocaleString()} Credits)
-                    </span>
+                    {demoResult.quote?.requiredCredits && (
+                      <span className="text-sm text-muted-foreground font-mono">
+                        ({demoResult.quote.requiredCredits.toLocaleString()} Credits)
+                      </span>
+                    )}
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     Pay only for reconstruction. Full Next.js 15 source code delivered. Studio edits locked unless unlocked per edit.

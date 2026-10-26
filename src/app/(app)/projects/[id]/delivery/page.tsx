@@ -104,6 +104,7 @@ export default async function DeliveryPage({ params }: DeliveryPageProps) {
       githubTokenConfigured={Boolean(env.GITHUB_TOKEN)}
       recipientEmail={context.ownerEmail || session.user.email}
       deployGuide={buildDeployGuide()}
+      review={context.review || null}
     />
   );
 }

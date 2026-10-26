@@ -12,6 +12,7 @@ const ROLES: PromptRole[] = [
   "builder",
   "edit_planner",
   "edit_builder",
+  "reviewer",
 ];
 
 const failures: string[] = [];
@@ -25,7 +26,7 @@ console.log(`Prompt eval ${PROMPT_VERSION}`);
 for (const role of ROLES) {
   const prompt = getPrompt(role);
   const system = prompt.system;
-  check(system.length >= 1500, `${role}: system prompt is under 1500 characters`);
+  check(system.length >= 1500, `${role}: system prompt is under 1500 characters (${system.length})`);
   check(system.includes("untrusted"), `${role}: missing lowercase "untrusted"`);
   check(system.includes("unknown"), `${role}: missing lowercase "unknown"`);
   check(!system.includes("${"), `${role}: contains a template placeholder`);
@@ -43,8 +44,12 @@ for (const role of ROLES) {
     check(system.includes("clarification"), `${role}: missing clarification contract`);
   }
   if (role === "analyst") {
-    check(system.includes("evidence"), `${role}: missing evidence ledger contract`);
-    check(system.includes("unknown_server_side"), `${role}: missing unknown_server_side`);
+    check(system.toLowerCase().includes("evidence"), `${role}: missing evidence ledger contract`);
+    check(system.toLowerCase().includes("unknown_server_side"), `${role}: missing unknown_server_side`);
+    check(system.includes("Rubric (hours)"), `${role}: missing hours rubric`);
+  }
+  if (role === "reviewer") {
+    check(system.toLowerCase().includes("verdict"), `${role}: missing verdict requirement`);
   }
 }
 
@@ -62,8 +67,8 @@ for (const fixture of PROMPT_EVAL_FIXTURES) {
   console.log(`  [${fixture.role}] ${fixture.id}`);
 }
 
-if (PROMPT_EVAL_FIXTURES.length !== 5) {
-  failures.push(`expected 5 fixtures, found ${PROMPT_EVAL_FIXTURES.length}`);
+if (PROMPT_EVAL_FIXTURES.length !== 6) {
+  failures.push(`expected 6 fixtures, found ${PROMPT_EVAL_FIXTURES.length}`);
 }
 
 if (failures.length > 0) {

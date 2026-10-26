@@ -2,10 +2,12 @@ import React from "react";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { systemDb } from "@/db";
-import { pricingConfig } from "@/db/schema";
-import { desc } from "drizzle-orm";
+import { pricingConfig, pricingTiers, tierCostStats } from "@/db/schema";
+import { desc, eq } from "drizzle-orm";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { DEFAULT_PRICING_TIERS, checkCostFloor, TierId } from "@/lib/pricing/tiers";
+import { env } from "@/env";
 
 export const dynamic = "force-dynamic";
 
@@ -28,8 +30,48 @@ export default async function AdminPricingPage() {
 
   const tiers = (activeConfig?.tiers ?? {}) as Record<string, PricedTier>;
 
+  const dbPricingTiers = await systemDb
+    .select()
+    .from(pricingTiers)
+    .catch(() => []);
+
+  const stats = await systemDb
+    .select()
+    .from(tierCostStats)
+    .where(eq(tierCostStats.modelProfile, "launch"))
+    .catch(() => []);
+
+  const belowFloorTiers: string[] = [];
+  for (const tierId of Object.keys(DEFAULT_PRICING_TIERS) as TierId[]) {
+    const tierDef = DEFAULT_PRICING_TIERS[tierId];
+    const stat = stats.find((s) => s.tier === tierId);
+    if (stat) {
+      const check = checkCostFloor({
+        priceCents: tierDef.priceCents,
+        projectedCostP90Cents: stat.p90CostCents,
+      });
+      if (!check.allowed) {
+        belowFloorTiers.push(`${tierDef.name} ($${tierDef.priceCents / 100} < floor $${check.costFloorCents / 100})`);
+      }
+    }
+  }
+
+  const isTestProfile = env.MODEL_PROFILE === "test";
+
   return (
     <div className="mx-auto w-full max-w-[1200px] space-y-8 p-4 font-sans sm:p-6 lg:p-8">
+      {isTestProfile && (
+        <div className="rounded-lg border border-amber-500/50 bg-amber-500/10 p-4 font-bold text-amber-800">
+          TEST PROFILE — not representative. Model costs and margins shown here reflect cheap experimentation providers and must not be used for customer pricing, quality claims, or launch decisions.
+        </div>
+      )}
+
+      {belowFloorTiers.length > 0 && (
+        <div className="rounded-lg border border-destructive bg-destructive/10 p-4 font-bold text-destructive">
+          COST FLOOR GUARD ALERT: The following pricing tiers are priced below the minimum measured cost floor ({belowFloorTiers.join("; ")}). Checkout will refuse sales for these tiers without explicit admin override.
+        </div>
+      )}
+
       <div className="space-y-2 border-b border-border pb-4">
         <Badge variant="outline" className="border-primary/40 text-sm text-primary">
           PRICING ALGORITHM
@@ -43,6 +85,43 @@ export default async function AdminPricingPage() {
             : "No pricing configuration row is recorded. Default values are not substituted."}
         </p>
       </div>
+
+      {/* Admin Pricing Tiers & Caps Table */}
+      <Card className="border-border bg-card shadow-sm">
+        <CardHeader>
+          <CardTitle className="font-serif text-lg">Flat Clone Pricing Tiers &amp; Scope Caps</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm font-mono">
+              <thead>
+                <tr className="border-b border-border text-muted-foreground">
+                  <th className="py-2">Tier ID</th>
+                  <th className="py-2">Name</th>
+                  <th className="py-2">Price (USD)</th>
+                  <th className="py-2">Max Screens</th>
+                  <th className="py-2">Max Entities</th>
+                  <th className="py-2">Max Integrations</th>
+                  <th className="py-2">Max Hours</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/60">
+                {Object.values(DEFAULT_PRICING_TIERS).map((t) => (
+                  <tr key={t.id}>
+                    <td className="py-2 font-bold text-primary">{t.id}</td>
+                    <td className="py-2">{t.name}</td>
+                    <td className="py-2 font-bold">${t.priceCents / 100}</td>
+                    <td className="py-2">{t.maxScreens}</td>
+                    <td className="py-2">{t.maxEntities}</td>
+                    <td className="py-2">{t.maxIntegrations}</td>
+                    <td className="py-2">{t.maxHours}h</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
 
       {activeConfig ? (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">

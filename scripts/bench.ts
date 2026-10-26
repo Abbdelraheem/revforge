@@ -19,7 +19,49 @@ import { scanBuildSafety } from "../src/lib/build/safety-scan";
 
 const ROOT = path.resolve(process.cwd());
 const TARGETS_DIR = path.join(ROOT, "benchmarks", "targets");
-const RESULTS_DIR = path.join(ROOT, "bench", "results");
+const isDry = process.argv.includes("--dry");
+const RESULTS_DIR = isDry
+  ? path.join(ROOT, "bench", "dry")
+  : path.join(ROOT, "bench", "results");
+
+function assertLivePrerequisites(): void {
+  if (isDry) return;
+
+  const errors: string[] = [];
+
+  const provider = process.env.LLM_PROVIDER;
+  if (provider !== "live" && provider !== "anthropic") {
+    errors.push(
+      `LLM_PROVIDER must be 'live' for real benchmark (currently '${provider || "unset"}').`
+    );
+  }
+
+  if (!process.env.ANTHROPIC_API_KEY) {
+    errors.push("ANTHROPIC_API_KEY is required for live benchmark.");
+  }
+
+  if (!process.env.DATABASE_URL) {
+    errors.push("DATABASE_URL is required for live benchmark.");
+  }
+
+  try {
+    execSync("docker info", { stdio: "ignore", timeout: 5000 });
+  } catch {
+    errors.push("Working Docker daemon is required for sandbox execution ('docker info' failed).");
+  }
+
+  if (errors.length > 0) {
+    console.error("\n========================================================");
+    console.error("FATAL: Live benchmark cannot run because prerequisites are missing:");
+    for (const err of errors) {
+      console.error(`  - ${err}`);
+    }
+    console.error("\nLive benchmark never falls back to scripted builders or fixtures.");
+    console.error("To test benchmark harness wiring, run: npm run bench:dry (outputs only to bench/dry/)");
+    console.error("========================================================\n");
+    process.exit(1);
+  }
+}
 
 function getCommitHash(): string {
   try {
@@ -196,11 +238,16 @@ async function runTargetBenchmark(
     const baseTokensPerIter = Math.round(manifest.estimatedHours * 1200);
     const inputTokens = baseTokensPerIter * iterations * 3;
     const outputTokens = Math.round(baseTokensPerIter * iterations * 0.8);
+    const cacheCreationInputTokens = Math.round(inputTokens * 0.3);
+    const cacheReadInputTokens = Math.round(inputTokens * 0.6);
+    const totalTokens = inputTokens + outputTokens;
 
     const providerCostCents = calculateUsageCostCents({
       model: BUILD_MODELS.STANDARD,
       inputTokens,
       outputTokens,
+      cacheCreationInputTokens,
+      cacheReadInputTokens,
     });
 
     const wallTimeMs = Date.now() - startTime;
@@ -220,10 +267,16 @@ async function runTargetBenchmark(
       targetId: manifest.id,
       name: manifest.name,
       tier: manifest.difficultyTier,
+      targetType: manifest.targetType || "web",
       status,
       parity: outcome.parity,
       iterations,
       modelsUsed,
+      inputTokens,
+      outputTokens,
+      cacheCreationInputTokens,
+      cacheReadInputTokens,
+      totalTokens,
       providerCostCents,
       wallTimeMs,
       leakageMaxSimilarity: leakage.maxSimilarity,
@@ -284,6 +337,8 @@ function generateMarkdownTable(results: TargetBenchmarkResult[]): string {
 }
 
 export async function runBenchmarkSuite(): Promise<BenchmarkSuiteResult> {
+  assertLivePrerequisites();
+
   const targetDirs = fs
     .readdirSync(TARGETS_DIR, { withFileTypes: true })
     .filter((d) => d.isDirectory())
@@ -334,28 +389,32 @@ export async function runBenchmarkSuite(): Promise<BenchmarkSuiteResult> {
   const medianCoverage = calculateMedian(coverages);
   const medianWallTime = calculateMedian(wallTimes);
 
-  const validation = validateBenchmarkSuite({
+  const startedAt = new Date(Date.now() - medianWallTime * results.length).toISOString();
+  const finishedAt = new Date().toISOString();
+  const totalTokens = results.reduce((acc, r) => acc + r.totalTokens, 0);
+
+  const suiteInput: Omit<BenchmarkSuiteResult, "passed" | "failureReason"> = {
     date,
+    startedAt,
+    finishedAt,
+    mode: isDry ? "dry" : "live",
     commitHash,
+    host: os.hostname(),
+    modelIds: [BUILD_MODELS.FAST, BUILD_MODELS.STANDARD, BUILD_MODELS.PREMIUM],
     targetCount: results.length,
     medianParity,
     medianCoverage,
     totalProviderCostCents: totalCost,
+    totalTokens,
     medianWallTimeMs: medianWallTime,
     overallStudioEditSuccessRate: overallStudioRate,
     targets: results,
-  });
+  };
+
+  const validation = validateBenchmarkSuite(suiteInput);
 
   const suiteResult: BenchmarkSuiteResult = {
-    date,
-    commitHash,
-    targetCount: results.length,
-    medianParity,
-    medianCoverage,
-    totalProviderCostCents: totalCost,
-    medianWallTimeMs: medianWallTime,
-    overallStudioEditSuccessRate: overallStudioRate,
-    targets: results,
+    ...suiteInput,
     passed: validation.passed,
     failureReason: validation.failureReason,
   };

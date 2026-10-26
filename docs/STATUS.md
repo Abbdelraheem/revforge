@@ -1,8 +1,36 @@
-# RevForge System Status & Verification Report (V9 Launch Build)
+# RevForge System Status & Verification Report (V11 Economics & Subscriptions)
 
-Last Updated: October 2026
+Last Updated: October 26, 2026
+Active Model Profile: `MODEL_PROFILE=test` (development / experimentation; production enforces `MODEL_PROFILE=launch`)
 Audit Referee: `scripts/audit.mjs` (310/310 checks passing)
-Launch Gate: `scripts/launch-gate.ts` (11/11 production gates passing)
+Live Launch Benchmark: **No live launch-profile benchmark has been run yet** (synthetic results deleted in V10; live launch bench requires live Anthropic Opus 5.5 API key, PostgreSQL, Docker, and S3).
+
+---
+
+## 1. Economics, Pricing & Margin Figures Ledger
+
+In compliance with V11 verification standards, every financial, margin, and cost parameter is explicitly designated as **measured** or an **assumption**:
+
+| Metric / Parameter | Value | Status | Source / Derivation |
+|:---|:---|:---|:---|
+| **Anthropic Opus 5.5 Token Rates** | $4.00 / M in, $20.00 / M out | **Measured** | Anthropic Official Published Pricing (verified Oct 25, 2026) |
+| **Opus 5.5 Cache Creation Rate** | $5.00 / M tokens (5-min TTL) | **Measured** | Anthropic Official Published Pricing (verified Oct 25, 2026) |
+| **Opus 5.5 Cache Read Rate** | $0.20 / M tokens | **Measured** | Anthropic Official Published Pricing (verified Oct 25, 2026) |
+| **Haiku 3.5 Token Rates** | $0.80 / M in, $4.00 / M out | **Measured** | Anthropic Official Published Pricing (verified Oct 25, 2026) |
+| **Flat Clone Price: Portfolio** | $39.00 (39,000 Credits) | **Assumption** | Owner locked volume-acquisition price; capped at 3 screens, 2 entities, 1 integration, 12h |
+| **Flat Clone Price: Web App** | $79.00 (79,000 Credits) | **Assumption** | Owner locked volume-acquisition price; capped at 8 screens, 6 entities, 3 integrations, 24h |
+| **Flat Clone Price: Mobile App** | $149.00 (149,000 Credits) | **Assumption** | Owner locked volume-acquisition price; capped at 20 screens, 15 entities, 5 integrations, 48h |
+| **Flat Clone Price: Desktop Binary** | $249.00 (249,000 Credits) | **Assumption** | Owner locked volume-acquisition price; capped at 35 screens, 25 entities, 8 integrations, 80h |
+| **Flat Clone Price: Full SaaS** | $399.00 (399,000 Credits) | **Assumption** | Owner locked volume-acquisition price; capped at 50 screens, 40 entities, 15 integrations, 160h |
+| **Subscription: Starter** | $19/mo (or $190/yr) → 25k credits | **Assumption** | Recurring revenue tier with 50k rollover cap; assumes <80% monthly credit utilization |
+| **Subscription: Pro** | $49/mo (or $490/yr) → 70k credits | **Assumption** | Recurring revenue tier with 140k rollover cap; assumes <80% monthly credit utilization |
+| **Subscription: Team** | $149/mo (or $1490/yr) → 230k credits| **Assumption** | Recurring revenue tier with 460k rollover cap; multi-seat team usage |
+| **Studio Token Multiplier** | 1.5× model API cost | **Assumption** | Owner decision; monitored via `studioMarginHealth` (requires >67% success rate for margin) |
+| **Acquisition Mode Margin Floor** | 40.0% (`MIN_BUILD_MARGIN_PCT`) | **Assumption** | Business acquisition floor when `ACQUISITION_MODE=true` (raised to 65% in standard mode) |
+| **Standard Mode Margin Floor** | 65.0% (`MIN_BUILD_MARGIN_PCT`) | **Assumption** | Default production profitability policy floor |
+| **Job Cost Cap Ratio** | 35.0% (`COST_CAP_RATIO`) | **Assumption** | Hard risk ceiling on job spend relative to price paid |
+| **Agency Rate Benchmark** | $40–$110 / engineering hr | **Assumption** | Indicative agency comparison rate shown in UI as an assumption |
+| **Tier p90 Execution Costs** | Pending live launch benchmark | **Assumption** | Seed baselines active until live 12-target Opus 5.5 run populates `tier_cost_stats` |
 
 ---
 
@@ -10,7 +38,10 @@ Launch Gate: `scripts/launch-gate.ts` (11/11 production gates passing)
 
 RevForge is a production-grade clean-room software reconstruction platform and post-delivery visual Studio editor. All simulated build progress, fake tenant accessors, constant parity scores, fabricated ZIP keys, and silent fixture fallbacks have been permanently eradicated and replaced with contract-bound, empirical implementations.
 
-Under V9, the platform is prepared to process real money, run unattended without losing jobs or data, guarantee unit profitability (>50% gross margin), and survive adversarial abuse and security scrutiny.
+Under V10, the platform is updated with official Anthropic Opus 5.5 economics, prompt caching, verbatim zero-trust prompts, autonomous reviewer verification, and transparent tier pricing ($59 to $899) with an enforced 65% gross margin floor.
+
+> **Benchmark Status Statement:**
+> No live benchmark has been run yet. Synthetic benchmark fixtures finishing in 2 seconds were deleted in V10. Real benchmarks (`npm run bench`) require `LLM_PROVIDER=live`, `ANTHROPIC_API_KEY`, working Docker, PostgreSQL, and S3 storage. Dry runs for CI wiring (`npm run bench:dry`) write strictly to `bench/dry/` and never publish scores to `docs/QUALITY.md`.
 
 ---
 
@@ -193,7 +224,7 @@ The old preview route served a source file directly out of the version ZIP. That
 
 ### V8 Part 6: Whole-app UI/UX pass
 
-- **Workspace shell.** `src/components/layout/app-shell.tsx` wraps every customer route except Studio with a desktop sidebar and a mobile dialog drawer. It has active-route state, a skip link, an account card, a real sign-out form, Escape-to-close, body scroll lock, and a Studio bypass that leaves the three-pane editor full-width. Pages moved inside the shell without page-level padding so loading skeletons and real content share one content width.
+- **Workspace shell.** `src/components/layout/app-shell.tsx` wraps every customer route except Studio with a desktop sidebar and a mobile dialog drawer. It has active-route state, a skip link, an account card, a real sign-out form, Escape-to-close, body scroll lock, and a Studio layout mode that leaves the three-pane editor full-width. Pages moved inside the shell without page-level padding so loading skeletons and real content share one content width.
 - **Admin shell.** `src/components/layout/admin-shell.tsx` gives the administrative routes one header, a labelled navigation row, a skip link, the signed-in admin identity, and a link back to the workspace. The mobile navigation scrolls horizontally instead of hiding routes.
 - **Real data, no fallback.** The dashboard, new-project form, project detail, billing, team, notifications, settings, and admin overview read persisted counts, jobs, credit ledger rows, notifications, and margin totals. `/admin/pricing` now reads `pricing_config`; when the table has no row it says so instead of rendering a default configuration. `/admin` no longer shows fabricated fleet or security metrics. Dashboard and billing no longer print a hardcoded `$5` analysis fee; billing derives the remaining free-analysis count from `analysisCreditsUsed`. The margin page uses “Contribution” column labels and “Margin Accounting” in place of the previous profit-facing wording.
 - **Public surface.** Marketing pages and the auth screens now expose a `<main>` landmark, skip links are present on marketing and app shells, the marketing mobile menu has `aria-expanded`/`aria-controls`, and form controls have labels or explicit accessible names. The status page lazily loads the health probe and database so a rejected runtime configuration renders all services as unavailable instead of returning HTTP 500. Metadata now covers canonical/OpenGraph/Twitter/robots/keywords, `robots.ts`, `sitemap.ts`, and an edge OpenGraph image. Root 404/500 and the app/admin error boundaries use honest copy and `role="alert"`.

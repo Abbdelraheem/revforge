@@ -8,8 +8,8 @@ const envSchema = z
     APP_URL: z.string().url().default("http://localhost:3000"),
     DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
     SYSTEM_DATABASE_URL: z.string().min(1).optional(),
-    COST_CAP_RATIO: z.coerce.number().default(0.6),
-    MIN_BUILD_MARGIN_PCT: z.coerce.number().default(25),
+    COST_CAP_RATIO: z.coerce.number().min(0).max(1).default(0.35),
+    MIN_BUILD_MARGIN_PCT: z.coerce.number().min(0).max(100).default(65),
     MARGIN_ALERT_PCT: z.coerce.number().default(20),
     PAYMENT_FEE_PERCENT: z.coerce.number().default(5),
     PAYMENT_FEE_FIXED_CENTS: z.coerce.number().default(50),
@@ -21,8 +21,8 @@ const envSchema = z
 
     // Studio Configuration
     STUDIO_TOKEN_CENTS: z.coerce.number().default(1),
-    STUDIO_INCLUDED_RATIO: z.coerce.number().default(0.15),
-    STUDIO_MARKUP: z.coerce.number().default(1.5),
+    STUDIO_INCLUDED_RATIO: z.coerce.number().default(0.1),
+    STUDIO_MARKUP: z.coerce.number().default(3.0),
     STUDIO_MIN_CHARGE_CENTS: z.coerce.number().default(50),
     STUDIO_DAILY_EDIT_LIMIT: z.coerce.number().default(20),
 
@@ -30,10 +30,29 @@ const envSchema = z
     ANTHROPIC_API_KEY: z.string().optional(),
     NVIDIA_API_KEY: z.string().optional(),
     NVIDIA_BASE_URL: z.string().default("https://integrate.api.nvidia.com/v1"),
-    LLM_MODEL_FAST: z.string().default("claude-3-5-haiku-latest"),
-    LLM_MODEL_STANDARD: z.string().default("claude-3-5-sonnet-latest"),
-    LLM_MODEL_PREMIUM: z.string().default("claude-3-7-sonnet-latest"),
-    LLM_PROVIDER: z.enum(["anthropic", "nvidia", "fixture"]).default("fixture"),
+    MODEL_FAST: z.string().optional(),
+    MODEL_STANDARD: z.string().optional(),
+    MODEL_PREMIUM: z.string().optional(),
+    // Legacy names kept as fallbacks; MODEL_* wins when both are set.
+    LLM_MODEL_FAST: z.string().optional(),
+    LLM_MODEL_STANDARD: z.string().optional(),
+    LLM_MODEL_PREMIUM: z.string().optional(),
+    LLM_PROVIDER: z.enum(["live", "anthropic", "nvidia", "fixture"]).default("fixture"),
+    MODEL_PROFILE: z.enum(["test", "launch"]).default("test"),
+    ACQUISITION_MODE: z
+      .string()
+      .transform((v) => v === "true" || v === "1")
+      .default("true"),
+    DAILY_SPEND_LIMIT_CENTS: z.coerce.number().default(50000),
+    AUTO_CALIBRATE: z
+      .string()
+      .transform((v) => v === "true" || v === "1")
+      .default("false"),
+    DAILY_BUILD_LIMIT: z.coerce.number().default(5),
+    DAILY_EDIT_LIMIT: z.coerce.number().default(20),
+    DAILY_ANALYSIS_LIMIT: z.coerce.number().default(10),
+    TURNSTILE_SECRET_KEY: z.string().optional(),
+    TURNSTILE_SITE_KEY: z.string().optional(),
 
     // Payment Provider Configuration
     PAYMENT_PROVIDER: z.enum(["paddle", "fake"]).default("fake"),
@@ -105,6 +124,13 @@ const envSchema = z
           path: ["LLM_PROVIDER"],
         });
       }
+      if (data.MODEL_PROFILE !== "launch") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "production requires MODEL_PROFILE=launch",
+          path: ["MODEL_PROFILE"],
+        });
+      }
       if (!data.DATA_KEY) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -140,10 +166,17 @@ function parseEnv() {
       NODE_ENV: "production",
       APP_URL: "http://localhost:3000",
       DATABASE_URL: process.env.DATABASE_URL || "postgres://dummy:dummy@localhost:5432/dummy",
-      LLM_MODEL_FAST: "claude-haiku-5-5",
-      LLM_MODEL_STANDARD: "claude-sonnet-5-5",
-      LLM_MODEL_PREMIUM: "claude-opus-5-5",
+      MODEL_FAST: "claude-haiku-5-5",
+      MODEL_STANDARD: "claude-opus-5-5",
+      MODEL_PREMIUM: "claude-opus-5-5",
       LLM_PROVIDER: "fixture",
+      MODEL_PROFILE: "launch",
+      ACQUISITION_MODE: true,
+      DAILY_SPEND_LIMIT_CENTS: 50000,
+      AUTO_CALIBRATE: false,
+      DAILY_BUILD_LIMIT: 5,
+      DAILY_EDIT_LIMIT: 20,
+      DAILY_ANALYSIS_LIMIT: 10,
       PAYMENT_PROVIDER: "paddle",
       PADDLE_ENVIRONMENT: "sandbox",
       REDIS_URL: "redis://localhost:6379",
@@ -159,8 +192,8 @@ function parseEnv() {
       SANDBOX_RUNTIME: "runc",
       BUILD_AGENT_CONCURRENCY: 6,
       WORKER_IDLE_SHUTDOWN_MIN: 30,
-      COST_CAP_RATIO: 0.6,
-      MIN_BUILD_MARGIN_PCT: 25,
+      COST_CAP_RATIO: 0.35,
+      MIN_BUILD_MARGIN_PCT: 65,
       MARGIN_ALERT_PCT: 20,
       PAYMENT_FEE_PERCENT: 5,
       PAYMENT_FEE_FIXED_CENTS: 50,
@@ -191,10 +224,17 @@ function parseEnv() {
         NODE_ENV: "development",
         APP_URL: "http://localhost:3000",
         DATABASE_URL: process.env.DATABASE_URL || "postgres://postgres:postgrespassword@localhost:5432/revforge",
-        LLM_MODEL_FAST: "claude-haiku-5-5",
-        LLM_MODEL_STANDARD: "claude-sonnet-5-5",
-        LLM_MODEL_PREMIUM: "claude-opus-5-5",
+        MODEL_FAST: "claude-haiku-5-5",
+        MODEL_STANDARD: "claude-opus-5-5",
+        MODEL_PREMIUM: "claude-opus-5-5",
         LLM_PROVIDER: "fixture",
+      MODEL_PROFILE: "launch",
+      ACQUISITION_MODE: true,
+      DAILY_SPEND_LIMIT_CENTS: 50000,
+      AUTO_CALIBRATE: false,
+      DAILY_BUILD_LIMIT: 5,
+      DAILY_EDIT_LIMIT: 20,
+      DAILY_ANALYSIS_LIMIT: 10,
         PAYMENT_PROVIDER: "fake",
         PADDLE_ENVIRONMENT: "sandbox",
         REDIS_URL: "redis://127.0.0.1:6379",
@@ -210,8 +250,8 @@ function parseEnv() {
         SANDBOX_RUNTIME: "runc",
         BUILD_AGENT_CONCURRENCY: 6,
         WORKER_IDLE_SHUTDOWN_MIN: 30,
-        COST_CAP_RATIO: 0.6,
-        MIN_BUILD_MARGIN_PCT: 25,
+        COST_CAP_RATIO: 0.35,
+        MIN_BUILD_MARGIN_PCT: 65,
         MARGIN_ALERT_PCT: 20,
         PAYMENT_FEE_PERCENT: 5,
         PAYMENT_FEE_FIXED_CENTS: 50,

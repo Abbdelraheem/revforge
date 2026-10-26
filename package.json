@@ -16,6 +16,7 @@
     "prompts:eval": "tsx scripts/prompts-eval.ts",
     "prompts:live": "tsx scripts/prompts-live.ts",
     "bench": "tsx scripts/bench.ts",
+    "bench:dry": "tsx scripts/bench.ts --dry",
     "launch-gate": "tsx scripts/launch-gate.ts"
   },
   "dependencies": {

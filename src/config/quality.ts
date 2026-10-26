@@ -77,6 +77,7 @@ export interface TargetBenchmarkResult {
   targetId: string;
   name: string;
   tier: TargetDifficultyTier;
+  targetType: BenchmarkManifest["targetType"];
   status: "delivered" | "delivered_partial" | "build_failed";
   parity: {
     visual: number | null;
@@ -88,6 +89,11 @@ export interface TargetBenchmarkResult {
   };
   iterations: number;
   modelsUsed: string[];
+  inputTokens: number;
+  outputTokens: number;
+  cacheCreationInputTokens: number;
+  cacheReadInputTokens: number;
+  totalTokens: number;
   providerCostCents: number;
   wallTimeMs: number;
   leakageMaxSimilarity: number;
@@ -99,11 +105,17 @@ export interface TargetBenchmarkResult {
 
 export interface BenchmarkSuiteResult {
   date: string;
+  startedAt: string;
+  finishedAt: string;
+  mode: "live" | "dry";
   commitHash: string;
+  host: string;
+  modelIds: string[];
   targetCount: number;
   medianParity: number;
   medianCoverage: number;
   totalProviderCostCents: number;
+  totalTokens: number;
   medianWallTimeMs: number;
   overallStudioEditSuccessRate: number;
   targets: TargetBenchmarkResult[];
@@ -127,13 +139,25 @@ export function calculateMedian(values: number[]): number {
 }
 
 /**
- * Validates a benchmark suite result against quality thresholds.
+ * Validates a benchmark suite result against the launch thresholds. This is
+ * intentionally strict: a suite only counts when it was produced by the live
+ * pipeline, covered the full target set, and every web target has a real
+ * visual score.
  */
 export function validateBenchmarkSuite(
   suite: Omit<BenchmarkSuiteResult, "passed" | "failureReason">
 ): { passed: boolean; failureReason?: string } {
-  if (suite.targets.length === 0) {
-    return { passed: false, failureReason: "No benchmark targets executed." };
+  if (suite.mode !== "live") {
+    return { passed: false, failureReason: "Benchmark mode is not live." };
+  }
+  if (suite.targetCount < 12 || suite.targets.length < 12) {
+    return {
+      passed: false,
+      failureReason: `Only ${suite.targets.length} targets ran; at least 12 are required.`,
+    };
+  }
+  if (suite.modelIds.length === 0 || suite.modelIds.some((id) => !id)) {
+    return { passed: false, failureReason: "Benchmark did not record its model ids." };
   }
 
   // 1. No target can end in build_failed
@@ -153,7 +177,47 @@ export function validateBenchmarkSuite(
     };
   }
 
-  // 3. Leakage max similarity must not exceed limit
+  // 3. Median coverage must meet the delivery threshold
+  if (suite.medianCoverage < QUALITY_THRESHOLDS.minCoverage) {
+    return {
+      passed: false,
+      failureReason: `Median coverage ${suite.medianCoverage.toFixed(3)} is below threshold ${QUALITY_THRESHOLDS.minCoverage.toFixed(3)}.`,
+    };
+  }
+
+  // 4. At least half of the targets must be fully delivered.
+  const delivered = suite.targets.filter((t) => t.status === "delivered").length;
+  if (delivered * 2 < suite.targets.length) {
+    return {
+      passed: false,
+      failureReason: `Only ${delivered}/${suite.targets.length} targets were delivered.`,
+    };
+  }
+
+  // 5. Web targets need a real visual score, not a missing measurement.
+  const webWithoutVisual = suite.targets.find(
+    (t) => t.targetType === "web" && t.parity.visual === null
+  );
+  if (webWithoutVisual) {
+    return {
+      passed: false,
+      failureReason: `Web target ${webWithoutVisual.targetId} has no visual score.`,
+    };
+  }
+
+  // 6. Prompt caching must have been exercised once a target needed more
+  // than one builder iteration.
+  const uncached = suite.targets.find(
+    (t) => t.iterations >= 2 && t.cacheReadInputTokens <= 0
+  );
+  if (uncached) {
+    return {
+      passed: false,
+      failureReason: `Target ${uncached.targetId} ran ${uncached.iterations} iterations without any cache-read tokens.`,
+    };
+  }
+
+  // 7. Leakage max similarity must not exceed limit
   const leakingTarget = suite.targets.find(
     (t) => t.leakageMaxSimilarity > QUALITY_THRESHOLDS.maxLeakageSimilarity
   );
@@ -164,7 +228,7 @@ export function validateBenchmarkSuite(
     };
   }
 
-  // 4. Studio edit success rate must meet minimum
+  // 8. Studio edit success rate must meet minimum
   if (suite.overallStudioEditSuccessRate < QUALITY_THRESHOLDS.minStudioEditSuccessRate) {
     return {
       passed: false,

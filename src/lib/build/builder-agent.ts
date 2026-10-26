@@ -22,7 +22,13 @@ export interface BuilderAgentOptions {
 export interface AgentExecutionResult {
   modifiedFiles: string[];
   toolCallsCount: number;
-  tokensUsed: { input: number; output: number };
+  tokensUsed: {
+    input: number;
+    output: number;
+    cacheCreationInputTokens?: number;
+    cacheReadInputTokens?: number;
+  };
+  cacheHitRatio?: number;
 }
 
 /**
@@ -89,10 +95,24 @@ export class BuilderAgent {
     }
   }
 
-  async executeTask(taskPrompt: string, specification: string): Promise<AgentExecutionResult> {
+  async executeTask(
+    taskPrompt: string,
+    specification: string,
+    feedback?: string
+  ): Promise<AgentExecutionResult> {
     const modifiedFiles: string[] = [];
     let toolCallsCount = 0;
-    const tokensUsed = { input: 0, output: 0 };
+    const tokensUsed: {
+      input: number;
+      output: number;
+      cacheCreationInputTokens: number;
+      cacheReadInputTokens: number;
+    } = {
+      input: 0,
+      output: 0,
+      cacheCreationInputTokens: 0,
+      cacheReadInputTokens: 0,
+    };
 
     const tools: Anthropic.Tool[] = [
       {
@@ -141,10 +161,29 @@ export class BuilderAgent {
       },
     ];
 
+    const userMessageContent: any[] = [
+      {
+        type: "text",
+        text: `<untrusted_spec>\n${specification}\n</untrusted_spec>`,
+        cache_control: { type: "ephemeral" },
+      },
+      {
+        type: "text",
+        text: `<untrusted_user_request>\n${taskPrompt}\n</untrusted_user_request>`,
+      },
+    ];
+
+    if (feedback) {
+      userMessageContent.push({
+        type: "text",
+        text: `<untrusted_feedback>\n${feedback}\n</untrusted_feedback>`,
+      });
+    }
+
     const messages: Anthropic.MessageParam[] = [
       {
         role: "user",
-        content: `SPECIFICATION:\n${specification}\n\nTASK:\n${taskPrompt}`,
+        content: userMessageContent,
       },
     ];
 
@@ -272,7 +311,13 @@ export class BuilderAgent {
         this.client.messages.create({
           model: this.model,
           max_tokens: 4096,
-          system: this.systemPrompt,
+          system: [
+            {
+              type: "text",
+              text: this.systemPrompt,
+              cache_control: { type: "ephemeral" },
+            },
+          ] as any,
           messages,
           tools,
         })
@@ -280,6 +325,10 @@ export class BuilderAgent {
 
       tokensUsed.input += response.usage.input_tokens;
       tokensUsed.output += response.usage.output_tokens;
+      const cWrite = (response.usage as any).cache_creation_input_tokens || 0;
+      const cRead = (response.usage as any).cache_read_input_tokens || 0;
+      tokensUsed.cacheCreationInputTokens += cWrite;
+      tokensUsed.cacheReadInputTokens += cRead;
 
       const toolUseBlocks = response.content.filter(
         (b): b is Anthropic.ToolUseBlock => b.type === "tool_use"
@@ -336,10 +385,15 @@ export class BuilderAgent {
       });
     }
 
+    const totalReads = tokensUsed.cacheReadInputTokens || 0;
+    const totalInputs = tokensUsed.input + totalReads;
+    const cacheHitRatio = totalInputs > 0 ? totalReads / totalInputs : 0;
+
     return {
       modifiedFiles: Array.from(new Set(modifiedFiles)),
       toolCallsCount,
       tokensUsed,
+      cacheHitRatio,
     };
   }
 }

@@ -11,8 +11,8 @@ export default function OpenGraphImage() {
     (
       <div
         style={{
-          width: "100%",
-          height: "100%",
+          width: 1200,
+          height: 630,
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",

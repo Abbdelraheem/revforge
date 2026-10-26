@@ -14,6 +14,11 @@ export interface PackageDeliveryOptions {
   parity: ParityBreakdown;
   leakage: { maxSimilarity: number };
   unmet?: string[];
+  review?: {
+    verdict: string;
+    customerSummary: string;
+    topFixes: string[];
+  };
   evidenceItems?: Array<{
     component: string;
     category: string;
@@ -172,6 +177,7 @@ export async function packageDelivery(
         projectId,
         jobId,
         status: options.status,
+        review: options.review || null,
         parity: {
           overall: parity.overall,
           coverage: parity.coverage,

@@ -3,13 +3,15 @@ import { plannerPrompt } from "./planner";
 import { builderPrompt } from "./builder";
 import { editPlannerPrompt } from "./edit_planner";
 import { editBuilderPrompt } from "./edit_builder";
+import { reviewerPrompt } from "./reviewer";
 
 export type PromptRole =
   | "analyst"
   | "planner"
   | "builder"
   | "edit_planner"
-  | "edit_builder";
+  | "edit_builder"
+  | "reviewer";
 
 export interface Prompt {
   system: string;
@@ -21,7 +23,7 @@ export interface Prompt {
  * value with each report, build job, and Studio edit so a result can always be
  * traced to the exact prompt text that produced it.
  */
-export const PROMPT_VERSION = "2026-10-23.v8";
+export const PROMPT_VERSION = "v10";
 
 const PROMPTS: Record<PromptRole, string> = {
   analyst: analystPrompt,
@@ -29,6 +31,7 @@ const PROMPTS: Record<PromptRole, string> = {
   builder: builderPrompt,
   edit_planner: editPlannerPrompt,
   edit_builder: editBuilderPrompt,
+  reviewer: reviewerPrompt,
 };
 
 export function getPrompt(role: PromptRole): Prompt {

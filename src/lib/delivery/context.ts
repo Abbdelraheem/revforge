@@ -1,5 +1,6 @@
 import { and, desc, eq } from "drizzle-orm";
 import { withTenant } from "@/db/tenant";
+import { storage } from "@/lib/storage";
 import {
   buildJobs,
   deliveries,
@@ -21,6 +22,11 @@ export interface DeliveryContext {
   gitArchives: Array<typeof deliveryGitArchives.$inferSelect>;
   ownerEmail: string | null;
   retentionDays: number;
+  review?: {
+    verdict: "pass" | "pass-with-gaps" | "fail";
+    customerSummary: string;
+    topFixes: string[];
+  } | null;
 }
 
 export async function loadDeliveryContext(
@@ -89,6 +95,7 @@ export async function loadDeliveryContext(
 
       const latestJob = jobs[0] || null;
       let delivery: typeof deliveries.$inferSelect | null = null;
+      let review: DeliveryContext["review"] = null;
 
       if (latestJob) {
         const [row] = await tx
@@ -103,6 +110,11 @@ export async function loadDeliveryContext(
           .orderBy(desc(deliveries.createdAt))
           .limit(1);
         delivery = row || null;
+
+        try {
+          const reviewBuf = await storage.getObject(`deliveries/${latestJob.id}/review.json`);
+          review = JSON.parse(reviewBuf.toString("utf8"));
+        } catch {}
       }
 
       return {
@@ -114,6 +126,7 @@ export async function loadDeliveryContext(
         gitArchives: archives,
         ownerEmail: owner[0]?.email || null,
         retentionDays: env.DELIVERY_RETENTION_DAYS,
+        review,
       };
     }
   );

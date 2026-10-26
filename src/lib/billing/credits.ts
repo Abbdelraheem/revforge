@@ -8,6 +8,19 @@ export interface WorkspaceCreditBalance {
 }
 
 /**
+ * Single source of truth formatting helper for UI credit presentation.
+ * 1,000 credits = $1.00 USD (i.e. cents * 10).
+ * No second balance, no float math.
+ */
+export function centsToCreditsDisplay(cents: number): number {
+  return Math.round(cents * 10);
+}
+
+export function formatCredits(cents: number): string {
+  return centsToCreditsDisplay(cents).toLocaleString("en-US");
+}
+
+/**
  * Gets the net available platform credit balance for a workspace in integer cents.
  * credits_ledger is append-only; balance is calculated as SUM(delta_cents).
  */

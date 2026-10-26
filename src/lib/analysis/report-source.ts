@@ -102,19 +102,20 @@ export async function buildReport(
 Extract observable component evidence, itemize features for clean-room reconstruction, and determine architecture boundaries.`;
 
   // Evidence and userPrompt go ONLY in untrusted field; never in system or task
-  let untrustedContent = "";
+  const targetTag = `<untrusted_target>\nkind: ${input.target.kind}\nsource: ${input.target.source}\n</untrusted_target>`;
+  let untrustedContent = targetTag;
   if (!input.extraction.ok) {
-    untrustedContent = `[EXTRACTION_FAILED]: extraction failed: ${input.extraction.error}`;
+    untrustedContent += `\n<untrusted_evidence>\n[EXTRACTION_FAILED]: extraction failed: ${input.extraction.error}\n</untrusted_evidence>`;
   } else {
     const rawData =
       typeof input.extraction.result === "string"
         ? input.extraction.result
         : JSON.stringify(input.extraction.result, null, 2);
-    untrustedContent = `<untrusted_target_data kind="${input.target.kind}">\n${rawData}\n</untrusted_target_data>`;
+    untrustedContent += `\n<untrusted_evidence>\n${rawData}\n</untrusted_evidence>`;
   }
 
   if (input.userPrompt) {
-    untrustedContent += `\n<untrusted_user_prompt>\n${input.userPrompt}\n</untrusted_user_prompt>`;
+    untrustedContent += `\n<untrusted_user_request>\n${input.userPrompt}\n</untrusted_user_request>`;
   }
 
   let structuredResult;

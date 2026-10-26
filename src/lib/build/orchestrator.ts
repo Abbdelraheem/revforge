@@ -23,6 +23,7 @@ import { scanBuildSafety } from "./safety-scan";
 import { packageDelivery } from "./packager";
 import { WorkspaceCheckpointManager } from "./checkpoint";
 import { runBuildLoop, LoopDeps, LoopInput } from "./engine";
+import { executeReviewerPass } from "./reviewer";
 import { calculateUsageCostCents } from "@/config/pricing";
 import { recordCostEvent } from "@/lib/billing/costs";
 import { storage } from "@/lib/storage";
@@ -186,17 +187,17 @@ export async function runBuild(jobId: string): Promise<BuildResult> {
         modelName: model,
       });
 
-      const taskPrompt = `Iteration ${iteration}. Reconstruct missing components for: ${unmet.join(", ")}.${
-        feedback ? ` Address previous issues: ${feedback}` : ""
-      }`;
+      const taskPrompt = `Iteration ${iteration}. Reconstruct missing components for: ${unmet.join(", ")}.`;
       const specification = JSON.stringify(reportRow || {}, null, 2);
 
-      const res = await agent.executeTask(taskPrompt, specification);
+      const res = await agent.executeTask(taskPrompt, specification, feedback);
       return {
         usage: {
           model,
           inputTokens: res.tokensUsed.input,
           outputTokens: res.tokensUsed.output,
+          cacheCreationInputTokens: res.tokensUsed.cacheCreationInputTokens,
+          cacheReadInputTokens: res.tokensUsed.cacheReadInputTokens,
         },
       };
     },
@@ -261,6 +262,8 @@ export async function runBuild(jobId: string): Promise<BuildResult> {
         model: usage.model,
         inputTokens: usage.inputTokens,
         outputTokens: usage.outputTokens,
+        cacheCreationInputTokens: (usage as any).cacheCreationInputTokens,
+        cacheReadInputTokens: (usage as any).cacheReadInputTokens,
       });
     },
 
@@ -342,6 +345,98 @@ export async function runBuild(jobId: string): Promise<BuildResult> {
     effectiveStatus = "delivered_partial";
   }
 
+  // 9b. Independent Reviewer Pass (PREMIUM model / Opus 5.5)
+  const specText = JSON.stringify(reportRow || {}, null, 2);
+  let reviewerResult = await executeReviewerPass({
+    workspaceDir,
+    specification: specText,
+    parity: finalVerify.parity,
+    diagnostics: finalVerify.diagnostics,
+    unmetObligations: loopResult.unmet,
+  });
+
+  await recordCostEvent(systemDb, {
+    workspaceId: job.workspaceId,
+    projectId: job.projectId,
+    source: "build",
+    refId: `${job.id}:reviewer:pass1`,
+    model: reviewerResult.usage.model,
+    inputTokens: reviewerResult.usage.inputTokens,
+    outputTokens: reviewerResult.usage.outputTokens,
+  });
+
+  // If verdict is fail and cost cap has margin, run ONE targeted builder pass with top 5 fixes
+  if (reviewerResult.review.verdict === "fail" && loopResult.spentCents < costCapCents) {
+    const topFixesFeedback = reviewerResult.review.topFixes.join("\n");
+    const fixAgent = new BuilderAgent({
+      workspaceDir,
+      role: "STANDARD",
+      modelName: BUILD_MODELS.STANDARD,
+    });
+    const fixPrompt = `Targeted builder fix pass based on reviewer failure verdict. Address these priority items:\n${topFixesFeedback}`;
+    const fixResult = await fixAgent.executeTask(fixPrompt, specText, topFixesFeedback);
+
+    await recordCostEvent(systemDb, {
+      workspaceId: job.workspaceId,
+      projectId: job.projectId,
+      source: "build",
+      refId: `${job.id}:reviewer:fix_pass`,
+      model: BUILD_MODELS.STANDARD,
+      inputTokens: fixResult.tokensUsed.input,
+      outputTokens: fixResult.tokensUsed.output,
+      cacheCreationInputTokens: fixResult.tokensUsed.cacheCreationInputTokens,
+      cacheReadInputTokens: fixResult.tokensUsed.cacheReadInputTokens,
+    });
+
+    // Re-verify after targeted fix
+    const reCapture = await captureAndVerifyApp({
+      workspaceDir,
+      expectedRoutes,
+      features: (reportRow as any)?.features || [],
+      apiEndpoints: reportRow?.boundaries?.apiEndpoints || [],
+      targetUrl: (project as any).targetUrl,
+    });
+
+    const reVerify = await verifyBuildWorkspace(
+      {
+        workspaceDir,
+        expectedRoutes,
+        referenceScreenshots: reCapture.referenceScreenshots,
+        renderedScreenshots: reCapture.renderedScreenshots,
+        behavioralChecks: reCapture.behavioralChecks,
+      },
+      verifierRunner
+    );
+
+    // Re-evaluate reviewer pass
+    reviewerResult = await executeReviewerPass({
+      workspaceDir,
+      specification: specText,
+      parity: reVerify.parity,
+      diagnostics: reVerify.diagnostics,
+      unmetObligations: loopResult.unmet,
+    });
+
+    await recordCostEvent(systemDb, {
+      workspaceId: job.workspaceId,
+      projectId: job.projectId,
+      source: "build",
+      refId: `${job.id}:reviewer:pass2`,
+      model: reviewerResult.usage.model,
+      inputTokens: reviewerResult.usage.inputTokens,
+      outputTokens: reviewerResult.usage.outputTokens,
+    });
+  }
+
+  // Persist reviewer report directly to S3 alongside delivery
+  try {
+    await storage.putObject(
+      `deliveries/${job.id}/review.json`,
+      Buffer.from(JSON.stringify(reviewerResult.review, null, 2)),
+      "application/json"
+    );
+  } catch {}
+
   // 10. Package Delivery ZIP via real fflate and upload to S3
   const pkgResult = await packageDelivery({
     workspaceDir,
@@ -352,6 +447,11 @@ export async function runBuild(jobId: string): Promise<BuildResult> {
     parity: finalVerify.parity,
     leakage: { maxSimilarity: 0.05 },
     unmet: loopResult.unmet,
+    review: {
+      verdict: reviewerResult.review.verdict,
+      customerSummary: reviewerResult.review.customerSummary,
+      topFixes: reviewerResult.review.topFixes,
+    },
     evidenceItems: evidenceItemsList,
     storage,
   });

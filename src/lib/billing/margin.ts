@@ -176,7 +176,7 @@ export function computeProjectMargin({
 
   const grossProfitCents = revenueCents - feesCents - providerCostCents - infra;
   const marginPct =
-    revenueCents === 0 ? null : (grossProfitCents / revenueCents) * 100;
+    revenueCents <= 0 ? null : (grossProfitCents / revenueCents) * 100;
 
   return {
     revenueCents,
@@ -206,6 +206,6 @@ export function computeStudioEditMargin({
     chargedCents: charged,
     providerCostCents: cost,
     grossProfitCents,
-    marginPct: charged === 0 ? null : (grossProfitCents / charged) * 100,
+    marginPct: charged <= 0 ? null : (grossProfitCents / charged) * 100,
   };
 }

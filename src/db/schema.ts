@@ -287,8 +287,11 @@ export const costEvents = pgTable("cost_events", {
   }).notNull(),
   refId: text("ref_id"),
   model: text("model"),
+  modelProfile: text("model_profile", { enum: ["test", "launch"] }).default("launch").notNull(),
   inputTokens: integer("input_tokens").default(0).notNull(),
   outputTokens: integer("output_tokens").default(0).notNull(),
+  cacheCreationInputTokens: integer("cache_creation_input_tokens").default(0).notNull(),
+  cacheReadInputTokens: integer("cache_read_input_tokens").default(0).notNull(),
   providerCostCents: integer("provider_cost_cents").default(0).notNull(),
   providerCostMicros: bigint("provider_cost_micros", { mode: "number" }).default(0).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
@@ -620,6 +623,72 @@ export const previewTunnelRequests = pgTable("preview_tunnel_requests", {
   claimedAt: timestamp("claimed_at", { withTimezone: true }),
   completedAt: timestamp("completed_at", { withTimezone: true }),
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+});
+
+// 35. Pricing Tiers (admin-editable with caps for flat clone pricing)
+export const pricingTiers = pgTable("pricing_tiers", {
+  id: text("id").primaryKey(), // portfolio, web_app, mobile_app, desktop_binary, enterprise_saas
+  name: text("name").notNull(),
+  priceCents: integer("price_cents").notNull(),
+  maxScreens: integer("max_screens").notNull(),
+  maxEntities: integer("max_entities").notNull(),
+  maxIntegrations: integer("max_integrations").notNull(),
+  maxHours: integer("max_hours").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+// 36. Tier Cost Stats (projected cost from live launch-profile bench)
+export const tierCostStats = pgTable("tier_cost_stats", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  tier: text("tier").notNull(),
+  modelProfile: text("model_profile", { enum: ["test", "launch"] }).default("launch").notNull(),
+  p50CostCents: integer("p50_cost_cents").notNull(),
+  p90CostCents: integer("p90_cost_cents").notNull(),
+  sampleCount: integer("sample_count").default(0).notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+// 37. Subscriptions (Paddle subscriptions for recurring revenue)
+export const subscriptions = pgTable("subscriptions", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  workspaceId: uuid("workspace_id").references(() => workspaces.id, { onDelete: "cascade" }).notNull(),
+  paddleSubscriptionId: text("paddle_subscription_id").unique(),
+  paddleCustomerId: text("paddle_customer_id"),
+  planId: text("plan_id", { enum: ["starter", "pro", "team"] }).notNull(),
+  status: text("status", {
+    enum: ["active", "past_due", "canceled", "paused", "trialing"],
+  }).default("active").notNull(),
+  currentPeriodStart: timestamp("current_period_start", { withTimezone: true }).notNull(),
+  currentPeriodEnd: timestamp("current_period_end", { withTimezone: true }).notNull(),
+  cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false).notNull(),
+  monthlyCreditsCents: integer("monthly_credits_cents").notNull(),
+  rolloverCapCents: integer("rollover_cap_cents").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+// 38. Subscription Events (Audit trail & webhook idempotency)
+export const subscriptionEvents = pgTable("subscription_events", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  subscriptionId: uuid("subscription_id").references(() => subscriptions.id, { onDelete: "cascade" }).notNull(),
+  workspaceId: uuid("workspace_id").references(() => workspaces.id, { onDelete: "cascade" }).notNull(),
+  eventType: text("event_type").notNull(),
+  paddleEventId: text("paddle_event_id").unique(),
+  payload: jsonb("payload"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+// 39. Coupons (Paddle discount / launch promotion codes)
+export const coupons = pgTable("coupons", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  code: text("code").notNull().unique(),
+  discountPct: integer("discount_pct").notNull(),
+  maxUses: integer("max_uses"),
+  usedCount: integer("used_count").default(0).notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }),
+  active: boolean("active").default(true).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
 // Relations

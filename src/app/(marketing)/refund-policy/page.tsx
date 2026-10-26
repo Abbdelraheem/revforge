@@ -40,7 +40,7 @@ export default function RefundPolicyPage() {
           <section className="space-y-3">
             <h2 className="text-lg font-serif font-bold text-foreground">2. Build Failure Compensation</h2>
             <p>
-              If an autonomous compilation run terminates in a terminal <code className="text-primary font-mono">build_failed</code> state because verification criteria or health checks could not be met within the maximum iteration window, a <strong>100% platform credit refund</strong> is automatically credited to your workspace ledger.
+              If an autonomous compilation run terminates in a terminal <code className="text-primary font-mono">build_failed</code> state because verification criteria or health checks could not be met within the maximum iteration window, a <strong>full platform credit refund</strong> is automatically credited to your workspace ledger.
             </p>
           </section>
 

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { resolveValidated } from "@/lib/security/safe-fetch";
 import { priceQuote, DEFAULT_PRICING_CONFIG_V1 } from "@/lib/pricing/engine";
+import { DEFAULT_PRICING_TIERS, TierId } from "@/lib/pricing/tiers";
+import { centsToCreditsDisplay } from "@/lib/billing/credits";
 
 export const runtime = "nodejs";
 
@@ -28,7 +30,7 @@ export async function POST(req: NextRequest) {
     const isDesktop = target.includes(".asar") || target.includes(".exe") || target.includes(".dll");
     const isEnterprise = target.includes("enterprise") || target.includes("saas");
 
-    const tier = isMobile
+    const tier: TierId = isMobile
       ? "mobile_app"
       : isDesktop
       ? "desktop_binary"
@@ -36,15 +38,14 @@ export async function POST(req: NextRequest) {
       ? "enterprise_saas"
       : "web_app";
 
-    const hours = tier === "enterprise_saas" ? 80 : tier === "mobile_app" ? 40 : 24;
+    const tierDef = DEFAULT_PRICING_TIERS[tier];
+    if (!tierDef) {
+      return NextResponse.json({ error: `Pricing tier unavailable for ${tier}` }, { status: 400 });
+    }
 
-    const clonePriceUsd =
-      tier === "enterprise_saas"
-        ? 79
-        : tier === "mobile_app" || tier === "desktop_binary"
-        ? 149
-        : 39;
-    const requiredCredits = clonePriceUsd * 1000;
+    const hours = tierDef.maxHours;
+    const clonePriceUsd = tierDef.priceCents / 100;
+    const requiredCredits = centsToCreditsDisplay(tierDef.priceCents);
 
     const quote = priceQuote(
       [
@@ -74,7 +75,7 @@ export async function POST(req: NextRequest) {
           directCloneUsd: clonePriceUsd,
           directCloneCredits: requiredCredits,
           scopeCapOptions: {
-            optionA: "Pay difference for 100% completion",
+            optionA: "Pay difference for complete build",
             optionB: "Partial delivery up to available credit limit",
           },
         },

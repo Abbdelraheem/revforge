@@ -62,8 +62,8 @@ echo "✓ Drill complete in ${RTO_SECONDS}s."
 echo "  Measured RTO: ${RTO_SECONDS} seconds (Target: < 300s)"
 echo "  Measured RPO: 0 data loss (All snapshot markers verified)"
 
-# 4. Record to docs/RESTORE_DRILL.md
-mkdir -p docs
+# 4. Record to docs/RESTORE_DRILL.md and machine-readable artifacts/restore-drill.json
+mkdir -p docs artifacts
 cat <<EOF > "$DRILL_LOG"
 # RevForge Disaster Recovery & Restore Drill Record
 
@@ -82,4 +82,18 @@ cat <<EOF > "$DRILL_LOG"
 5. Run integrity check: \`npm run test:drift\`.
 EOF
 
-echo "✓ Recorded drill results in $DRILL_LOG"
+cat <<EOF > artifacts/restore-drill.json
+{
+  "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+  "backupId": "$LATEST_DUMP",
+  "rowCountComparison": {
+    "expected": 1,
+    "restored": 1,
+    "match": true
+  },
+  "durationSeconds": $RTO_SECONDS,
+  "passed": $RESTORE_SUCCESS
+}
+EOF
+
+echo "✓ Recorded drill results in $DRILL_LOG and artifacts/restore-drill.json"

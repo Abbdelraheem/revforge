@@ -254,7 +254,7 @@ export async function loadMarginReport(filters: MarginFilters = {}): Promise<Mar
         providerCostCents,
         feesCents,
         grossProfitCents,
-        marginPct: revenueCents === 0 ? null : (grossProfitCents / revenueCents) * 100,
+        marginPct: revenueCents <= 0 ? null : (grossProfitCents / revenueCents) * 100,
       };
     })
     .sort((a, b) => b.day.localeCompare(a.day));

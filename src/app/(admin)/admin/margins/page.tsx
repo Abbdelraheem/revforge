@@ -49,8 +49,16 @@ export default async function AdminMarginsPage({
   if (typeof params.to === "string" && params.to) query.set("to", params.to);
   if (projectId) query.set("projectId", projectId);
 
+  const isTestProfile = env.MODEL_PROFILE === "test";
+
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 font-sans">
+      {isTestProfile && (
+        <div className="rounded-lg border border-amber-500/50 bg-amber-500/10 p-4 font-bold text-amber-800">
+          TEST PROFILE — not representative. Model costs and margins shown here reflect cheap experimentation providers and must not be used for customer pricing, quality claims, or launch decisions.
+        </div>
+      )}
+
       <div className="space-y-2 border-b border-border pb-4">
         <p className="text-sm font-semibold tracking-wider text-primary uppercase">
           Margin Accounting

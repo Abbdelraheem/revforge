@@ -67,6 +67,9 @@ jobs:
       - name: Unit & Integration Suites (vitest) + Schema Drift
         run: npm test
 
+      - name: Schema Drift Assertion (--require-db)
+        run: npm run test:drift
+
       - name: Sandbox Containment Self-Test
         run: npx tsx scripts/sandbox-selftest.ts || true
 

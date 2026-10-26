@@ -8,34 +8,15 @@ This document records the empirical performance, parity measurements, and operat
 
 ## 1. Latest Benchmark Run
 
-- **Execution Date**: 2026-10-23
-- **Git Commit**: `a97dc83`
-- **Harness**: `npm run bench` (`scripts/bench.ts`)
-- **Total Reference Targets**: 12
-- **Median Parity**: 100.0% (Quality threshold: $\ge 85.0\%$)
-- **Median Coverage**: 65.0% (offline sandboxed verification without live browser rendering)
-- **Overall Studio Edit Success Rate**: 100.0% (36/36 scripted edits passed verification)
-- **Max Leakage Similarity**: 2.9% (Strict ceiling: $\le 30.0\%$)
-- **Total Provider Token Cost**: $4.29 (across all 12 targets, 27 build iterations)
+No live benchmark has been run.
+
+A live benchmark requires LLM_PROVIDER=live with a valid ANTHROPIC_API_KEY, active PostgreSQL, Docker container runner, and S3 storage. Once a live benchmark execution completes across the reference targets via pm run bench, its measured results, model IDs, token expenditures, and parity scores will be recorded here from ench/results/latest.json.
 
 ---
 
 ## 2. Empirical Target Results Matrix
 
-| Target ID | Tier | Final Status | Overall Parity | Visual | Structural | Behavioral | Build Health | Coverage | Iterations | Cost ($) | Wall Time (s) | Max Leakage | Studio Edits |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| `01-static-landing` | landing | delivered_partial | 100.0% | null | 100.0% | 100.0% | 100.0% | 65.0% | 2 | $0.13 | 2.3s | 0.1% | 3/3 (100%) |
-| `02-multipage-marketing` | multi-page | delivered_partial | 100.0% | null | 100.0% | 100.0% | 100.0% | 65.0% | 2 | $0.23 | 2.2s | 0.0% | 3/3 (100%) |
-| `03-spa-dashboard` | dashboard | delivered_partial | 100.0% | null | 100.0% | 100.0% | 100.0% | 65.0% | 3 | $0.61 | 2.2s | 2.9% | 3/3 (100%) |
-| `04-blog-cms` | content | delivered_partial | 100.0% | null | 100.0% | 100.0% | 100.0% | 65.0% | 2 | $0.26 | 2.1s | 0.0% | 3/3 (100%) |
-| `05-ecommerce-demo` | ecommerce | delivered_partial | 100.0% | null | 100.0% | 100.0% | 100.0% | 65.0% | 3 | $0.76 | 2.2s | 0.0% | 3/3 (100%) |
-| `06-auth-crud` | crud | delivered_partial | 100.0% | null | 100.0% | 100.0% | 100.0% | 65.0% | 2 | $0.38 | 2.2s | 0.0% | 3/3 (100%) |
-| `07-pwa-offline` | pwa | delivered_partial | 100.0% | null | 100.0% | 100.0% | 100.0% | 65.0% | 2 | $0.21 | 2.1s | 0.0% | 3/3 (100%) |
-| `08-har-capture` | har | delivered_partial | 76.9% | null | 0.0% | 100.0% | 100.0% | 65.0% | 2 | $0.31 | 2.2s | 2.5% | 3/3 (100%) |
-| `09-electron-asar` | desktop | delivered_partial | 100.0% | null | 100.0% | 100.0% | 100.0% | 65.0% | 2 | $0.43 | 2.2s | 0.4% | 3/3 (100%) |
-| `10-mobile-apk` | mobile | delivered_partial | 76.9% | null | 0.0% | 100.0% | 100.0% | 65.0% | 2 | $0.36 | 2.4s | 0.0% | 3/3 (100%) |
-| `11-doc-portal` | documentation | delivered_partial | 100.0% | null | 100.0% | 100.0% | 100.0% | 65.0% | 2 | $0.33 | 2.5s | 0.0% | 3/3 (100%) |
-| `12-portfolio-showcase` | portfolio | delivered_partial | 100.0% | null | 100.0% | 100.0% | 100.0% | 65.0% | 2 | $0.28 | 2.6s | 0.0% | 3/3 (100%) |
+No live benchmark has been run. No scores are recorded until a verified live run executes.
 
 ---
 

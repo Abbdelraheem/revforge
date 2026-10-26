@@ -36,8 +36,8 @@ describe("margin accounting", () => {
     expect(margin.marginPct).toBeCloseTo((3_650 / 8_500) * 100);
   });
 
-  it("returns a null margin percentage when revenue is zero", () => {
-    const margin = computeProjectMargin({
+  it("returns a null margin percentage when revenue is zero or negative", () => {
+    const marginZero = computeProjectMargin({
       payments: [],
       refundsCents: 0,
       creditsGrantedCents: 0,
@@ -48,9 +48,17 @@ describe("margin accounting", () => {
       infraAllocationCents: 0,
     });
 
-    expect(margin.revenueCents).toBe(0);
-    expect(margin.marginPct).toBeNull();
-    expect(margin.liabilityCents).toBe(0);
+    expect(marginZero.revenueCents).toBe(0);
+    expect(marginZero.marginPct).toBeNull();
+    expect(marginZero.liabilityCents).toBe(0);
+
+    const marginNegative = computeProjectMargin({
+      payments: [{ amountCents: 1_000 }],
+      refundsCents: 2_000,
+      costEvents: [],
+    });
+    expect(marginNegative.revenueCents).toBe(-1_000);
+    expect(marginNegative.marginPct).toBeNull();
   });
 
   it("computes Studio edit margin from real charge and cost", () => {

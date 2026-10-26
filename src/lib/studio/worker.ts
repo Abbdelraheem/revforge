@@ -765,6 +765,8 @@ function defaultRunBuilder(): StudioRunBuilder {
         model,
         inputTokens: result.tokensUsed.input,
         outputTokens: result.tokensUsed.output,
+        cacheCreationInputTokens: result.tokensUsed.cacheCreationInputTokens,
+        cacheReadInputTokens: result.tokensUsed.cacheReadInputTokens,
       },
       modifiedFiles: result.modifiedFiles,
     };
@@ -1076,6 +1078,8 @@ export async function executeStudioEdit(
           model: usage.model,
           inputTokens: usage.inputTokens,
           outputTokens: usage.outputTokens,
+          cacheCreationInputTokens: (usage as any).cacheCreationInputTokens,
+          cacheReadInputTokens: (usage as any).cacheReadInputTokens,
         });
       },
 

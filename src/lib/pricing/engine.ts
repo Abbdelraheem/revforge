@@ -31,7 +31,7 @@ export interface QuoteLine {
   selected: boolean;
 }
 
-export const MIN_BUILD_MARGIN_PCT = 50; // 50% minimum gross margin requirement
+export const MIN_BUILD_MARGIN_PCT = 65; // 65% minimum gross margin requirement
 
 export interface QuoteCalculationResult {
   lines: QuoteLine[];
@@ -78,27 +78,27 @@ export const DEFAULT_PRICING_CONFIG_V1: PricingConfig = {
     portfolio: {
       hourlyRateCents: 4000, // $40/hr
       minFeatureCents: 900,  // $9
-      minOrderCents: 2900,   // $29
+      minOrderCents: 3900,   // $39 Landing / Portfolio
     },
     web_app: {
       hourlyRateCents: 6000, // $60/hr
       minFeatureCents: 1900, // $19
-      minOrderCents: 9900,   // $99
+      minOrderCents: 7900,   // $79 Web App
     },
     mobile_app: {
       hourlyRateCents: 7500, // $75/hr
       minFeatureCents: 2900, // $29
-      minOrderCents: 19900,  // $199
+      minOrderCents: 14900,  // $149 Mobile Binary
     },
     desktop_binary: {
       hourlyRateCents: 9500, // $95/hr
       minFeatureCents: 3900, // $39
-      minOrderCents: 29900,  // $299
+      minOrderCents: 24900,  // $249 Desktop Binary
     },
     enterprise_saas: {
       hourlyRateCents: 11000, // $110/hr
       minFeatureCents: 4900,  // $49
-      minOrderCents: 49900,   // $499
+      minOrderCents: 39900,   // $399 Full SaaS
     },
   },
 };
@@ -143,12 +143,6 @@ export function priceQuote(
     "portfolio"
   );
 
-  const floored =
-    selected.length === 0 ? 0 : Math.max(subtotal, cfg.tiers[topTier].minOrderCents);
-
-  const credits = Math.min(Math.max(creditsCents, 0), floored);
-  const totalCents = floored - credits;
-
   // Estimate provider cost based on selected features & top tier
   const tierCost = customTierCosts?.[topTier] ?? HISTORICAL_TIER_COST_CENTS[topTier];
   const totalHours = selected.reduce((s, l) => s + l.hoursQ4 / 4, 0);
@@ -156,6 +150,16 @@ export function priceQuote(
     tierCost,
     Math.round((totalHours / 10) * tierCost)
   );
+
+  // Hard floor: projected cost / (1 - MIN_BUILD_MARGIN_PCT)
+  const marginFloorCents = Math.ceil(projectedCostCents / (1 - MIN_BUILD_MARGIN_PCT / 100));
+  const floored =
+    selected.length === 0
+      ? 0
+      : Math.max(subtotal, cfg.tiers[topTier].minOrderCents, marginFloorCents);
+
+  const credits = Math.min(Math.max(creditsCents, 0), floored);
+  const totalCents = floored - credits;
 
   // Projected margin calculation
   const projectedMarginPct =

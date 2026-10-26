@@ -23,10 +23,12 @@ import {
 } from "lucide-react";
 import { priceQuote, DEFAULT_PRICING_CONFIG_V1, TierKey } from "@/lib/pricing/engine";
 import { DIRECT_CLONE_TIERS, CREDIT_BUNDLES } from "@/config/pricing";
+import { SUBSCRIPTION_PLANS } from "@/lib/billing/subscriptions";
 
 export default function PricingPage() {
   const [estimatedHours, setEstimatedHours] = useState(24);
   const [targetType, setTargetType] = useState<TierKey>("web_app");
+  const [isAnnual, setIsAnnual] = useState(false);
 
   const quoteResult = priceQuote(
     [
@@ -61,7 +63,7 @@ export default function PricingPage() {
             Accessible Clean-Room Pricing &amp; Token Credits
           </h1>
           <p className="text-muted-foreground text-sm md:text-base leading-relaxed">
-            Choose between flat-rate direct cloning or flexible token credit bundles. Every project includes verified clean-room Next.js 15 source code with 100% intellectual property ownership.
+            Choose between flat-rate direct cloning or flexible token credit bundles. Every project includes verified clean-room Next.js 15 source code with full commercial use rights.
           </p>
         </div>
 
@@ -115,6 +117,98 @@ export default function PricingPage() {
                 </div>
               </Card>
             ))}
+          </div>
+        </section>
+
+        {/* Subscriptions: Recurring Revenue & Member Credits */}
+        <section className="space-y-6 border-t border-border pt-12">
+          <div className="text-center space-y-3 max-w-2xl mx-auto">
+            <p className="text-sm font-semibold tracking-wider text-primary uppercase">
+              Recurring Subscriptions
+            </p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground font-serif">
+              Continuous Rebuilds &amp; Member Credits
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Predictable monthly credits at discounted rates. Spend credits on flat clone builds or Studio refinements. Unused credits roll over automatically (up to 2× monthly cap).
+            </p>
+
+            {/* Monthly vs Annual Toggle */}
+            <div className="inline-flex items-center gap-3 p-1 rounded-full border border-border bg-card mt-2">
+              <button
+                type="button"
+                onClick={() => setIsAnnual(false)}
+                className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors ${
+                  !isAnnual ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Monthly Billing
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsAnnual(true)}
+                className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors flex items-center gap-1.5 ${
+                  isAnnual ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <span>Annual Billing</span>
+                <span className="text-sm bg-success/20 text-success px-1.5 py-0.5 rounded-full font-mono">
+                  2 Mos Free
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {Object.values(SUBSCRIPTION_PLANS).map((plan) => {
+              const price = isAnnual ? plan.priceAnnualUsd : plan.priceMonthlyUsd;
+              const period = isAnnual ? "/yr" : "/mo";
+              return (
+                <Card
+                  key={plan.id}
+                  className={`border bg-card shadow-sm flex flex-col justify-between p-6 space-y-4 ${
+                    plan.id === "pro" ? "border-primary ring-1 ring-primary/30" : "border-border"
+                  }`}
+                >
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-primary font-bold uppercase tracking-wider">{plan.name}</span>
+                      {plan.id === "pro" && (
+                        <Badge variant="default" className="text-sm font-semibold">
+                          Most Popular
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed">{plan.description}</p>
+                    <div className="flex items-baseline gap-1 pt-2 border-t border-border">
+                      <span className="text-4xl font-extrabold text-foreground font-mono">
+                        ${price}
+                      </span>
+                      <span className="text-sm text-muted-foreground font-mono">{period}</span>
+                    </div>
+                    <div className="text-sm font-semibold text-primary font-mono">
+                      {(plan.monthlyCreditsCents * 10).toLocaleString()} Credits/mo (${plan.monthlyCreditsCents / 100} value)
+                    </div>
+                    <ul className="space-y-2 text-sm text-muted-foreground pt-2">
+                      {plan.features.map((feat, i) => (
+                        <li key={i} className="flex items-center gap-2">
+                          <Check className="h-4 w-4 text-primary shrink-0" />
+                          <span>{feat}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="pt-4 border-t border-border">
+                    <Link href="/projects/new" className="w-full">
+                      <Button variant={plan.id === "pro" ? "default" : "outline"} className="w-full text-sm font-semibold">
+                        <span>Subscribe to {plan.name}</span>
+                      </Button>
+                    </Link>
+                  </div>
+                </Card>
+              );
+            })}
           </div>
         </section>
 
@@ -187,7 +281,7 @@ export default function PricingPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               <div className="p-4 rounded border border-border bg-card space-y-2">
                 <span className="text-sm font-bold text-primary font-mono uppercase">
-                  Option A: Pay Difference for 100% Final Build
+                  Option A: Pay Difference for Complete Final Build
                 </span>
                 <p className="text-sm text-muted-foreground leading-relaxed">
                   Pay only the exact remaining credit difference to produce the full, uncompromised reconstruction across all routes.
@@ -425,7 +519,7 @@ export default function PricingPage() {
                 tier: "Landing Page",
                 hours: "2.5 hrs",
                 cost: "$75.00",
-                parity: "100%",
+                parity: "Verified (Pass)",
                 leakage: "< 2.9%",
                 status: "Delivered",
               },
@@ -435,7 +529,7 @@ export default function PricingPage() {
                 tier: "Web Application",
                 hours: "24.0 hrs",
                 cost: "$720.00",
-                parity: "100%",
+                parity: "Verified (Pass)",
                 leakage: "< 2.9%",
                 status: "Delivered",
               },
@@ -445,7 +539,7 @@ export default function PricingPage() {
                 tier: "E-Commerce",
                 hours: "32.0 hrs",
                 cost: "$960.00",
-                parity: "100%",
+                parity: "Verified (Pass)",
                 leakage: "< 2.9%",
                 status: "Delivered",
               },
@@ -455,7 +549,7 @@ export default function PricingPage() {
                 tier: "REST / State App",
                 hours: "18.0 hrs",
                 cost: "$540.00",
-                parity: "100%",
+                parity: "Verified (Pass)",
                 leakage: "< 2.9%",
                 status: "Delivered",
               },
@@ -521,10 +615,10 @@ export default function PricingPage() {
             <Card className="border-border bg-card shadow-sm p-6 space-y-3">
               <div className="flex items-center gap-2 text-foreground font-serif font-bold text-base">
                 <FileCheck className="h-5 w-5 text-primary" />
-                <span>Who owns the delivered source code?</span>
+                <span>What rights do you receive for delivered source code?</span>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                You own 100% of all synthesized repositories, documentation, and migration artifacts delivered by the platform. Upon completed delivery, you can export the full Git commit history and apply any open-source or proprietary license of your choosing. {BRAND.name} retains zero intellectual property claims over your generated code.
+                You receive all synthesized repositories, documentation, and migration artifacts delivered by the platform with full commercial use rights. Upon completed delivery, you can export the full Git commit history and apply any open-source or proprietary license of your choosing. {BRAND.name} retains zero intellectual property claims over your generated code.
               </p>
             </Card>
 
@@ -544,7 +638,7 @@ export default function PricingPage() {
                 <span>What is the refund policy if a build fails?</span>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                If an automated build encounters an unrecoverable compilation error or fails to satisfy minimum parity thresholds, the platform immediately cancels the job and credits 100% of the build payment back to your workspace credit ledger. Platform credits can be reused for alternative targets or post-delivery Studio edits.
+                If an automated build encounters an unrecoverable compilation error or fails to satisfy minimum parity thresholds, the platform immediately cancels the job and credits the full build payment back to your workspace credit ledger. Platform credits can be reused for alternative targets or post-delivery Studio edits.
               </p>
             </Card>
           </div>
